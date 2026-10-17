@@ -195,7 +195,23 @@ describe("sport-aware coach (rule-based mode)", () => {
 
   it("says it has no verified rules summary instead of inventing one", async () => {
     const { cookie } = await newUser();
-    const r = await call(coach.POST, { cookie, body: { message: "What are the rules of sepak takraw?" } });
+    const r = await call(coach.POST, { cookie, body: { message: "What are the rules of kitesurfing?" } });
     expect(r.json.messages.at(-1).content).toMatch(/don't have a reviewed rules summary/);
+  });
+});
+
+describe("additive seeding", () => {
+  it("adds missing content to existing sports but never touches admin-edited ones", async () => {
+    const { seedSports } = await import("../prisma/seed-sports");
+    const tennis = await db.sport.findUniqueOrThrow({ where: { slug: "tennis" } });
+    const lesson = await db.lesson.findFirstOrThrow({ where: { sportId: tennis.id } });
+    await db.lesson.update({ where: { id: lesson.id }, data: { title: "Edited by admin" } });
+    await db.lesson.deleteMany({ where: { sportId: tennis.id, NOT: { id: lesson.id }, order: { gte: 5 } } });
+    const custom = await db.sport.update({ where: { slug: "golf" }, data: { isCustom: true, summary: "Custom summary" } });
+    await seedSports(db);
+    expect((await db.lesson.findUniqueOrThrow({ where: { id: lesson.id } })).title).toBe("Edited by admin"); // existing rows kept
+    expect(await db.lesson.count({ where: { sportId: tennis.id } })).toBeGreaterThanOrEqual(6); // missing ones re-created
+    expect((await db.sport.findUniqueOrThrow({ where: { id: custom.id } })).summary).toBe("Custom summary");
+    expect(await db.ruleset.count({ where: { reviewedAt: { not: null } } })).toBe(0); // nothing claims a review
   });
 });
