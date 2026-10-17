@@ -135,7 +135,7 @@ describe("uploads & private media", () => {
     const b = await newUser();
     const form = (file: Buffer, consent = "true") => {
       const f = new FormData();
-      f.set("file", new Blob([file]), "photo.jpg");
+      f.set("file", new Blob([new Uint8Array(file)]), "photo.jpg");
       f.set("pose", "front");
       f.set("dateKey", D);
       f.set("consent", consent);
@@ -161,7 +161,7 @@ describe("uploads & private media", () => {
     f.set("exercise", "push-up");
     f.set("mediaKind", "photo");
     f.set("consent", "true");
-    f.append("frames", new Blob([JPEG]), "f.jpg");
+    f.append("frames", new Blob([new Uint8Array(JPEG)]), "f.jpg");
     const r = await call(formCheck.POST, { cookie, form: f });
     expect(r.status).toBe(200);
     expect(r.json.result.provider).toBe("guided");
@@ -177,7 +177,7 @@ describe("export & deletion", () => {
     const { cookie, userId } = await newUser();
     await call(measurements.POST, { cookie, body: { dateKey: D, weightKg: 74, waistCm: 80 } });
     const f = new FormData();
-    f.set("file", new Blob([JPEG]), "p.jpg");
+    f.set("file", new Blob([new Uint8Array(JPEG)]), "p.jpg");
     f.set("pose", "side");
     f.set("dateKey", D);
     f.set("consent", "true");

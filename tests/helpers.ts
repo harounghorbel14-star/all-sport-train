@@ -2,7 +2,7 @@ import { resetRateLimits } from "@/lib/server/rate-limit";
 import * as register from "@/app/api/auth/register/route";
 import * as onboarding from "@/app/api/onboarding/route";
 
-type Handler = (req: Request, ctx?: { params: Promise<Record<string, string>> }) => Promise<Response>;
+type Handler = (req: Request, ctx: { params: Promise<Record<string, string>> }) => Promise<Response>;
 
 export async function call(handler: Handler, opts: { method?: string; path?: string; body?: unknown; cookie?: string; params?: Record<string, string>; headers?: Record<string, string>; form?: FormData } = {}) {
   const headers: Record<string, string> = { ...(opts.headers ?? {}) };

@@ -74,7 +74,7 @@ export function publicRoute<B = undefined, Q = undefined>(
   opts: Options<B, Q>,
   fn: (ctx: Ctx<B, Q, Record<string, string>> & { user: AuthUser | null }) => Promise<Response | unknown>,
 ) {
-  return async (req: Request, route?: RouteParams) => {
+  return async (req: Request, route: RouteParams) => {
     try {
       assertSameOrigin(req);
       const params = (await route?.params) ?? {};
@@ -93,7 +93,7 @@ export function authedRoute<B = undefined, Q = undefined>(
   opts: Options<B, Q>,
   fn: (ctx: AuthedCtx<B, Q, Record<string, string>>) => Promise<Response | unknown>,
 ) {
-  return async (req: Request, route?: RouteParams) => {
+  return async (req: Request, route: RouteParams) => {
     try {
       assertSameOrigin(req);
       const user = await getUserFromToken(readCookie(req.headers.get("cookie"), SESSION_COOKIE));

@@ -109,7 +109,7 @@ export async function completeOnboarding(userId: string, input: OnboardingInput)
 
 type SettingsPatch = Partial<OnboardingInput> & Record<string, unknown>;
 
-const JSON_FIELDS = ["goals", "sports", "equipment", "limitations", "exercisePrefs", "dietPrefs", "allergies", "trainingDays"] as const;
+const JSON_FIELDS = ["goals", "sports", "equipment", "limitations", "exercisePrefs", "dietPrefs", "allergies", "trainingDays", "sportSchedule"] as const;
 
 export async function updateSettings(userId: string, patch: SettingsPatch) {
   const current = await getProfile(userId);

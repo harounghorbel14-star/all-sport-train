@@ -90,6 +90,7 @@ export const settingsSchema = onboardingSchema.partial().extend({
   visibility: z.enum(["private", "friends", "public"]).optional(),
   shareWorkouts: z.boolean().optional(),
   notificationPrefs: notificationPrefsSchema.partial().optional(),
+  sportSchedule: z.record(z.string().regex(/^[0-6]$/), z.array(z.string().max(30)).max(4)).optional(),
 });
 
 export const foodEntrySchema = z.object({
