@@ -9,6 +9,15 @@ const schema = z.object({
   FDC_API_KEY: z.string().optional().default(""),
   UPLOAD_DIR: z.string().optional().default("./storage/uploads"),
   ENFORCE_TIERS: z.string().optional().default("false"),
+  // Public base URL of the app (used for OAuth callbacks and links in emails), e.g. https://app.example.com
+  APP_BASE_URL: z.string().optional().default(""),
+  // Google OAuth 2.0 / OpenID Connect (server-side only)
+  GOOGLE_CLIENT_ID: z.string().optional().default(""),
+  GOOGLE_CLIENT_SECRET: z.string().optional().default(""),
+  GOOGLE_CALLBACK_URL: z.string().optional().default(""),
+  // Transactional email via Resend's HTTP API (password reset). Without it, development writes mails to the server log.
+  RESEND_API_KEY: z.string().optional().default(""),
+  MAIL_FROM: z.string().optional().default(""),
 });
 
 let cached: z.infer<typeof schema> | null = null;
@@ -28,6 +37,16 @@ export function env() {
 export function resetEnvCache() {
   cached = null;
 }
+
+/** Base URL for absolute links; falls back to the request origin in development. */
+export function appBaseUrl(req?: Request) {
+  const configured = env().APP_BASE_URL.trim().replace(/\/$/, "");
+  if (configured) return configured;
+  if (req) return new URL(req.url).origin;
+  return "http://localhost:3000";
+}
+
+export const googleConfigured = () => Boolean(env().GOOGLE_CLIENT_ID.trim() && env().GOOGLE_CLIENT_SECRET.trim());
 
 export const aiConfigured = () => env().ANTHROPIC_API_KEY.trim().length > 0;
 export const adminEmails = () =>

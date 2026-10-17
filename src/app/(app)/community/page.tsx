@@ -6,7 +6,7 @@ import { CommunityApp } from "./app";
 export const metadata = { title: "Community" };
 
 export default async function CommunityPage() {
-  const { user, profile } = await requireUser();
+  const { user, profile } = await requireUser({ guest: false });
   const [f, connections, groups] = await Promise.all([feed(user.id), listConnections(user.id), listGroups(user.id)]);
   return (
     <div>

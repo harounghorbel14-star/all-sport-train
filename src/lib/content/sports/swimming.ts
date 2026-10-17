@@ -73,7 +73,7 @@ export const SWIMMING: SportSeed = {
       governingBody: "World Aquatics",
       scope: "Competitive pool swimming. Masters, school and club events may apply their own variations.",
       editionNote: "Plain-language summary reviewed by our editors. Check the current World Aquatics swimming rules for exact definitions.",
-      verification: "summary",
+      verification: "general",
       sources: ["world-aquatics"],
       points: [
         { topic: "Starts", text: "Freestyle, breaststroke and butterfly races start with a dive from the blocks; backstroke starts in the water facing the wall. A swimmer who starts before the signal is disqualified." },

@@ -4,6 +4,9 @@ import { LOCAL_FOODS } from "../src/lib/content/foods";
 import { exerciseToDb } from "../src/lib/server/exercise-mapper";
 import { addDays, todayKey, weekStart } from "../src/lib/domain/dates";
 import { seedSports } from "./seed-sports";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import path from "node:path";
+import { importResearch, initResearchQueue } from "../src/lib/services/research";
 
 const db = new PrismaClient();
 
@@ -53,8 +56,20 @@ export async function seed(client: PrismaClient = db) {
     });
   }
   const sports = await seedSports(client);
+  // Research runs committed under prisma/research/<date>/ (imported once; unverified until reviewed).
+  const researchDir = path.resolve(process.cwd(), "prisma/research");
+  let researchImported = 0;
+  if (existsSync(researchDir)) {
+    for (const run of readdirSync(researchDir).sort()) {
+      const dir = path.join(researchDir, run);
+      for (const f of readdirSync(dir).filter((x) => x.endsWith(".json"))) {
+        if ((await importResearch(JSON.parse(readFileSync(path.join(dir, f), "utf8")))).imported) researchImported++;
+      }
+    }
+  }
+  const researchQueued = await initResearchQueue();
   const ws = weekStart(today);
-  return { sports, exercises: EXERCISE_CATALOG.length, foods: LOCAL_FOODS.length, challenges: challenges.length, weekStart: ws };
+  return { sports, exercises: EXERCISE_CATALOG.length, foods: LOCAL_FOODS.length, challenges: challenges.length, researchImported, researchQueued, weekStart: ws };
 }
 
 if (process.argv[1]?.includes("seed")) {

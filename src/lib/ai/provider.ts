@@ -89,3 +89,59 @@ export async function structured<T extends z.ZodType>(opts: { system: string; me
     handleError(e);
   }
 }
+
+export interface WebResearchResult {
+  text: string;
+  /** URLs returned by the web_search tool (seen as search results). */
+  searched: Map<string, string>;
+  /** URLs the web_fetch tool actually opened. */
+  fetched: Set<string>;
+}
+
+/**
+ * Researches a question with Anthropic's server-side web search + web fetch tools.
+ * Returns the model's notes plus exactly which URLs were searched and opened, so callers
+ * can refuse any citation that wasn't really seen.
+ */
+export async function webResearch(opts: { system: string; prompt: string; allowedDomains?: string[]; maxSearches?: number; maxFetches?: number }): Promise<WebResearchResult> {
+  const c = getClient();
+  const tools: Anthropic.Beta.BetaToolUnion[] = [
+    { type: "web_search_20260209", name: "web_search", max_uses: opts.maxSearches ?? 6, ...(opts.allowedDomains?.length ? { allowed_domains: opts.allowedDomains } : {}) },
+    { type: "web_fetch_20260209", name: "web_fetch", max_uses: opts.maxFetches ?? 6, ...(opts.allowedDomains?.length ? { allowed_domains: opts.allowedDomains } : {}) },
+  ];
+  const messages: Anthropic.Beta.BetaMessageParam[] = [{ role: "user", content: opts.prompt }];
+  const searched = new Map<string, string>();
+  const fetched = new Set<string>();
+  const texts: string[] = [];
+  try {
+    // Server tools can pause long turns; resume up to a few times.
+    for (let i = 0; i < 4; i++) {
+      const res = await c.beta.messages.create({
+        model: env().AI_MODEL,
+        max_tokens: 16000,
+        system: opts.system,
+        messages,
+        tools,
+        output_config: { effort: "medium" },
+        betas: [FALLBACK_BETA],
+        fallbacks: "default",
+      });
+      if (res.stop_reason === "refusal") throw new AiUnavailableError("refused", "The AI declined this research request");
+      for (const b of res.content) {
+        if (b.type === "text") texts.push(b.text);
+        else if (b.type === "web_search_tool_result" && Array.isArray(b.content)) {
+          for (const r of b.content) if (r.type === "web_search_result") searched.set(r.url, r.title);
+        } else if (b.type === "web_fetch_tool_result" && b.content.type === "web_fetch_result") {
+          fetched.add(b.content.url);
+        }
+      }
+      if (res.stop_reason !== "pause_turn") break;
+      messages.push({ role: "assistant", content: res.content });
+    }
+  } catch (e) {
+    handleError(e);
+  }
+  const text = texts.join("\n").trim();
+  if (!text) throw new AiUnavailableError("invalid_output", "Empty research response");
+  return { text, searched, fetched };
+}

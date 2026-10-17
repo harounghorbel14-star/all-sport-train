@@ -1,20 +1,13 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { publicRoute } from "@/lib/server/api";
-import { db } from "@/lib/server/db";
-import { AppError } from "@/lib/server/errors";
-import { LIMITS, rateLimit } from "@/lib/server/rate-limit";
-import { verifyPassword } from "@/lib/auth/password";
-import { createSession, SESSION_COOKIE, sessionCookieOptions } from "@/lib/auth/session";
+import { loginWithPassword } from "@/lib/auth/accounts";
+import { safeNext } from "@/lib/auth/redirect";
+import { landingFor, withSession } from "@/lib/auth/respond";
 import { loginSchema } from "@/lib/validation";
-import { clientIp } from "@/lib/server/request";
 
-export const POST = publicRoute({ body: loginSchema }, async ({ body, req }) => {
-  rateLimit(`login:${clientIp(req)}:${body.email}`, LIMITS.auth.limit, LIMITS.auth.windowMs);
-  const user = await db.user.findUnique({ where: { email: body.email } });
-  // Same message for unknown email and wrong password.
-  if (!user || !(await verifyPassword(body.password, user.passwordHash))) throw new AppError(401, "invalid_credentials", "Email or password is incorrect");
-  const { token, expiresAt } = await createSession(user.id, req.headers.get("user-agent"));
-  const res = NextResponse.json({ user: { id: user.id, email: user.email } });
-  res.cookies.set(SESSION_COOKIE, token, sessionCookieOptions(expiresAt));
-  return res;
+export const POST = publicRoute({ body: loginSchema.extend({ next: z.string().max(300).optional() }) }, async ({ body, req, user: current }) => {
+  const user = await loginWithPassword(req, body.email, body.password);
+  const redirectTo = await landingFor(user.id, safeNext(body.next));
+  return withSession(NextResponse.json({ user: { id: user.id, email: user.email }, redirectTo }), req, user.id, current);
 });

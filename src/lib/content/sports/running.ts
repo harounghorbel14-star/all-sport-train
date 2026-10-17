@@ -70,7 +70,7 @@ export const RUNNING: SportSeed = {
       governingBody: "World Athletics",
       scope: "Sanctioned track and road events. Local fun runs may apply simpler rules.",
       editionNote: "Plain-language summary of selected rules reviewed by our editors. Check the current World Athletics Competition and Technical Rules.",
-      verification: "summary",
+      verification: "general",
       sources: ["world-athletics"],
       points: [
         { topic: "Starts", text: "Races up to and including 400 m use a crouch start with starting blocks. In most World Athletics competitions, an athlete responsible for a false start is disqualified." },

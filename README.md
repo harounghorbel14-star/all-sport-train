@@ -62,6 +62,10 @@ For Playwright in a custom environment, set `PLAYWRIGHT_CHROMIUM_PATH` to a Chro
 | `FDC_API_KEY` | no | USDA FoodData Central key for extended food search; the local database is always available |
 | `UPLOAD_DIR` | no | Private media storage, default `./storage/uploads` (never under `public/`) |
 | `ENFORCE_TIERS` | no | `true` to gate Pro/Elite features. Default `false`, because there is no payment provider. |
+| `APP_BASE_URL` | for Google / email | Public base URL, e.g. `https://app.example.com`. Used for the OAuth callback and reset links. |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | no | Enables "Continue with Google" (see [Google sign-in setup](#google-sign-in-setup)). |
+| `GOOGLE_CALLBACK_URL` | no | Override for the redirect URI; defaults to `${APP_BASE_URL}/api/auth/google/callback`. |
+| `RESEND_API_KEY`, `MAIL_FROM` | for password reset | Transactional email through Resend. Without them, development logs reset links to the server console; production sends nothing. |
 
 Secrets are only read on the server (`src/lib/server/env.ts`, validated with Zod). No key ever reaches the browser.
 
@@ -69,7 +73,9 @@ Secrets are only read on the server (`src/lib/server/env.ts`, validated with Zod
 
 - **Anthropic API** (`ANTHROPIC_API_KEY`): coach conversations, meal-photo estimates, form-check image analysis. Requests use server-side refusal fallbacks and validated structured output. Without a key you get the rule-based coach, the local text meal parser, and a guided form-check checklist.
 - **USDA FoodData Central** (`FDC_API_KEY`): extra food search results. Results are never fabricated; failures fall back to the local database.
-- **Not implemented, needing credentials**: payments (Stripe or similar), wearables and health platforms (Apple Health, Health Connect, Strava, Garmin), push and email delivery. The UI marks each one as "not configured". Imports would use the existing `ActivityEntry.externalId` de-duplication.
+- **Google OAuth** (`GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`): implemented and tested against mocked Google responses (real RS256-signed ID tokens, mocked token endpoint). **It has not been tested against live Google credentials in this environment** — do that once with your own client before relying on it.
+- **Email** (`RESEND_API_KEY`): password-reset delivery. Implemented against Resend's HTTP API; not exercised against the live service here.
+- **Not implemented, needing credentials**: payments (Stripe or similar), wearables and health platforms (Apple Health, Health Connect, Strava, Garmin), push delivery. The UI marks each one as "not configured". Imports would use the existing `ActivityEntry.externalId` de-duplication.
 
 ## What's in the app
 
@@ -144,6 +150,72 @@ When there is no reviewed ruleset, the coach says so instead of inventing rules.
 
 **Tracking honesty.** Progress is only what the user logs. There are no universal "sport scores", invented sensor data, rankings or match results.
 
+## Authentication
+
+One session system (HTTP-only `apex_session` cookie → HMAC-hashed token in the `Session` table); every sign-in method ends in the same kind of session.
+
+| Flow | How it works |
+| --- | --- |
+| **Email + password** | scrypt hashes; client- and server-side validation; terms acceptance recorded; duplicate emails → clear 409 (race-safe via the unique index). Login compares against a dummy hash when the account doesn't exist, so timing doesn't reveal which emails are registered. |
+| **Return to destination** | Middleware passes the requested path to the page guard; `/login?next=…` only accepts same-site relative paths (`safeNext` rejects absolute, protocol-relative, backslash and API URLs). |
+| **Forgot / reset password** | Always the same response ("if an account exists…"). Tokens: 32 random bytes, only an HMAC stored, 30-minute expiry, one live token per user, atomically single-use. A reset signs out every device. |
+| **Google (OAuth 2.0 + OIDC)** | Authorization-code flow with PKCE (S256), `state` and `nonce` held in a signed, 10-minute, HTTP-only cookie. The code is exchanged server-to-server with the client secret; the ID token is verified with Google's JWKS via `jose` (signature, issuer, audience, expiry, nonce). The account key is Google's stable `sub`, never the email. Handles cancelled consent, state mismatch, expired codes and bad tokens with specific messages. |
+| **Account linking** | Never automatic. If a Google email matches an existing account, sign-in is refused with an explanation; the owner logs in with their password and connects Google from **Profile → Security** (`intent=link`). A Google identity can belong to only one account. Google-only accounts can add a password through the reset flow (proves inbox control). |
+| **Guest mode** | "Continue as guest" creates an isolated guest account (`isGuest`, placeholder `…@guest.invalid` email, no password) with beginner defaults, so Today, the library, Academy, sports lessons, practice builder, logging and the rule-based coach all work immediately. Guests are blocked server-side from community, challenges, media uploads, progress photos, photo meal estimates and admin (`guestBlocked()` in the API wrapper), have a lower coach rate limit, and see a "Guest mode" banner. Inactive guests are deleted after 30 days. |
+| **Guest → account** | *Create account* while a guest upgrades the same user in place — nothing to migrate. *Log in* to an existing account while a guest stores a signed claim cookie; the app then **asks** before importing. The import validates the claim, moves workouts, activities, plans, logs and progress, skips conflicts (same-day check-ins, existing favourites, lower skill progress), never overwrites, and deletes the guest. Matching emails never trigger a merge. |
+| **Sessions** | HTTP-only, `SameSite=Lax`, `Secure` in production; 30-day expiry; logout deletes the session; *Sign out everywhere* deletes them all. Mutations are origin-checked (CSRF). Rate limits: login per IP+email and per email across IPs, registration, guest creation, reset requests. |
+| **Audit** | `AuthEvent` records registrations, logins, failures, resets, Google links, guest creation/conversion/import (IP + user agent; never secrets). |
+
+Routes: public — `/`, `/login`, `/register`, `/forgot-password`, `/reset-password`, `/terms`, `/privacy`, `/account-required`. Everything under the app shell requires a session (guest or full); community, challenges and form check require a full account.
+
+### Google sign-in setup
+
+1. In [Google Cloud Console](https://console.cloud.google.com/), create or select a project.
+2. **APIs & Services → OAuth consent screen**: choose *External*, set the app name, support email and authorised domain, and add the scopes `openid`, `email`, `profile`.
+3. While the app is in *Testing* status, add your Google accounts under **Test users** (others will be refused).
+4. **Credentials → Create credentials → OAuth client ID → Web application.**
+   - Authorised JavaScript origins: `http://localhost:3000` (dev) and `https://your-domain` (prod).
+   - Authorised redirect URIs: `http://localhost:3000/api/auth/google/callback` and `https://your-domain/api/auth/google/callback` — must match `APP_BASE_URL` (or `GOOGLE_CALLBACK_URL`) exactly.
+5. Put the client ID and secret in the **server** environment (`.env`, or your host's secret manager): `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `APP_BASE_URL`. Never commit them.
+6. `npm run dev`, open `/login`, click **Continue with Google**, consent, and you should land on onboarding (new account) or Today.
+7. Production: serve over HTTPS (secure cookies require it), set `APP_BASE_URL=https://your-domain`, publish the consent screen (Google may require verification for external apps), and keep the secret in your platform's secret store.
+
+## Research & knowledge engine
+
+Goal: every sports fact a user sees should be traceable to a source, and anything not yet checked should be visibly marked as such.
+
+**What exists**
+- **Data model**:
+  - `ContentSource` — with `accessedAt` / `accessedBy` (set only when someone actually opened the source), edition, change-tracking hash and check status.
+  - `KnowledgeClaim` — statement, category, level, source references with sections, confidence, `status` (unverified / verified / disputed / outdated / rejected) and `evidence` (`snippet` / `source_opened` / `admin_checked`).
+  - `ResearchTask` — the persistent queue: verify rules, research a topic, user knowledge gaps, source changes, review suggestions.
+  - `RulesetVersion` — previous versions are kept on every edit.
+  - `Ruleset.reviewFlag` — the "possibly outdated" warning.
+- **Coverage dashboard** (`/admin/research`): per sport, it shows:
+  - lessons, drills, rulesets (and how many are verified), sources opened vs cited;
+  - claims verified vs pending, open tasks, review suggestions, missing topics, last research run.
+  - It also has tabs for suggested changes (current vs suggested text with sources), the research queue, and claim review. Verifying a claim requires entering the URL you opened and the section that supports it.
+- **Retrieval for the coach**: `searchKnowledge()` searches published lessons, drills, rule points and **verified** claims only. It is keyword-based: no embedding provider is configured, so there is no semantic search. A hit needs a minimum term overlap.
+  - Specific sports questions are answered from those hits, each with its verification label and sources.
+  - With no hit, the coach says it has no verified information, doesn't guess, and adds a `knowledge_gap` task.
+  - With an AI key, the model gets the same retrieved data and is told never to answer from memory when nothing was found.
+- **AI web research** (`runAiResearch`, needs `ANTHROPIC_API_KEY`): uses Anthropic's server-side `web_search_20260209` and `web_fetch_20260209` tools, then structured extraction.
+  - A claim is kept **only if its URL was actually returned** by the search or fetch tools; anything else is dropped.
+  - Claims from opened pages are marked `source_opened`. Everything is saved as `unverified` for human review.
+- **Source monitoring** (`npm run research -- check-sources`): respects robots.txt, uses one polite request per source and hashes the page text.
+  - A changed page flags every ruleset that cites it and opens a review task.
+  - Blocked or disallowed sources are recorded as such. Nothing is auto-published.
+- **Queue and jobs**: `npm run research -- init-queue | import <dir> | check-sources | run-next [n]`. Suggested cron schedule: `check-sources` weekly, `run-next 5` nightly when an AI key is set; review the results in the dashboard.
+
+**What was actually researched in this session (honest status)**
+- Research agents covered the 8 full sports with web search. **This environment's network policy blocked every source page** (IFAB, FIBA, MLB, ITF, World Aquatics, World Athletics, World Boxing, PubMed and others), so **no source was opened**. Every finding is a *lead from search-result snippets*.
+- The runs are committed in `prisma/research/2026-10-17/` and imported by the seed as:
+  - 73 unverified, snippet-level claims;
+  - 74 review suggestions (e.g. IFAB 2026/27 law changes, FIBA 2026 foul categories, the breaststroke underwater kick, the weak evidence behind the "10% rule");
+  - "possibly outdated" flags on 8 rulesets, shown to users on the Rules tab and by the coach.
+- Because nobody has checked the seeded rules summaries against the current rulebooks, all of them are now labelled **"General overview — not yet verified against the current rulebook"**. A migration downgraded the old "checked against source" label.
+- To do real verification: allow the federation and journal domains in the environment's network settings (or run in an environment with internet access), re-run the research, and have a reviewer verify claims and apply suggestions in `/admin/research`.
+
 ## Architecture
 
 ```
@@ -180,7 +252,7 @@ To use PostgreSQL, change `provider` in `schema.prisma` to `postgresql`, set `DA
 
 ### Security
 
-- Passwords hashed with scrypt; constant-time comparison. Session tokens are 256-bit random, stored as HMAC hashes, and expire after 30 days.
+- Passwords hashed with scrypt; constant-time comparison, including a dummy comparison for unknown accounts. Session tokens are 256-bit random, stored as HMAC hashes, and expire after 30 days. Reset tokens and OAuth state are likewise never stored in plain form. See [Authentication](#authentication).
 - Rate limits on login and registration, AI endpoints, uploads and social actions. The limiter is in-memory; use Redis when running more than one instance.
 - Uploads are type-checked by magic bytes (not by extension or client-supplied type), size-limited, stored outside `public/` with random keys, and served only to their owner with `Cache-Control: private, no-store`.
 - Security headers via `next.config.ts`. JSON logging without secrets or media.
@@ -189,9 +261,9 @@ To use PostgreSQL, change `provider` in `schema.prisma` to `postgresql`, set `DA
 
 - `npm run typecheck`: passes
 - `npm run lint`: passes with no warnings
-- `npm test`: **117 tests in 8 files, all passing**. Sports-specific tests cover: catalog integrity (unique slugs, valid references, https sources, full sports have lessons/drills/rulesets/metrics); practice-builder safety (no full contact, supervision, under-18, level, setting, time budget); personal bests and the ratio minimum-attempts rule; milestones; next lesson; weekly plan; API (search, hub, enrolment, lesson progress, practice create/complete/ownership, metric validation and personal bests, review, admin draft → publish visibility and required sources, non-admin 403); coach rule labels and "no verified summary" fallback; account export. The earlier tests cover: They cover: content integrity; engine (equipment, limitations, start-from-zero, time budget, readiness, determinism, V-taper legs, progression rules, substitutions); roadmap and reviews; dates and time zones; streaks (rest days, grace, pending today, late-night workouts across time zones); energy and TDEE (under-18 guard); nutrition maths and the text parser; readiness; levels and achievements; and API integration (auth, cookies, rate limit, 401s, CSRF origin, admin, onboarding persistence, ownership, plan generation/editing/validation, live session start/pause/resume/sets/refresh/complete, PRs, substitutions, skills and prerequisites, reviews, food logging and serving maths, water, saved meals, estimator fallback, activity estimates and import de-duplication, coach fallback and safety, uploads, private media, form check, export/delete, analytics empty state, community privacy and blocking, challenges, notifications).
+- `npm test`: **147 tests in 10 files, all passing**. Auth tests (19) cover: terms validation, safe `next` redirects, rate limiting and CSRF, sign-out-everywhere, protected endpoints, password reset (identical responses, hashed single-use token, expiry, sessions invalidated), Google OIDC with **mocked** token endpoint and locally generated signing keys (PKCE/state/nonce in the start URL, new verified account, returning user, state mismatch, cancelled consent, wrong audience, bad nonce, unverified email, expired code, no auto-linking by email, explicit linking, one identity per account, Google-only password hint), guest sandbox, guest restrictions, in-place guest upgrade, explicit conflict-safe guest import with forged-claim rejection, guest purge. Research tests (11) cover: import honesty and idempotency, no seeded ruleset claiming source checks, verified-only retrieval and verification requiring a source, knowledge search, admin-only endpoints, coach answers from knowledge with labels, coach admitting gaps and queueing them, AI research refusal without a key, robots.txt, source-change flags, ruleset versioning. Earlier: Sports-specific tests cover: catalog integrity (unique slugs, valid references, https sources, full sports have lessons/drills/rulesets/metrics); practice-builder safety (no full contact, supervision, under-18, level, setting, time budget); personal bests and the ratio minimum-attempts rule; milestones; next lesson; weekly plan; API (search, hub, enrolment, lesson progress, practice create/complete/ownership, metric validation and personal bests, review, admin draft → publish visibility and required sources, non-admin 403); coach rule labels and "no verified summary" fallback; account export. The earlier tests cover: They cover: content integrity; engine (equipment, limitations, start-from-zero, time budget, readiness, determinism, V-taper legs, progression rules, substitutions); roadmap and reviews; dates and time zones; streaks (rest days, grace, pending today, late-night workouts across time zones); energy and TDEE (under-18 guard); nutrition maths and the text parser; readiness; levels and achievements; and API integration (auth, cookies, rate limit, 401s, CSRF origin, admin, onboarding persistence, ownership, plan generation/editing/validation, live session start/pause/resume/sets/refresh/complete, PRs, substitutions, skills and prerequisites, reviews, food logging and serving maths, water, saved meals, estimator fallback, activity estimates and import de-duplication, coach fallback and safety, uploads, private media, form check, export/delete, analytics empty state, community privacy and blocking, challenges, notifications).
 - `npm run build`: passes
-- `npm run test:e2e`: **7 Playwright tests passing**: sports search → join → lesson → practice → complete → log a result and see the personal best; anonymous redirect; register → start-from-zero onboarding → live workout → refresh → finish → summary; food logging; rule-based coach; responsive navigation on desktop and mobile.
+- `npm run test:e2e`: **17 Playwright tests passing** (desktop + mobile for auth): login returns to the protected page you asked for; client-side registration validation and show/hide password; wrong-credential errors and hidden unconfigured Google button (production build); forgot/reset password with no account disclosure and invalid-token message; guest → restricted feature → account gate → save progress → full access; sports search → join → lesson → practice → complete → log a result and see the personal best; anonymous redirect; register → start-from-zero onboarding → live workout → refresh → finish → summary; food logging; rule-based coach; responsive navigation on desktop and mobile.
 
 ## Known limitations
 
@@ -202,6 +274,9 @@ To use PostgreSQL, change `provider` in `schema.prisma` to `postgresql`, set `DA
 - **Form check**: video is analysed as sampled still frames. There is no pose-estimation model, and no tempo or range measurement.
 - **Community**: no real-time updates (refresh-based), no admin moderation workflow beyond auto-hide plus a report list, and no images in posts by design.
 - **Sports content depth**: only 8 sports have a full learning system. The rest have overviews and tracking until lessons are written and reviewed. The seeded rules summaries were written from general knowledge of the cited rulebooks and need periodic re-review against current editions — the review date is shown to users for that reason.
+- **Research verification**: no source could be opened from this environment (network policy), so there are no verified claims yet; the coach therefore answers specific questions only from published lesson and rules content (clearly labelled) or says it doesn't know.
+- **Semantic search**: not available (no embedding provider); retrieval is keyword-based.
+- **Google OAuth / email delivery**: verified only with mocked responses; needs a one-time live test with real credentials. Email verification for password sign-ups (a confirmation link) is not implemented; `emailVerifiedAt` is set by Google sign-in or a completed password reset.
 - **Rate limiting and caching** are in-memory (single instance).
 - **Offline**: queued sets sync on reconnect, but pages themselves need a connection (no service worker).
 
@@ -211,7 +286,7 @@ To use PostgreSQL, change `provider` in `schema.prisma` to `postgresql`, set `DA
 2. Replace the in-memory rate limiter and exercise cache with Redis.
 3. Move uploads to private object storage (S3 or GCS with signed URLs) and add malware scanning.
 4. Configure HTTPS, `SESSION_SECRET` rotation, monitoring and error tracking (the JSON logs are ready to ship).
-5. Add email verification, password reset and optionally 2FA/OAuth.
+5. Configure Google OAuth and Resend with real credentials and test both once end to end; consider email verification for password sign-ups and 2FA.
 6. Integrate a payment provider before setting `ENFORCE_TIERS=true`.
 7. Add a background job runner for reminders and weekly reports, plus push/email delivery.
 8. Complete the translations and have a professional review the exercise safety content.

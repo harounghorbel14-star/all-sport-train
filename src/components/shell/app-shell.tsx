@@ -11,10 +11,11 @@ import { cx } from "../ui/primitives";
 import { Sheet } from "../ui/overlay";
 import { NAV } from "./nav";
 import { NotificationsPanel } from "./notifications";
+import { GuestBanner, GuestImportPrompt } from "./guest";
 
 interface ShellProps {
   children: ReactNode;
-  user: { displayName: string; handle: string; isAdmin: boolean };
+  user: { displayName: string; handle: string; isAdmin: boolean; isGuest: boolean };
   streak: number;
   level: number;
 }
@@ -37,6 +38,7 @@ export function AppShell({ children, user, streak, level }: ShellProps) {
   const primary = NAV.filter((n) => n.primary);
 
   async function logout() {
+    if (user.isGuest && !confirm("Leave guest mode? Without an account, this guest progress can't be recovered after you leave.")) return;
     await api("/api/auth/logout", { method: "POST" }).catch(() => undefined);
     router.push("/login");
     router.refresh();
@@ -109,6 +111,7 @@ export function AppShell({ children, user, streak, level }: ShellProps) {
             transition={{ duration: 0.22, ease: "easeOut" }}
             className="mx-auto w-full max-w-6xl px-4 pb-28 pt-6 lg:px-8 lg:pb-12"
           >
+            {user.isGuest ? <GuestBanner /> : <GuestImportPrompt />}
             {children}
           </motion.main>
       </div>

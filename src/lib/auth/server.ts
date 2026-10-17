@@ -1,9 +1,10 @@
 import "server-only";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { getUserFromToken, SESSION_COOKIE } from "./session";
 import { profileView } from "../services/profile";
+import { safeNext } from "./redirect";
 
 /** Current user for server components (memoised per request). */
 export const currentUser = cache(async () => {
@@ -11,9 +12,16 @@ export const currentUser = cache(async () => {
   return getUserFromToken(token);
 });
 
-export async function requireUser(opts: { onboarded?: boolean } = { onboarded: true }) {
+const currentPath = async () => safeNext((await headers()).get("x-pathname"), "/today");
+
+/**
+ * Page guard. Anonymous visitors go to /login (and come back afterwards).
+ * `guest: false` marks pages that need a full account; guests see an explanation instead.
+ */
+export async function requireUser(opts: { onboarded?: boolean; guest?: boolean } = {}) {
   const user = await currentUser();
-  if (!user || !user.profile) redirect("/login");
+  if (!user || !user.profile) redirect(`/login?next=${encodeURIComponent(await currentPath())}`);
+  if (opts.guest === false && user.isGuest) redirect(`/account-required?next=${encodeURIComponent(await currentPath())}`);
   if (opts.onboarded !== false && !user.profile.onboardingCompleted) redirect("/onboarding");
   return { user, profile: profileView(user.profile) };
 }

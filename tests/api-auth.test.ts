@@ -22,13 +22,13 @@ beforeAll(async () => {
 describe("authentication", () => {
   it("registers, logs in, reads the profile and logs out", async () => {
     resetRateLimits();
-    const reg = await call(register.POST, { body: { email: "Alice@Example.com", password: "password123", displayName: "Alice" } });
+    const reg = await call(register.POST, { body: { email: "Alice@Example.com", password: "password123", displayName: "Alice", acceptTerms: true } });
     expect(reg.status).toBe(201);
     const setCookie = reg.res.headers.get("set-cookie")!;
     expect(setCookie).toMatch(/HttpOnly/i);
     expect(setCookie).toMatch(/SameSite=lax/i);
 
-    const dup = await call(register.POST, { body: { email: "alice@example.com", password: "password123", displayName: "A" } });
+    const dup = await call(register.POST, { body: { email: "alice@example.com", password: "password123", displayName: "A", acceptTerms: true } });
     expect(dup.status).toBe(409);
 
     const bad = await call(login.POST, { body: { email: "alice@example.com", password: "wrongpass123" } });

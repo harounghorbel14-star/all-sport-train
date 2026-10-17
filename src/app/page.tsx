@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Bot, CalendarDays, GraduationCap, HeartPulse, Shield, Sparkles } from "lucide-react";
 import { currentUser } from "@/lib/auth/server";
 import { FadeIn } from "@/components/ui/motion";
+import { LandingGuest } from "./landing-guest";
 
 const FEATURES = [
   { icon: GraduationCap, title: "Calisthenics Academy", body: "Step-by-step progressions from your first push-up to the muscle-up, front lever and handstand — with prerequisite checks and safety notes." },
@@ -15,7 +16,7 @@ const FEATURES = [
 
 export default async function Landing() {
   const user = await currentUser();
-  if (user) redirect(user.profile?.onboardingCompleted ? "/today" : "/onboarding");
+  if (user) redirect(user.isGuest || user.profile?.onboardingCompleted ? "/today" : "/onboarding");
   return (
     <main id="main" className="relative overflow-hidden">
       <div aria-hidden className="pointer-events-none absolute -top-40 start-1/2 h-[480px] w-[900px] -translate-x-1/2 rounded-full bg-accent/10 blur-[120px]" />
@@ -49,6 +50,7 @@ export default async function Landing() {
               I have an account
             </Link>
           </div>
+          <LandingGuest />
           <p className="mt-6 max-w-xl text-xs text-subtle">
             Results depend on consistency, genetics, recovery, nutrition, age and training history. We don&apos;t promise a particular physique or deadline — we help you show up and progress safely.
           </p>

@@ -13,13 +13,20 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  role         String   @default("user") // user | admin
-  tier         String   @default("free") // free | pro | elite
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id              String    @id @default(cuid())
+  email           String    @unique // guests get a non-deliverable placeholder (…@guest.invalid)
+  passwordHash    String? // null for Google-only accounts and guests
+  emailVerifiedAt DateTime?
+  isGuest         Boolean   @default(false)
+  termsAcceptedAt DateTime?
+  role            String    @default("user") // user | admin
+  tier            String    @default("free") // free | pro | elite
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  authAccounts     AuthAccount[]
+  resetTokens      PasswordResetToken[]
+  authEvents       AuthEvent[]
 
   profile          Profile?
   sessions         Session[]
@@ -58,6 +65,49 @@ model User {
   lessonProgress   LessonProgress[]
   practicePlans    PracticePlan[]
   sportMetrics     SportMetricEntry[]
+}
+
+/// External identity (e.g. Google). The provider's stable subject id is the key — never the email.
+model AuthAccount {
+  id                String   @id @default(cuid())
+  userId            String
+  provider          String // google
+  providerAccountId String // OIDC "sub"
+  email             String?
+  emailVerified     Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@unique([userId, provider])
+}
+
+/// Password reset token. Only an HMAC of the token is stored; tokens are single-use and short-lived.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/// Security audit trail (logins, failures, resets, provider links, guest conversions).
+model AuthEvent {
+  id        String   @id @default(cuid())
+  userId    String?
+  type      String
+  ip        String?
+  userAgent String?
+  meta      String   @default("{}")
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([type, createdAt])
 }
 
 model Session {
@@ -678,6 +728,8 @@ model Sport {
   enrollments   UserSport[]
   practicePlans PracticePlan[]
   metricEntries SportMetricEntry[]
+  claims        KnowledgeClaim[]
+  researchTasks ResearchTask[]
 
   @@index([categorySlug])
   @@index([parentSlug])
@@ -712,7 +764,70 @@ model ContentSource {
   url        String?
   kind       String // governing_body | education | research | other
   notes      String?
+  edition    String? // e.g. "2025/26", publication year
   createdAt  DateTime @default(now())
+  // Access & change tracking — accessedAt is only set when someone actually opened the source.
+  accessedAt    DateTime?
+  accessedBy    String? // "admin:<email>", "ai_web_research", …
+  lastCheckedAt DateTime?
+  checkStatus   String? // ok | changed | blocked | robots_disallowed | error
+  contentHash   String?
+}
+
+/// A single, citable piece of sports knowledge (technique, tactic, rule detail, safety, science…).
+/// Only claims with status "verified" are used by the coach; everything else is research in progress.
+model KnowledgeClaim {
+  id          String    @id @default(cuid())
+  sportId     String?
+  topic       String
+  category    String // technique | tactics | training | safety | science | history | rules | equipment
+  level       String    @default("all")
+  statement   String
+  sourceRefs  String    @default("[]") // JSON [{ url, title, publisher, section, accessed }]
+  confidence  String    @default("low") // high | medium | low
+  status      String    @default("unverified") // unverified | verified | disputed | outdated | rejected
+  evidence    String    @default("snippet") // snippet (search results only) | source_opened | admin_checked
+  origin      String    @default("research") // research | ai_web_research | admin | seed
+  note        String?
+  reviewedAt  DateTime?
+  reviewedBy  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  sport       Sport?    @relation(fields: [sportId], references: [id], onDelete: Cascade)
+
+  @@index([sportId, status])
+  @@index([status, category])
+}
+
+/// Persistent research queue: what still needs researching, verifying or reviewing, per sport.
+model ResearchTask {
+  id        String    @id @default(cuid())
+  sportId   String?
+  kind      String // verify_rules | research_topic | knowledge_gap | source_change | review_suggestion
+  topic     String
+  detail    String?
+  status    String    @default("queued") // queued | in_progress | needs_review | done | blocked | dismissed
+  priority  Int       @default(2) // 1 high … 3 low
+  result    String? // JSON (suggested corrections, found sources)
+  lastRunAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  sport     Sport?    @relation(fields: [sportId], references: [id], onDelete: Cascade)
+
+  @@index([status, priority])
+  @@index([sportId, status])
+}
+
+/// Previous versions of a ruleset, kept whenever it is edited.
+model RulesetVersion {
+  id        String   @id @default(cuid())
+  rulesetId String
+  snapshot  String // JSON of the ruleset before the change
+  reason    String?
+  createdAt DateTime @default(now())
+  ruleset   Ruleset  @relation(fields: [rulesetId], references: [id], onDelete: Cascade)
+
+  @@index([rulesetId, createdAt])
 }
 
 model Ruleset {
@@ -724,12 +839,15 @@ model Ruleset {
   scope         String
   editionNote   String
   points        String // JSON [{topic, text}]
-  verification  String    @default("summary") // summary (checked against cited source) | general | unverified
+  verification  String    @default("general") // summary (checked against the cited source by a reviewer) | general | unverified
   sources       String    @default("[]") // ContentSource slugs
   contentStatus String    @default("published")
   reviewedAt    DateTime?
+  reviewFlag    String? // why this ruleset may be outdated (research lead, source change)
+  flaggedAt     DateTime?
   updatedAt     DateTime  @updatedAt
   sport         Sport     @relation(fields: [sportId], references: [id], onDelete: Cascade)
+  versions      RulesetVersion[]
 
   @@unique([sportId, slug])
 }

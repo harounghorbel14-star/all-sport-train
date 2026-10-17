@@ -12,7 +12,15 @@ export async function hashPassword(password: string): Promise<string> {
   return `scrypt$${PARAMS.N}$${PARAMS.r}$${PARAMS.p}$${salt.toString("base64")}$${hash.toString("base64")}`;
 }
 
-export async function verifyPassword(password: string, stored: string): Promise<boolean> {
+// A real hash of a random value: verifying against it keeps the response time the same when
+// the account doesn't exist or has no password (no user enumeration through timing).
+let dummy: Promise<string> | null = null;
+
+export async function verifyPassword(password: string, stored: string | null | undefined): Promise<boolean> {
+  if (!stored) {
+    await verifyPassword(password, await (dummy ??= hashPassword(randomBytes(16).toString("hex"))));
+    return false;
+  }
   const [alg, n, r, p, saltB64, hashB64] = stored.split("$");
   if (alg !== "scrypt" || !saltB64 || !hashB64) return false;
   const expected = Buffer.from(hashB64, "base64");

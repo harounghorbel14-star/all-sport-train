@@ -192,6 +192,13 @@ export default async function SportHubPage({ params, searchParams }: { params: P
                     </div>
                   ))}
                 </dl>
+                {r.reviewFlag && (
+                  <div className="mt-3">
+                    <Notice tone="warn">
+                      <strong>Possibly outdated.</strong> {r.reviewFlag}
+                    </Notice>
+                  </div>
+                )}
                 <p className="mt-3 text-xs italic text-subtle">{r.editionNote}</p>
                 <SourceList sources={hub.sources.filter((s) => r.sources.includes(s.slug))} />
               </Card>

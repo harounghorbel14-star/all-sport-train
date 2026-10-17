@@ -11,7 +11,7 @@ export function AvailabilityBadge({ availability }: { availability: Availability
 
 const VERIFICATION: Record<string, { label: string; tone: "success" | "info" | "warn" }> = {
   summary: { label: "Summary checked against source", tone: "success" },
-  general: { label: "General overview — varies by competition", tone: "info" },
+  general: { label: "General overview — not yet verified against the current rulebook", tone: "info" },
   unverified: { label: "Unverified", tone: "warn" },
 };
 export function VerificationBadge({ verification }: { verification: string }) {

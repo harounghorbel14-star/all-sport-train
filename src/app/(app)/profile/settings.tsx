@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Database, Download, Globe, Lock, Palette, Settings2, ShieldAlert, Sparkles, User, Utensils } from "lucide-react";
+import { Bell, Database, Download, Globe, KeyRound, Lock, Palette, Settings2, ShieldAlert, Sparkles, User, Utensils } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
@@ -15,7 +15,17 @@ type P = ProfileView;
 
 const TIMEZONES = typeof Intl !== "undefined" && "supportedValuesOf" in Intl ? (Intl as unknown as { supportedValuesOf: (k: string) => string[] }).supportedValuesOf("timeZone") : ["UTC"];
 
-export function SettingsApp({ email, tier, profile, ai, usda }: { email: string; tier: string; profile: P; ai: { configured: boolean; model: string | null }; usda: boolean }) {
+interface Security {
+  isGuest: boolean;
+  hasPassword: boolean;
+  emailVerified: boolean;
+  google: { email: string | null } | null;
+  googleEnabled: boolean;
+  sessions: number;
+  notice: { tone: "accent" | "danger"; text: string } | null;
+}
+
+export function SettingsApp({ email, tier, profile, ai, usda, security }: { email: string; tier: string; profile: P; ai: { configured: boolean; model: string | null }; usda: boolean; security: Security }) {
   const router = useRouter();
   const toast = useToast();
   const [p, setP] = useState(profile);
@@ -41,6 +51,13 @@ export function SettingsApp({ email, tier, profile, ai, usda }: { email: string;
   const toggleIn = (k: "equipment" | "limitations", v: string) => set(k, p[k].includes(v) ? p[k].filter((x) => x !== v) : [...p[k], v]);
   const np = p.notificationPrefs;
   const setNp = (k: keyof typeof np, v: boolean | number) => set("notificationPrefs", { ...np, [k]: v });
+
+  async function logoutAll() {
+    if (!confirm("Sign out of APEX FIT on every device, including this one?")) return;
+    await api("/api/auth/logout", { body: { all: true } }).catch(() => undefined);
+    router.push("/login");
+    router.refresh();
+  }
 
   async function deleteAccount() {
     try {
@@ -160,6 +177,42 @@ export function SettingsApp({ email, tier, profile, ai, usda }: { email: string;
         <ButtonLink href="/pricing" variant="outline" size="sm" className="mt-4">View plans</ButtonLink>
       </Card>
 
+      <Card id="security">
+        <CardTitle icon={<KeyRound className="size-4" />}>Security & sign-in</CardTitle>
+        {security.notice?.text && <div className="mb-3"><Notice tone={security.notice.tone}>{security.notice.text}</Notice></div>}
+        {security.isGuest ? (
+          <div className="space-y-2 text-sm">
+            <p className="text-muted">You&apos;re using a guest session. Create an account to keep your progress beyond 30 days and to use it on other devices.</p>
+            <ButtonLink href="/register" size="sm">Save my progress</ButtonLink>
+          </div>
+        ) : (
+          <ul className="space-y-3 text-sm">
+            <li className="flex flex-wrap items-center justify-between gap-2">
+              <span>Email <span className="text-muted">({email})</span></span>
+              <Badge tone={security.emailVerified ? "success" : "neutral"}>{security.emailVerified ? "Verified" : "Not verified"}</Badge>
+            </li>
+            <li className="flex flex-wrap items-center justify-between gap-2">
+              <span>Password</span>
+              {security.hasPassword ? <Badge tone="success">Set</Badge> : <Link href="/forgot-password" className="text-accent underline">Set a password via email</Link>}
+            </li>
+            <li className="flex flex-wrap items-center justify-between gap-2">
+              <span>Google{security.google?.email ? <span className="text-muted"> ({security.google.email})</span> : null}</span>
+              {security.google ? (
+                <Badge tone="success">Connected</Badge>
+              ) : security.googleEnabled ? (
+                <a href="/api/auth/google?intent=link" className="inline-flex h-9 items-center rounded-xl border border-line px-3 font-semibold hover:border-accent">Connect Google</a>
+              ) : (
+                <Badge>Not configured on this server</Badge>
+              )}
+            </li>
+            <li className="flex flex-wrap items-center justify-between gap-2">
+              <span>Active sessions <span className="text-muted">({security.sessions})</span></span>
+              <Button size="sm" variant="outline" onClick={logoutAll}>Sign out everywhere</Button>
+            </li>
+          </ul>
+        )}
+      </Card>
+
       <Card>
         <CardTitle icon={<Database className="size-4" />}>Your data</CardTitle>
         <p className="text-sm text-muted">Export everything as JSON, or permanently delete your account, data and stored media.</p>
@@ -173,9 +226,9 @@ export function SettingsApp({ email, tier, profile, ai, usda }: { email: string;
       <Sheet open={deleting} onClose={() => setDeleting(false)} title="Delete account permanently">
         <div className="space-y-3">
           <Notice tone="danger">This deletes your profile, workouts, nutrition, measurements, photos, posts and everything else. It can&apos;t be undone. Consider exporting your data first.</Notice>
-          <Field label="Password" htmlFor="del-pw"><Input id="del-pw" type="password" value={pw} onChange={(e) => setPw(e.target.value)} autoComplete="current-password" /></Field>
+          {security.hasPassword && <Field label="Password" htmlFor="del-pw"><Input id="del-pw" type="password" value={pw} onChange={(e) => setPw(e.target.value)} autoComplete="current-password" /></Field>}
           <Field label='Type "DELETE" to confirm' htmlFor="del-c"><Input id="del-c" value={confirmText} onChange={(e) => setConfirmText(e.target.value)} /></Field>
-          <Button variant="danger" className="w-full" disabled={!pw || confirmText !== "DELETE"} onClick={deleteAccount}>Delete everything</Button>
+          <Button variant="danger" className="w-full" disabled={(security.hasPassword && !pw) || confirmText !== "DELETE"} onClick={deleteAccount}>Delete everything</Button>
         </div>
       </Sheet>
     </div>

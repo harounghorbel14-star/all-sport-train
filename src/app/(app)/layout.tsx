@@ -6,7 +6,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const { user, profile } = await requireUser();
   const streak = await streakSummary(user.id);
   return (
-    <AppShell user={{ displayName: profile.displayName, handle: profile.handle, isAdmin: user.role === "admin" }} streak={streak.current} level={streak.level.level}>
+    <AppShell user={{ displayName: profile.displayName, handle: profile.handle, isAdmin: user.role === "admin", isGuest: user.isGuest }} streak={streak.current} level={streak.level.level}>
       {children}
     </AppShell>
   );

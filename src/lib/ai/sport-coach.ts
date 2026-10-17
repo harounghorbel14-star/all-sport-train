@@ -2,6 +2,7 @@ import { db } from "../server/db";
 import { AVAILABILITY_LABELS, levelRank } from "../content/sports/types";
 import { createPractice, getSportHub, publishedSports, sportReview, sportWeek, type SportHub } from "../services/sports";
 import type { CoachAction } from "./coach";
+import { recordKnowledgeGap, searchKnowledge, type KnowledgeHit } from "../services/research";
 
 /**
  * Sport-aware coaching. Every answer separates:
@@ -55,14 +56,28 @@ function rulesSection(hub: SportHub, query: string) {
     const sources = r.sources.map((s) => hub.sources.find((x) => x.slug === s)?.title ?? s).join(", ");
     const relevant = r.points.filter((p) => words.some((w) => p.topic.toLowerCase().includes(w) || p.text.toLowerCase().includes(w)));
     const points = (relevant.length ? relevant : r.points).slice(0, relevant.length ? 6 : 5);
-    const label = r.verification === "summary" ? "Rules summary (checked against the cited source)" : r.verification === "general" ? "General overview (rules vary — confirm locally)" : "Unverified";
-    return `**Official rules — ${r.name}** · ${label}\nSource: ${sources} · reviewed ${fmtDate(r.reviewedAt)}\n${points.map((p) => `- **${p.topic}:** ${p.text}`).join("\n")}\n_${r.editionNote}_`;
+    const label = r.verification === "summary" ? "Rules summary (checked against the cited source)" : r.verification === "general" ? "General overview — not yet verified against the current rulebook" : "Unverified";
+    const flag = r.reviewFlag ? `\n⚠️ Possibly outdated: ${r.reviewFlag}` : "";
+    return `**Official rules — ${r.name}** · ${label}\nSource: ${sources} · reviewed ${fmtDate(r.reviewedAt)}${flag}\n${points.map((p) => `- **${p.topic}:** ${p.text}`).join("\n")}\n_${r.editionNote}_`;
   });
   return parts.join("\n\n");
 }
 
 const uncertainty = (hub: SportHub) =>
   `**Uncertain / check locally**\n- Youth, amateur and professional competitions often modify rules (match length, equipment, substitutions).\n- Rules are updated regularly — confirm with your league or federation's current edition.${hub.profile.ageGuidance ? `\n- ${hub.profile.ageGuidance}` : ""}`;
+
+const isSpecificQuestion = (t: string) => /\?|\b(how|why|what|when|which|explain|difference|technique|improve|fix|correct)\b/i.test(t) && t.trim().split(/\s+/).length >= 4;
+
+const VERIF_LABEL: Record<string, string> = { verified: "verified claim", editorial: "APEX lesson content", general: "rules overview — not yet verified against the current rulebook", summary: "rules summary checked against source" };
+
+export function knowledgeSection(hits: KnowledgeHit[]) {
+  return hits
+    .map((h) => {
+      const src = h.sources.length ? ` — Source: ${h.sources.map((s) => `${s.title}${s.section ? ` (${s.section})` : ""}`).join("; ")}` : "";
+      return `- **${h.title}** _(${VERIF_LABEL[h.verification] ?? h.verification})_: ${h.text.slice(0, 280)}${src}`;
+    })
+    .join("\n");
+}
 
 /** Deterministic sport answer + structured facts for the AI model. */
 export async function sportDraft(userId: string, slug: string, text: string): Promise<{ text: string; actions: CoachAction[]; facts: string }> {
@@ -90,6 +105,19 @@ export async function sportDraft(userId: string, slug: string, text: string): Pr
     const out = `**Coaching suggestion — ${plan.title} (${plan.minutes} min, ${level})**\n${content.blocks.map((b) => `- ${b.title} — ${b.minutes} min`).join("\n")}\n\nBuilt for solo practice at your level. Open it to change the setting (partner/team), log results and complete it.${content.excluded.some((e) => /coach|supervis|contact/i.test(e.reason)) ? "\n\n**Safety:** partner-contact drills were left out — they need a qualified coach." : ""}`;
     actions.push({ type: "practice", planId: plan.id, title: plan.title, minutes: plan.minutes, sport: s.slug });
     return { text: out, actions, facts: out };
+  }
+
+  // Specific questions are answered from retrieved knowledge (published lessons/drills/rules + verified claims).
+  if (intent === "overview" && isSpecificQuestion(text)) {
+    const hits = await searchKnowledge(text, { sportSlug: slug, limit: 4 });
+    if (hits.length) {
+      const out = `**From the ${s.name} knowledge base**\n${knowledgeSection(hits)}\n\n**Coaching suggestion**\nPractise this with the related drills and log a benchmark so you can see progress.\n\n**Uncertain / check locally**\n- If your question is about something not covered above, I don't have verified information on it yet.`;
+      for (const h of hits.filter((x) => x.kind === "lesson").slice(0, 1)) actions.push({ type: "link", href: h.href, label: `Open lesson: ${h.title}` });
+      return { text: out, actions, facts: out };
+    }
+    await recordKnowledgeGap(slug, text);
+    const out = `I don't have verified ${s.name} information that answers this yet, so I won't guess. I've added your question to the research queue.\n\nIn the meantime: check the current rulebook of your league or federation for rules questions, and ask a qualified coach for technique feedback.${supervision}`;
+    return { text: out, actions, facts: "NO_VERIFIED_KNOWLEDGE: the knowledge base has nothing on this question. Say you don't have verified information; do not answer from memory." };
   }
 
   if (intent === "plan" || intent === "overview") {
@@ -159,4 +187,6 @@ export const SPORT_RULES = `When discussing a specific sport:
 - Structure answers with clear labels: "Official rules (summary)" only for content provided in <app_data> with its source; "Coaching suggestion" for your own advice; "Uncertain / check locally" for anything that varies by league, age group or edition.
 - Never invent official rules, numbers, rankings or statistics. If the rule isn't in the provided data, say you don't have a verified summary and point to the governing body.
 - For combat and contact sports, never prescribe sparring or contact drills; recommend a qualified instructor for any partner contact.
-- For sports marked as requiring external instruction, recommend certified instructors and limit advice to general conditioning.`;
+- For sports marked as requiring external instruction, recommend certified instructors and limit advice to general conditioning.
+- If <app_data> says NO_VERIFIED_KNOWLEDGE, say plainly that you don't have verified information on that question yet and that it has been added to the research queue. Do not answer it from memory.
+- Rulesets marked "possibly outdated" must be presented with that warning.`;

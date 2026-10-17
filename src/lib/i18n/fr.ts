@@ -25,7 +25,7 @@ const fr: DeepPartial<Dictionary> = {
     notifications: "Notifications",
   },
   common: { save: "Enregistrer", cancel: "Annuler", delete: "Supprimer", edit: "Modifier", add: "Ajouter", close: "Fermer", back: "Retour", next: "Suivant", skip: "Passer", done: "Terminé", start: "Commencer", loading: "Chargement…", retry: "Réessayer", search: "Rechercher", today: "Aujourd'hui" },
-  auth: { login: "Connexion", register: "Créer un compte", email: "E-mail", password: "Mot de passe", welcomeBack: "Bon retour", startJourney: "Commence ton parcours" },
+  auth: { login: "Connexion", register: "Créer un compte", email: "E-mail", password: "Mot de passe", welcomeBack: "Bon retour", startJourney: "Commence ton parcours", forgot: "Mot de passe oublié ?", google: "Continuer avec Google", guest: "Continuer en invité", or: "ou", confirmPassword: "Confirmer le mot de passe", backToLogin: "Retour à la connexion" },
   today: { greeting: "Prêt, {name} ?", todaysSession: "Séance du jour", startWorkout: "Démarrer", resume: "Reprendre", restDay: "Jour de repos prévu", weekly: "Cette semaine", streak: "Série" },
   workout: { warmup: "Échauffement", main: "Travail principal", cooldown: "Retour au calme", sets: "Séries", reps: "Répétitions", rest: "Repos", pause: "Pause", resume: "Reprendre", finish: "Terminer" },
 };

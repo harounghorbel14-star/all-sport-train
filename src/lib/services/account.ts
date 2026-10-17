@@ -38,8 +38,8 @@ export async function exportAccount(userId: string) {
     },
   });
   if (!user) return null;
-  const safe: Omit<typeof user, "passwordHash"> & { passwordHash?: string } = { ...user };
-  delete safe.passwordHash;
+  const { passwordHash, ...rest } = user;
+  const safe = { ...rest, hasPassword: Boolean(passwordHash) };
   return { exportedAt: new Date().toISOString(), format: "apex-fit-export-v1", data: safe };
 }
 

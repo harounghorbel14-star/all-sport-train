@@ -71,7 +71,7 @@ export const TENNIS: SportSeed = {
       governingBody: "ITF",
       scope: "Standard singles and doubles play. Tournaments may use alternative scoring methods listed in the rules' appendices.",
       editionNote: "Plain-language summary reviewed by our editors. Check the current ITF Rules of Tennis for exact wording.",
-      verification: "summary",
+      verification: "general",
       sources: ["itf-rules"],
       points: [
         { topic: "Scoring a game", text: "Points are called love (0), 15, 30, 40 and game. At 40–40 (deuce), a player must win two consecutive points: advantage, then game." },

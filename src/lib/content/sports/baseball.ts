@@ -90,7 +90,7 @@ export const BASEBALL: SportSeed = {
       governingBody: "MLB Official Baseball Rules / WBSC",
       scope: "Standard nine-inning baseball. Youth and amateur leagues change distances, innings, pitching and bat rules.",
       editionNote: "Plain-language summary reviewed by our editors. Check your league's current rulebook — professional rules (e.g. pitch timers) change frequently.",
-      verification: "summary",
+      verification: "general",
       sources: ["mlb-rules", "wbsc"],
       points: [
         { topic: "Teams & innings", text: "Nine players take the field. A standard game has nine innings; each team bats once per inning until three outs are recorded." },

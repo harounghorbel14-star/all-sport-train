@@ -1,0 +1,525 @@
+{
+  "sport": "running",
+  "accessedDate": "2026-10-17",
+  "sources": [
+    {
+      "id": "s1",
+      "title": "World Athletics Book of Rules: Competition and Technical Rules",
+      "publisher": "World Athletics",
+      "url": "https://worldathletics.org/about-iaaf/documents/book-of-rules",
+      "edition": "current (2026) edition - not opened",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s2",
+      "title": "World Athletics Rules Applicable to Disqualifications (24 Feb 2022)",
+      "publisher": "World Athletics (hosted by UK Athletics)",
+      "url": "https://www.uka.org.uk/wp-content/uploads/2022/05/WA-Rules-Applicable-to-Disqualifications-24-Feb-2022.pdf",
+      "edition": "24 February 2022",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "TR 16.8",
+        "TR 17.3.1",
+        "TR 17.4",
+        "TR 17.5",
+        "TR 39.8.3",
+        "TR 55.8.8",
+        "TR 55.10"
+      ]
+    },
+    {
+      "id": "s3",
+      "title": "Key Rules and Regulations relating to the start 2026-2028 (UKA rules)",
+      "publisher": "scottishathletics / UK Athletics",
+      "url": "https://www.scottishathletics.org.uk/wp-content/uploads/2026/05/Key-Rules-and-Regulations-relating-to-the-start-2026-2028-UKA-rules.docx",
+      "edition": "2026-2028",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "TR 7",
+        "TR 16"
+      ]
+    },
+    {
+      "id": "s4",
+      "title": "World Athletics rule changes for indoor track events effective for the 2026 season",
+      "publisher": "Athletics Illustrated",
+      "url": "https://athleticsillustrated.com/world-athletics-rule-changes-for-indoor-track-events-effective-for-the-2026-season/",
+      "edition": "2026",
+      "kind": "other",
+      "accessed": false,
+      "sectionsUsed": [
+        "TR 24.6"
+      ]
+    },
+    {
+      "id": "s5",
+      "title": "Updated rules to be observed at World Athletics Indoor Championships in March",
+      "publisher": "Jamaica Observer",
+      "url": "https://www.jamaicaobserver.com/2026/01/24/updated-rules-observed-world-athletics-indoor-championships-march/",
+      "edition": "24 January 2026",
+      "kind": "other",
+      "accessed": false,
+      "sectionsUsed": [
+        "TR 24 dropped baton"
+      ]
+    },
+    {
+      "id": "s6",
+      "title": "WMA Rules of Competition 2026",
+      "publisher": "World Masters Athletics",
+      "url": "https://world-masters-athletics.org/wp-content/uploads/2024/09/WMA-Rules-of-Competition-2026.pdf",
+      "edition": "2026",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "Rule 24",
+        "Rule 54",
+        "Rule 55"
+      ]
+    },
+    {
+      "id": "s7",
+      "title": "VRWC: World Athletics race walking rules extract",
+      "publisher": "Victorian Race Walking Club",
+      "url": "https://vrwc.org.au/vrwcWArules.shtml",
+      "edition": "c. 2019 extract",
+      "kind": "education",
+      "accessed": false,
+      "sectionsUsed": [
+        "TR 54.2"
+      ]
+    },
+    {
+      "id": "s8",
+      "title": "The latest shoe rules from World Athletics",
+      "publisher": "Canadian Running Magazine",
+      "url": "https://runningmagazine.ca/sections/gear/the-latest-shoe-rules-from-world-athletics/",
+      "edition": null,
+      "kind": "other",
+      "accessed": false,
+      "sectionsUsed": [
+        "TR 5"
+      ]
+    },
+    {
+      "id": "s9",
+      "title": "No effect of a graded training program on the number of running-related injuries in novice runners: a randomized controlled trial (Buist et al., Am J Sports Med 36(1):33-39)",
+      "publisher": "American Journal of Sports Medicine",
+      "url": "https://research.rug.nl/en/publications/no-effect-of-a-graded-training-program-on-the-number-of-running-r/",
+      "edition": "2008",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": [
+        "Abstract"
+      ]
+    },
+    {
+      "id": "s10",
+      "title": "Is there evidence for an association between changes in training load and running-related injuries? A systematic review (Damsted et al., IJSPT 13(6):931-942)",
+      "publisher": "International Journal of Sports Physical Therapy",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/30534459/",
+      "edition": "2018",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": [
+        "Abstract"
+      ]
+    },
+    {
+      "id": "s11",
+      "title": "How much running is too much? Identifying high-risk running sessions in a 5200-person cohort study (Frandsen, Nielsen et al.)",
+      "publisher": "British Journal of Sports Medicine",
+      "url": "https://pure.au.dk/portal/en/publications/how-much-running-is-too-much-identifying-high-risk-running-sessio/",
+      "edition": "2025",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": [
+        "Abstract"
+      ]
+    },
+    {
+      "id": "s12",
+      "title": "Incidence of Running-Related Injuries Per 1000 h of running in Different Types of Runners: A Systematic Review and Meta-Analysis (Videbaek et al., Sports Med)",
+      "publisher": "Sports Medicine",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4473093/",
+      "edition": "2015",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": [
+        "Abstract"
+      ]
+    },
+    {
+      "id": "s13",
+      "title": "Excessive progression in weekly running distance and risk of running-related injuries (Nielsen et al., JOSPT, DANO-RUN)",
+      "publisher": "Journal of Orthopaedic & Sports Physical Therapy",
+      "url": "https://vbn.aau.dk/da/publications/excessive-progression-in-weekly-running-distance-and-risk-of-runn",
+      "edition": "2014",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": [
+        "Abstract"
+      ]
+    },
+    {
+      "id": "s14",
+      "title": "Effects of step rate manipulation on joint mechanics during running (Heiderscheit et al., MSSE 43(2):296-302)",
+      "publisher": "Medicine & Science in Sports & Exercise",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3022995/",
+      "edition": "2011",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": [
+        "Abstract"
+      ]
+    },
+    {
+      "id": "s15",
+      "title": "Statement of the 3rd International Exercise-Associated Hyponatremia Consensus Development Conference (Hew-Butler et al., Clin J Sport Med) - press coverage",
+      "publisher": "ScienceDaily (reporting Clin J Sport Med)",
+      "url": "https://www.sciencedaily.com/releases/2015/06/150629100926.htm",
+      "edition": "2015",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s16",
+      "title": "ACSM Expert Consensus Statement on Exertional Heat Illness: Recognition, Management, and Return to Activity",
+      "publisher": "American College of Sports Medicine",
+      "url": "https://rebrandx.acsm.org/education-resources/pronouncements-scientific-communications/official-statements/acsm-expert-consensus-statement-exertional-heat-illness",
+      "edition": "2021, republished with corrigendum 2023",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": [
+        "Abstract"
+      ]
+    },
+    {
+      "id": "s17",
+      "title": "The effectiveness of exercise interventions to prevent sports injuries: a systematic review and meta-analysis of RCTs (Lauersen et al., BJSM 48(11):871)",
+      "publisher": "British Journal of Sports Medicine",
+      "url": "https://bjsm.bmj.com/content/48/11/871",
+      "edition": "2014",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": [
+        "Abstract"
+      ]
+    },
+    {
+      "id": "s18",
+      "title": "Tales of the Road / Highway Code pedestrian guidance",
+      "publisher": "UK Department for Transport (THINK!)",
+      "url": "https://www.think.gov.uk/wp-content/uploads/2020/07/WR_7535_DfT_TotR_Web_ENG_am2_201222_v3-FINAL.pdf",
+      "edition": null,
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    }
+  ],
+  "rulesetReview": [
+    {
+      "rulesetSlug": "world-athletics-running",
+      "topic": "Starts",
+      "currentText": "Races up to and including 400 m use a crouch start with starting blocks. In most World Athletics competitions, an athlete responsible for a false start is disqualified.",
+      "verdict": "corrected",
+      "correctedText": "In races up to and including 400 m (and the first leg of 4x200 m, medley relay and 4x400 m) a crouch start from starting blocks is compulsory; longer races use a standing start with only 'On your marks'. Except in combined events, any athlete responsible for a false start is disqualified; in combined events the first false start brings a warning and any further one by that athlete is a disqualification.",
+      "sourceId": "s2",
+      "section": "TR 16.3, TR 16.8, TR 39.8.3",
+      "note": "PROVISIONAL: sources not opened (worldathletics.org blocked). 'In most competitions' is vague; the combined-events exception is the actual WA distinction. National/age-group rules (e.g. some youth or masters meets) may differ."
+    },
+    {
+      "rulesetSlug": "world-athletics-running",
+      "topic": "Lanes",
+      "currentText": "Races up to 400 m are run entirely in lanes. In the 800 m, athletes run in lanes until the break line after the first bend.",
+      "verdict": "unverifiable",
+      "sourceId": "s2",
+      "section": "TR 17.5",
+      "note": "Consistent with excerpts (800 m in lanes to the near edge of the breakline; TR 17.5 covers leaving lane before breakline). Since 2021 one-off minor lane-line touches on bends may be tolerated if no advantage; repeats by same athlete/team lead to DQ (TR 17.3-17.4). Not opened."
+    },
+    {
+      "rulesetSlug": "world-athletics-running",
+      "topic": "Relays",
+      "currentText": "The baton must be carried in the hand and passed within the designated takeover zone. A dropped baton must be recovered by the athlete who dropped it.",
+      "verdict": "unverifiable",
+      "sourceId": "s5",
+      "section": "TR 24.6, TR 24.7",
+      "note": "Consistent with excerpts. Change effective 1 Nov 2025 (per press reports): the athlete no longer has to return to the exact drop point; they may leave the lane to recover it provided distance is not shortened and no one is impeded. Takeover-zone lengths could not be verified."
+    },
+    {
+      "rulesetSlug": "world-athletics-running",
+      "topic": "Road races",
+      "currentText": "Athletes must follow the designated course. Shortening the course leads to disqualification.",
+      "verdict": "unverifiable",
+      "sourceId": "s2",
+      "section": "TR 55 (55.8.8, 55.10)",
+      "note": "Consistent with older rule text and WA DQ list: leaving the marked course and shortening the distance = DQ; also taking refreshments outside official stations is an infringement. Not opened."
+    },
+    {
+      "rulesetSlug": "world-athletics-running",
+      "topic": "Race walking",
+      "currentText": "Walkers must have no visible loss of contact with the ground, and the advancing leg must be straightened from first contact until the vertical upright position.",
+      "verdict": "unverifiable",
+      "sourceId": "s7",
+      "section": "TR 54.2",
+      "note": "Matches excerpted TR 54.2 text ('visible to the human eye'); judges issue red cards, three from different judges = DQ (older extract; penalty-zone procedure in current rules not verified)."
+    }
+  ],
+  "newRulePoints": [
+    {
+      "rulesetSlug": "world-athletics-running",
+      "topic": "Start commands",
+      "text": "In sprint starts, at 'On your marks' athletes settle behind the line with both hands and at least one knee on the ground and both feet on the block plates; at 'Set' they rise at once to their final position. (Provisional.)",
+      "sourceId": "s2",
+      "section": "TR 16.3"
+    },
+    {
+      "rulesetSlug": "world-athletics-running",
+      "topic": "Competition shoes",
+      "text": "Since 1 Nov 2024 track spikes are limited to a 20 mm sole (stack height) and road shoes to 40 mm. Shoes must be approved and on the open market before use; non-compliant results may not be ratified. (Provisional - press sources only.)",
+      "sourceId": "s8",
+      "section": "TR 5"
+    },
+    {
+      "rulesetSlug": "world-athletics-running",
+      "topic": "Road race refreshments",
+      "text": "Athletes may take refreshments only at official stations; collecting them elsewhere is an infringement. Leaving the course is allowed only with an official's permission and without shortening the distance. (Provisional.)",
+      "sourceId": "s2",
+      "section": "TR 55.8.8"
+    },
+    {
+      "rulesetSlug": "world-athletics-running",
+      "topic": "Road course measurement",
+      "text": "Road courses are measured along the shortest possible route a runner could take within the permitted part of the road, and may not be shorter than the official distance. (Provisional.)",
+      "sourceId": "s1",
+      "section": "TR 55"
+    }
+  ],
+  "claims": [
+    {
+      "topic": "The 10% rule",
+      "category": "science",
+      "level": "beginner",
+      "statement": "A randomised trial in novice runners found a graded 13-week programme based on the 10% rule did not reduce injuries compared with a standard 8-week programme (about 21% vs 20% injured).",
+      "sourceIds": [
+        "s9"
+      ],
+      "section": "Abstract",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Load change evidence",
+      "category": "science",
+      "level": "all",
+      "statement": "A 2018 systematic review found only very limited evidence (4 studies) that sudden changes in training load raise running injury risk; it is reasonable but not proven to progress gradually.",
+      "sourceIds": [
+        "s10"
+      ],
+      "section": "Abstract",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Single-session spikes",
+      "category": "science",
+      "level": "all",
+      "statement": "In a 5,200-runner GPS cohort, a single run more than about 10% longer than the longest run in the prior 30 days was linked to higher injury risk (hazard rising with bigger spikes), while weekly ACWR and week-to-week change were not clearly linked.",
+      "sourceIds": [
+        "s11"
+      ],
+      "section": "Abstract / results",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Novice weekly progression",
+      "category": "training",
+      "level": "beginner",
+      "statement": "In the DANO-RUN cohort, novices who increased weekly distance by more than 30% over two weeks had more distance-related injuries than those increasing by under 10%. This was an exploratory observational study.",
+      "sourceIds": [
+        "s13"
+      ],
+      "section": "Abstract",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Novice injury rate",
+      "category": "science",
+      "level": "beginner",
+      "statement": "Novices get injured more per hour of running than established runners: pooled rates of about 17.8 vs 7.7 injuries per 1,000 h. Build up exposure cautiously in the first months.",
+      "sourceIds": [
+        "s12"
+      ],
+      "section": "Abstract",
+      "confidence": "high"
+    },
+    {
+      "topic": "Cadence cue",
+      "category": "technique",
+      "level": "intermediate",
+      "statement": "Raising step rate by 5-10% above a runner's preferred rate (same speed) reduced knee energy absorption, and at +10% reduced hip loading; a useful cue against overstriding, though injury reduction itself was not tested.",
+      "sourceIds": [
+        "s14"
+      ],
+      "section": "Results",
+      "confidence": "high"
+    },
+    {
+      "topic": "Drink to thirst",
+      "category": "safety",
+      "level": "all",
+      "statement": "The 2015 international consensus on exercise-associated hyponatraemia advises drinking according to thirst and avoiding forced over-drinking, which can dangerously dilute blood sodium in long events.",
+      "sourceIds": [
+        "s15"
+      ],
+      "section": "Recommendations",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Exertional heat stroke",
+      "category": "safety",
+      "level": "all",
+      "statement": "For suspected exertional heat stroke, stopping activity, early recognition and rapid whole-body cooling (cold-water immersion preferred) are essential to survival.",
+      "sourceIds": [
+        "s16"
+      ],
+      "section": "Abstract",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Strength training for injury prevention",
+      "category": "training",
+      "level": "all",
+      "statement": "A meta-analysis of 25 RCTs across sports found strength training was the most effective exercise strategy to cut sports injuries, while stretching showed no clear benefit. Running-specific evidence is thinner.",
+      "sourceIds": [
+        "s17"
+      ],
+      "section": "Abstract",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Visibility on roads",
+      "category": "safety",
+      "level": "all",
+      "statement": "Where there is no pavement, face oncoming traffic, keep close to the edge and cross before sharp right-hand bends (UK). Wear bright clothing by day and reflective items at night; drivers can see reflectives about three times further away.",
+      "sourceIds": [
+        "s18"
+      ],
+      "section": "Pedestrian rules",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Masters athletics",
+      "category": "rules",
+      "level": "advanced",
+      "statement": "World Masters Athletics publishes its own Rules of Competition (2026 edition) that follow World Athletics numbering for relays (24), race walking (54) and road races (55) with masters-specific modifications.",
+      "sourceIds": [
+        "s6"
+      ],
+      "section": "Rules 24, 54, 55",
+      "confidence": "low"
+    }
+  ],
+  "safetyReview": [
+    {
+      "currentText": "Be visible in low light and run against traffic where there is no pavement.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s18",
+      "section": "Pedestrian rules"
+    },
+    {
+      "currentText": "In heat: run early or late, carry water, slow down.",
+      "verdict": "corrected",
+      "correctedText": "In heat: run early or late, slow down, drink to thirst (don't force fluids), and stop at once if confused, dizzy or nauseous. Suspected heat stroke needs rapid whole-body cooling (cold water immersion) and emergency help.",
+      "sourceId": "s16",
+      "section": "Abstract"
+    },
+    {
+      "currentText": "Tell someone your route for long or remote runs.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s18",
+      "section": ""
+    },
+    {
+      "currentText": "Increase weekly distance gradually — a common rule of thumb is around 10% per week, with an easier week every 3–4 weeks.",
+      "verdict": "corrected",
+      "correctedText": "Increase training gradually, but treat the '10% rule' as a rough guide, not a proven safeguard: a trial found it did not prevent injuries in novices. Evidence suggests avoiding big jumps, e.g. keep any single run within about 10% of your longest run of the past month and avoid weekly increases over ~30%.",
+      "sourceId": "s11",
+      "section": "Abstract (also s9, s10, s13)"
+    },
+    {
+      "currentText": "Keep most running easy; limit hard sessions to 1–2 per week.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s10",
+      "section": ""
+    },
+    {
+      "currentText": "Replace worn-out shoes and change footwear gradually.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s10",
+      "section": ""
+    },
+    {
+      "currentText": "Persistent pain that changes how you run is a reason to stop and get assessed — don't run through it.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s12",
+      "section": ""
+    }
+  ],
+  "gaps": [
+    {
+      "topic": "All World Athletics rule text",
+      "reason": "worldathletics.org and all federation mirrors were blocked by this session's network policy; rule verdicts rest on search-result excerpts of 2019-2026 secondary documents. Check the current Competition and Technical Rules."
+    },
+    {
+      "topic": "Relay takeover zone lengths",
+      "reason": "No source in search results confirmed current zone lengths (commonly cited 30 m for 4x100 m); omitted."
+    },
+    {
+      "topic": "Race-walk penalty zone",
+      "reason": "Current penalty-zone procedure not found in search results."
+    },
+    {
+      "topic": "Carbohydrate intake during long runs",
+      "reason": "Lesson point (fuel for runs over ~75-90 min) could not be tied to a source; ACSM nutrition position stand not found/opened."
+    },
+    {
+      "topic": "Shoe rotation and footwear changes",
+      "reason": "No source found for shoe replacement or rotation evidence."
+    },
+    {
+      "topic": "Youth running distance guidance",
+      "reason": "No authoritative youth guidance was found; the input file has no age guidance for running."
+    }
+  ],
+  "notAccessed": [
+    {
+      "url": "https://worldathletics.org/about-iaaf/documents/book-of-rules",
+      "reason": "Blocked by session network policy (proxy 403 / WebFetch DNS failure)."
+    },
+    {
+      "url": "https://www.uka.org.uk/wp-content/uploads/2022/05/WA-Rules-Applicable-to-Disqualifications-24-Feb-2022.pdf",
+      "reason": "Not fetched: session network policy blocks non-allowlisted hosts."
+    },
+    {
+      "url": "https://pubmed.ncbi.nlm.nih.gov/30534459/",
+      "reason": "Blocked by session network policy (proxy 403)."
+    },
+    {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4473093/",
+      "reason": "Not fetched: session network policy blocks non-allowlisted hosts."
+    },
+    {
+      "url": "https://bjsm.bmj.com/content/48/11/871",
+      "reason": "Not fetched: session network policy blocks non-allowlisted hosts."
+    }
+  ]
+}
