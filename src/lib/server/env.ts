@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 const schema = z.object({
-  DATABASE_URL: z.string().min(1),
-  SESSION_SECRET: z.string().min(32, "SESSION_SECRET must be at least 32 characters"),
+  DATABASE_URL: z.string({ error: "DATABASE_URL is not set" }).min(1, "DATABASE_URL is empty"),
+  SESSION_SECRET: z.string({ error: "SESSION_SECRET is not set" }).min(32, "SESSION_SECRET must be at least 32 characters"),
   ADMIN_EMAILS: z.string().optional().default(""),
   ANTHROPIC_API_KEY: z.string().optional().default(""),
   AI_MODEL: z.string().optional().default("claude-opus-5-5"),
@@ -34,6 +34,16 @@ export function env() {
   return cached;
 }
 
+/**
+ * Configuration problems by variable name (never values), without throwing.
+ * Used by the health check, startup logging and the setup notice.
+ */
+export function configProblems(): string[] {
+  const parsed = schema.safeParse(process.env);
+  if (parsed.success) return [];
+  return parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`);
+}
+
 export function resetEnvCache() {
   cached = null;
 }
@@ -46,7 +56,8 @@ export function appBaseUrl(req?: Request) {
   return "http://localhost:3000";
 }
 
-export const googleConfigured = () => Boolean(env().GOOGLE_CLIENT_ID.trim() && env().GOOGLE_CLIENT_SECRET.trim());
+// Reads process.env directly so pages can render (and show the setup notice) even when other config is broken.
+export const googleConfigured = () => Boolean(process.env.GOOGLE_CLIENT_ID?.trim() && process.env.GOOGLE_CLIENT_SECRET?.trim());
 
 export const aiConfigured = () => env().ANTHROPIC_API_KEY.trim().length > 0;
 export const adminEmails = () =>

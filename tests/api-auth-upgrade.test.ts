@@ -24,6 +24,8 @@ import * as activity from "@/app/api/activity/route";
 import * as checkin from "@/app/api/recovery/checkin/route";
 import * as feed from "@/app/api/community/feed/route";
 import * as exercises from "@/app/api/exercises/route";
+import * as health from "@/app/api/health/route";
+import { configProblems } from "@/lib/server/env";
 
 const D = "2026-10-01";
 const cookieOf = (res: Response, name: string) =>
@@ -323,5 +325,23 @@ describe("guest mode", () => {
     await db.session.updateMany({ where: { userId: id }, data: { lastSeenAt: old } });
     expect(await purgeExpiredGuests()).toBeGreaterThanOrEqual(1);
     expect(await db.user.findUnique({ where: { id } })).toBeNull();
+  });
+});
+
+describe("deployment health", () => {
+  it("reports ok when configured, migrated and seeded, and names missing variables otherwise", async () => {
+    const r = await health.GET();
+    expect(r.status).toBe(200);
+    const saved = process.env.SESSION_SECRET;
+    process.env.SESSION_SECRET = "";
+    try {
+      expect(configProblems().join(" ")).toMatch(/SESSION_SECRET/);
+      const bad = await health.GET();
+      expect(bad.status).toBe(503);
+      const body = await bad.json();
+      expect(JSON.stringify(body)).not.toContain(saved!); // names only, never values
+    } finally {
+      process.env.SESSION_SECRET = saved;
+    }
   });
 });
