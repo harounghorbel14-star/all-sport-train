@@ -148,7 +148,7 @@ export async function createPost(userId: string, input: { body: string; kind: "t
   });
 }
 
-const postInclude = (userId: string) => ({
+const postInclude = () => ({
   author: { select: { profile: { select: { handle: true, displayName: true } } } },
   comments: { where: { hidden: false }, orderBy: { createdAt: "asc" as const }, take: 20, include: { author: { select: { profile: { select: { handle: true, displayName: true } } } } } },
   reactions: { select: { userId: true, emoji: true } },
@@ -198,7 +198,7 @@ export async function feed(userId: string, opts: { cursor?: string; groupId?: st
     orderBy: { createdAt: "desc" },
     take: 21,
     ...(opts.cursor ? { cursor: { id: opts.cursor }, skip: 1 } : {}),
-    include: postInclude(userId),
+    include: postInclude(),
   });
   const page = posts.slice(0, 20).filter((p) => !blocked.has(p.authorId));
   return { posts: page.map((p) => shapePost(userId, p, blocked)), nextCursor: posts.length > 20 ? posts[19].id : null };

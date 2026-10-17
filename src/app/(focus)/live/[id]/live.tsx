@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { BookOpen, Check, ChevronLeft, ChevronRight, Flame, Minus, Pause, Play, Plus, Repeat, SkipForward, Timer, Trophy, WifiOff, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { GeneratedWorkout } from "@/lib/engine/types";
 import type { ExerciseLookup } from "@/lib/services/views";
 import { api, ApiError } from "@/lib/client/api";
@@ -82,7 +82,6 @@ export function LiveWorkout({
   const [finishing, setFinishing] = useState(false);
   const [summary, setSummary] = useState<Summary | null>(session.status === "completed" ? null : null);
   const [shared, setShared] = useState(false);
-  const holdRef = useRef<number | null>(null);
 
   const block = workout.main[index];
   const info = block ? lookup[block.exercise] : undefined;

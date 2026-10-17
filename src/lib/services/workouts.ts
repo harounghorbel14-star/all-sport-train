@@ -65,7 +65,7 @@ export async function buildHistory(userId: string, since?: Date): Promise<Record
       h._seen += 1;
     }
   }
-  return Object.fromEntries(Object.entries(history).map(([k, { _seen, ...v }]) => [k, v]));
+  return Object.fromEntries(Object.entries(history).map(([k, v]) => [k, { sessions: v.sessions, recentTopHits: v.recentTopHits, recentMisses: v.recentMisses, lastReps: v.lastReps, lastSeconds: v.lastSeconds, lastRpe: v.lastRpe, lastDate: v.lastDate }]));
 }
 
 async function activeSkillExercise(userId: string) {

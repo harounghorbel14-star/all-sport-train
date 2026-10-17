@@ -15,6 +15,7 @@ export async function call(handler: Handler, opts: { method?: string; path?: str
   });
   const res = await handler(req, { params: Promise.resolve(opts.params ?? {}) });
   const text = await res.text();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- test helper returns loosely typed JSON
   let json: any = null;
   try {
     json = JSON.parse(text);

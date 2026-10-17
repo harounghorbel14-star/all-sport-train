@@ -34,7 +34,8 @@ export async function exportAccount(userId: string) {
     },
   });
   if (!user) return null;
-  const { passwordHash: _omit, ...safe } = user;
+  const safe: Omit<typeof user, "passwordHash"> & { passwordHash?: string } = { ...user };
+  delete safe.passwordHash;
   return { exportedAt: new Date().toISOString(), format: "apex-fit-export-v1", data: safe };
 }
 
