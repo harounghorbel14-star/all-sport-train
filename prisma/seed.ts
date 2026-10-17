@@ -3,6 +3,7 @@ import { EXERCISE_CATALOG } from "../src/lib/content/exercises";
 import { LOCAL_FOODS } from "../src/lib/content/foods";
 import { exerciseToDb } from "../src/lib/server/exercise-mapper";
 import { addDays, todayKey, weekStart } from "../src/lib/domain/dates";
+import { seedSports } from "./seed-sports";
 
 const db = new PrismaClient();
 
@@ -51,8 +52,9 @@ export async function seed(client: PrismaClient = db) {
       update: {},
     });
   }
+  const sports = await seedSports(client);
   const ws = weekStart(today);
-  return { exercises: EXERCISE_CATALOG.length, foods: LOCAL_FOODS.length, challenges: challenges.length, weekStart: ws };
+  return { sports, exercises: EXERCISE_CATALOG.length, foods: LOCAL_FOODS.length, challenges: challenges.length, weekStart: ws };
 }
 
 if (process.argv[1]?.includes("seed")) {

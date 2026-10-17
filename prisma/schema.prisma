@@ -54,6 +54,10 @@ model User {
   reports          Report[]      @relation("reporter")
   groupMemberships GroupMember[]
   ownedGroups      Group[]
+  userSports       UserSport[]
+  lessonProgress   LessonProgress[]
+  practicePlans    PracticePlan[]
+  sportMetrics     SportMetricEntry[]
 }
 
 model Session {
@@ -633,4 +637,209 @@ model Reaction {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([postId, userId])
+}
+
+// ── Sports knowledge system ────────────────────────────────────────────
+// Sports, disciplines and their learning content live in the database so
+// administrators can add sports, rulesets and lessons without code changes.
+// contentStatus: draft | review | published (only published is visible to users).
+
+model SportCategory {
+  slug        String  @id
+  name        String
+  description String
+  order       Int     @default(0)
+}
+
+model Sport {
+  id            String    @id @default(cuid())
+  slug          String    @unique
+  name          String
+  categorySlug  String
+  parentSlug    String? // discipline of another sport (e.g. open-water-swimming → swimming)
+  summary       String
+  aliases       String    @default("[]")
+  availability  String    @default("basic") // full | basic | external
+  contentStatus String    @default("published")
+  metLight      Float
+  metModerate   Float
+  metVigorous   Float
+  distanceUnit  String? // km | m
+  workoutBased  Boolean   @default(false)
+  profile       String    @default("{}") // JSON SportProfile (sections vary by sport)
+  isCustom      Boolean   @default(false)
+  reviewedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  metrics       SportMetric[]
+  lessons       Lesson[]
+  drills        Drill[]
+  rulesets      Ruleset[]
+  enrollments   UserSport[]
+  practicePlans PracticePlan[]
+  metricEntries SportMetricEntry[]
+
+  @@index([categorySlug])
+  @@index([parentSlug])
+}
+
+model SportMetric {
+  id          String  @id @default(cuid())
+  sportId     String
+  key         String
+  label       String
+  unit        String?
+  kind        String // number | time | ratio | select | text
+  scope       String // session (logged with an activity) | performance (tests, drills, PBs)
+  direction   String  @default("higher") // higher | lower | none
+  options     String  @default("[]")
+  min         Float?
+  max         Float?
+  minAttempts Int?
+  description String?
+  measurement String? // how the value must be obtained (e.g. "radar gun only")
+  order       Int     @default(0)
+  sport       Sport   @relation(fields: [sportId], references: [id], onDelete: Cascade)
+
+  @@unique([sportId, key])
+}
+
+model ContentSource {
+  id         String   @id @default(cuid())
+  slug       String   @unique
+  title      String
+  publisher  String
+  url        String?
+  kind       String // governing_body | education | research | other
+  notes      String?
+  createdAt  DateTime @default(now())
+}
+
+model Ruleset {
+  id            String    @id @default(cuid())
+  sportId       String
+  slug          String
+  name          String
+  governingBody String
+  scope         String
+  editionNote   String
+  points        String // JSON [{topic, text}]
+  verification  String    @default("summary") // summary (checked against cited source) | general | unverified
+  sources       String    @default("[]") // ContentSource slugs
+  contentStatus String    @default("published")
+  reviewedAt    DateTime?
+  updatedAt     DateTime  @updatedAt
+  sport         Sport     @relation(fields: [sportId], references: [id], onDelete: Cascade)
+
+  @@unique([sportId, slug])
+}
+
+model Lesson {
+  id                  String   @id @default(cuid())
+  sportId             String
+  slug                String
+  title               String
+  level               String // beginner | intermediate | advanced
+  order               Int
+  summary             String
+  content             String // JSON LessonContent
+  prerequisites       String   @default("[]") // lesson slugs
+  drillSlugs          String   @default("[]")
+  requiresSupervision Boolean  @default(false)
+  sources             String   @default("[]")
+  contentStatus       String   @default("published")
+  updatedAt           DateTime @updatedAt
+  sport               Sport    @relation(fields: [sportId], references: [id], onDelete: Cascade)
+  progress            LessonProgress[]
+
+  @@unique([sportId, slug])
+}
+
+model Drill {
+  id                  String   @id @default(cuid())
+  sportId             String
+  slug                String
+  title               String
+  purpose             String
+  level               String
+  focus               String // warmup | technique | tactical | conditioning | game | cooldown
+  durationMin         Int
+  setting             String // solo | partner | team
+  minPlayers          Int      @default(1)
+  equipment           String   @default("[]")
+  contact             String   @default("none") // none | light | controlled | full
+  requiresSupervision Boolean  @default(false)
+  metricKey           String?
+  content             String // JSON DrillContent
+  contentStatus       String   @default("published")
+  updatedAt           DateTime @updatedAt
+  sport               Sport    @relation(fields: [sportId], references: [id], onDelete: Cascade)
+
+  @@unique([sportId, slug])
+}
+
+model UserSport {
+  userId     String
+  sportId    String
+  level      String   @default("beginner")
+  goals      String   @default("[]")
+  position   String?
+  supervised Boolean  @default(false) // trains with a qualified coach/club
+  startedAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sport      Sport    @relation(fields: [sportId], references: [id], onDelete: Cascade)
+
+  @@id([userId, sportId])
+}
+
+model LessonProgress {
+  userId      String
+  lessonId    String
+  status      String // in_progress | completed
+  completedAt DateTime?
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@id([userId, lessonId])
+}
+
+model PracticePlan {
+  id         String   @id @default(cuid())
+  userId     String
+  sportId    String
+  title      String
+  focus      String
+  minutes    Int
+  content    String // JSON PracticePlanContent
+  source     String   @default("engine") // engine | coach
+  status     String   @default("planned") // planned | completed | archived
+  activityId String?
+  rpe        Int?
+  notes      String?
+  createdAt  DateTime @default(now())
+  completedAt DateTime?
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sport      Sport    @relation(fields: [sportId], references: [id], onDelete: Cascade)
+
+  @@index([userId, sportId, createdAt])
+}
+
+model SportMetricEntry {
+  id             String   @id @default(cuid())
+  userId         String
+  sportId        String
+  metricKey      String
+  value          Float
+  made           Int?
+  attempts       Int?
+  dateKey        String
+  context        String   @default("practice") // practice | test | match | drill
+  practicePlanId String?
+  notes          String?
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sport          Sport    @relation(fields: [sportId], references: [id], onDelete: Cascade)
+
+  @@index([userId, sportId, metricKey, dateKey])
 }

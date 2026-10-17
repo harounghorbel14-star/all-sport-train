@@ -5,7 +5,7 @@ import { badRequest, conflict, notFound } from "../server/errors";
 import { addDays, todayKey, weekStart } from "../domain/dates";
 import { cyclingMetFromSpeed, exerciseKcal, estimateTdee, runningMetFromPace, walkingMetFromSpeed } from "../domain/energy";
 import { XP } from "../domain/levels";
-import { SPORT_BY_SLUG } from "../content/sports";
+import { sportBySlug } from "./sports";
 import type { activitySchema } from "../validation";
 import { getProfile } from "./profile";
 import { awardXp, evaluateAchievements } from "./gamification";
@@ -13,36 +13,38 @@ import { awardXp, evaluateAchievements } from "./gamification";
 type ActivityInput = z.infer<typeof activitySchema>;
 
 /** MET for a sport session, refined by pace when distance is known. */
-export function activityMet(sport: string, intensity: "light" | "moderate" | "vigorous", distanceKm?: number, durationMin?: number) {
-  const def = SPORT_BY_SLUG.get(sport);
+export async function activityMet(sport: string, intensity: "light" | "moderate" | "vigorous", distanceKm?: number, durationMin?: number) {
+  const def = await sportBySlug(sport);
   if (!def) throw badRequest("Unknown sport");
   if (distanceKm && durationMin) {
     const byPace =
       sport === "running" ? runningMetFromPace(distanceKm, durationMin) : sport === "cycling" ? cyclingMetFromSpeed(distanceKm, durationMin) : sport === "walking" ? walkingMetFromSpeed(distanceKm, durationMin) : null;
     if (byPace) return { met: byPace, basis: "pace" as const };
   }
-  return { met: def.met[intensity], basis: "intensity" as const };
+  const met = intensity === "light" ? def.met[0] : intensity === "vigorous" ? def.met[2] : def.met[1];
+  return { met, basis: "intensity" as const };
 }
 
 export async function logActivity(userId: string, input: ActivityInput) {
-  const def = SPORT_BY_SLUG.get(input.sport);
+  const def = await sportBySlug(input.sport);
   if (!def) throw badRequest("Unknown sport");
-  // Validate sport-specific fields against the sport definition.
+  // Validate sport-specific session fields against the sport's metric definitions.
+  const fields = def.metrics.filter((m) => m.scope === "session");
   const metrics: Record<string, string | number> = {};
   for (const [k, v] of Object.entries(input.metrics ?? {})) {
-    const field = def.fields.find((f) => f.key === k);
+    const field = fields.find((f) => f.key === k);
     if (!field) continue;
-    if (field.type === "number") {
+    if (field.kind === "number") {
       const n = Number(v);
       if (!Number.isFinite(n) || (field.min != null && n < field.min) || (field.max != null && n > field.max)) throw badRequest(`Invalid value for ${field.label}`);
       metrics[k] = n;
-    } else if (field.type === "select") {
+    } else if (field.kind === "select") {
       if (!field.options?.includes(String(v))) throw badRequest(`Invalid option for ${field.label}`);
       metrics[k] = String(v);
     } else metrics[k] = String(v).slice(0, 80);
   }
   const p = await getProfile(userId);
-  const { met, basis } = activityMet(input.sport, input.intensity, input.distanceKm, input.durationMin);
+  const { met, basis } = await activityMet(input.sport, input.intensity, input.distanceKm, input.durationMin);
   const kcal = exerciseKcal(met, input.durationMin, p.weightKg);
   try {
     const entry = await db.activityEntry.create({

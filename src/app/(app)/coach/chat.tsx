@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Bot, Dumbbell, GraduationCap, Info, Send, Trash2, TrendingUp, User } from "lucide-react";
+import { BookOpen, Bot, ClipboardList, Dumbbell, GraduationCap, Info, Send, Trash2, TrendingUp, Trophy, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { CoachAction } from "@/lib/ai/coach";
@@ -19,6 +19,15 @@ interface Msg {
   createdAt: string;
 }
 
+const SPORT_PROMPTS = (name: string) => [
+  `Build me a 45 minute ${name} practice`,
+  `What should I learn next in ${name}?`,
+  `Explain the main ${name} rules`,
+  `Plan my ${name} week`,
+  `Review my ${name} progress`,
+  `${name} safety tips`,
+];
+
 const PROMPTS = [
   "Create my workout for today",
   "I only have 20 minutes",
@@ -34,7 +43,10 @@ const PROMPTS = [
 /** Minimal, safe markdown: **bold**, bullet and numbered lists, paragraphs. No raw HTML. */
 function Markdown({ text }: { text: string }) {
   const blocks = text.split(/\n{2,}/);
-  const inline = (s: string) => s.split(/(\*\*[^*]+\*\*)/g).map((part, i) => (part.startsWith("**") && part.endsWith("**") ? <strong key={i}>{part.slice(2, -2)}</strong> : <span key={i}>{part}</span>));
+  const inline = (s: string) =>
+    s.split(/(\*\*[^*]+\*\*|(?<![A-Za-z0-9])_[^_]+_(?![A-Za-z0-9]))/g).map((part, i) =>
+      part.startsWith("**") && part.endsWith("**") ? <strong key={i}>{part.slice(2, -2)}</strong> : part.length > 2 && part.startsWith("_") && part.endsWith("_") ? <em key={i} className="text-muted">{part.slice(1, -1)}</em> : <span key={i}>{part}</span>,
+    );
   return (
     <div className="prose-coach text-sm leading-relaxed">
       {blocks.map((b, i) => {
@@ -91,6 +103,28 @@ function ActionCard({ a }: { a: CoachAction }) {
         <BarChart height={90} data={a.weeks.map((w, i) => ({ label: `W${i + 1}`, value: w.workouts, highlight: i === a.weeks.length - 1 }))} />
       </div>
     );
+  if (a.type === "sport")
+    return (
+      <Link href={`/sports/${a.slug}`} className="mt-2 inline-flex items-center gap-2 rounded-xl border border-line bg-surface-2 px-3 py-2 text-sm hover:border-accent">
+        <Trophy className="size-4 text-accent" /> Open {a.name} hub
+      </Link>
+    );
+  if (a.type === "practice")
+    return (
+      <Link href={`/practice/${a.planId}`} className="mt-2 flex items-center gap-3 rounded-xl border border-accent/40 bg-accent-soft p-3 hover:border-accent">
+        <ClipboardList className="size-5 text-accent" />
+        <div className="flex-1">
+          <p className="text-sm font-semibold">{a.title}</p>
+          <p className="text-xs text-muted">~{a.minutes} min · open to adjust, log results and complete</p>
+        </div>
+      </Link>
+    );
+  if (a.type === "lesson")
+    return (
+      <Link href={`/sports/${a.sport}/lessons/${a.slug}`} className="mt-2 inline-flex items-center gap-2 rounded-xl border border-line bg-surface-2 px-3 py-2 text-sm hover:border-accent">
+        <BookOpen className="size-4 text-accent" /> Next lesson: {a.title}
+      </Link>
+    );
   return (
     <Link href={a.href} className="mt-2 inline-flex items-center gap-2 rounded-xl border border-line bg-surface-2 px-3 py-2 text-sm hover:border-accent">
       {a.label} →
@@ -98,8 +132,23 @@ function ActionCard({ a }: { a: CoachAction }) {
   );
 }
 
-export function CoachChat({ initial, ai, nutritionShared }: { initial: Msg[]; ai: { configured: boolean; model: string | null }; nutritionShared: boolean }) {
+export function CoachChat({
+  initial,
+  ai,
+  nutritionShared,
+  sports,
+  initialSport,
+}: {
+  initial: Msg[];
+  ai: { configured: boolean; model: string | null };
+  nutritionShared: boolean;
+  sports: { slug: string; name: string }[];
+  initialSport: string;
+}) {
   const [messages, setMessages] = useState<Msg[]>(initial);
+  const [sport, setSport] = useState(initialSport);
+  const sportName = sports.find((s) => s.slug === sport)?.name;
+  const prompts = sportName ? SPORT_PROMPTS(sportName) : PROMPTS;
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const toast = useToast();
@@ -116,7 +165,7 @@ export function CoachChat({ initial, ai, nutritionShared }: { initial: Msg[]; ai
     const optimistic: Msg = { id: `tmp-${Date.now()}`, role: "user", content: message, provider: null, action: [], createdAt: new Date().toISOString() };
     setMessages((m) => [...m, optimistic]);
     try {
-      const r = await api<{ messages: Msg[] }>("/api/coach", { body: { message } });
+      const r = await api<{ messages: Msg[] }>("/api/coach", { body: { message, ...(sport ? { sport } : {}) } });
       setMessages(r.messages);
     } catch (e) {
       setMessages((m) => m.filter((x) => x.id !== optimistic.id));
@@ -195,12 +244,27 @@ export function CoachChat({ initial, ai, nutritionShared }: { initial: Msg[]; ai
       </div>
       <div className="sticky bottom-20 mt-4 space-y-2 bg-bg/80 pt-2 backdrop-blur lg:bottom-4">
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-          {PROMPTS.map((p) => (
+          {prompts.map((p) => (
             <button key={p} onClick={() => send(p)} disabled={sending} className="shrink-0 rounded-full border border-line bg-surface-2 px-3 py-1.5 text-xs font-medium hover:border-accent disabled:opacity-50">
               {p}
             </button>
           ))}
         </div>
+        {sports.length > 0 && (
+          <div className="flex items-center gap-2 text-xs">
+            <label htmlFor="coach-sport" className="text-muted">
+              Coaching for
+            </label>
+            <select id="coach-sport" value={sport} onChange={(e) => setSport(e.target.value)} className="h-8 rounded-lg border border-line bg-surface-2 px-2 text-xs">
+              <option value="">General training (auto-detect sport)</option>
+              {sports.map((s) => (
+                <option key={s.slug} value={s.slug}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <form onSubmit={onSubmit} className="flex gap-2">
           <label htmlFor="coach-input" className="sr-only">
             Message the coach

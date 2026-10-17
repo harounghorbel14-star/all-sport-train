@@ -4,7 +4,6 @@ import { Heart, Search, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { DIFFICULTY_LABELS, EQUIPMENT_LABELS, MUSCLE_LABELS, PATTERN_LABELS } from "@/lib/content/exercises";
-import { SPORTS } from "@/lib/content/sports";
 import { Badge, Card, Chip, EmptyState, Input, Select, cx } from "@/components/ui/primitives";
 import { MuscleMap, MUSCLE_REGIONS, type RegionId } from "@/components/muscle-map";
 import { Stagger, StaggerItem } from "@/components/ui/motion";
@@ -24,7 +23,7 @@ interface Ex {
   favorite: boolean;
 }
 
-export function ExerciseBrowser({ exercises, ownedEquipment }: { exercises: Ex[]; ownedEquipment: string[] }) {
+export function ExerciseBrowser({ exercises, ownedEquipment, sports }: { exercises: Ex[]; ownedEquipment: string[]; sports: { slug: string; name: string }[] }) {
   const [q, setQ] = useState("");
   const [regions, setRegions] = useState<RegionId[]>([]);
   const [pattern, setPattern] = useState("");
@@ -117,7 +116,7 @@ export function ExerciseBrowser({ exercises, ownedEquipment }: { exercises: Ex[]
             </Select>
             <Select value={sport} onChange={(e) => setSport(e.target.value)} aria-label="Sport">
               <option value="">Any sport</option>
-              {SPORTS.map((s) => <option key={s.slug} value={s.slug}>{s.name}</option>)}
+              {sports.map((s) => <option key={s.slug} value={s.slug}>{s.name}</option>)}
               <option value="general">General fitness</option>
             </Select>
             <Select value={location} onChange={(e) => setLocation(e.target.value)} aria-label="Location">
