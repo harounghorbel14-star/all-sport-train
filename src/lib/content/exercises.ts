@@ -1,0 +1,89 @@
+import { UPPER_EXERCISES } from "./exercises-upper";
+import { LOWER_CORE_EXERCISES } from "./exercises-lower-core";
+import { SKILL_MOBILITY_EXERCISES } from "./exercises-skills-mobility";
+import type { ExerciseSeed } from "./types";
+
+export const EXERCISE_CATALOG: ExerciseSeed[] = [...UPPER_EXERCISES, ...LOWER_CORE_EXERCISES, ...SKILL_MOBILITY_EXERCISES];
+
+export const EXERCISE_BY_SLUG = new Map(EXERCISE_CATALOG.map((e) => [e.slug, e]));
+
+export const EQUIPMENT_LABELS: Record<string, string> = {
+  pullup_bar: "Pull-up bar",
+  low_bar: "Low bar / railing",
+  rings: "Gymnastic rings / suspension trainer",
+  parallel_bars: "Parallel bars / dip station",
+  parallettes: "Parallettes",
+  resistance_band: "Resistance bands",
+  dumbbells: "Dumbbells",
+  kettlebell: "Kettlebell",
+  barbell: "Barbell & rack",
+  bench: "Bench",
+  cable_machine: "Gym machines / cables",
+  sturdy_chair: "Sturdy chair or step",
+  sturdy_table: "Heavy sturdy table",
+  jump_rope: "Jump rope",
+  box: "Box or stairs",
+};
+
+export const MUSCLE_LABELS: Record<string, string> = {
+  chest: "Chest",
+  upper_chest: "Upper chest",
+  front_delts: "Front shoulders",
+  side_delts: "Side shoulders",
+  rear_delts: "Rear shoulders",
+  triceps: "Triceps",
+  biceps: "Biceps",
+  forearms: "Forearms & grip",
+  lats: "Lats",
+  upper_back: "Upper back",
+  traps: "Traps",
+  abs: "Abs",
+  obliques: "Obliques",
+  deep_core: "Deep core",
+  lower_back: "Lower back",
+  glutes: "Glutes",
+  quads: "Quads",
+  hamstrings: "Hamstrings",
+  adductors: "Adductors",
+  calves: "Calves",
+  hip_flexors: "Hip flexors",
+  full_body: "Full body",
+};
+
+export const PATTERN_LABELS: Record<string, string> = {
+  horizontal_push: "Horizontal push",
+  vertical_push: "Vertical push",
+  horizontal_pull: "Horizontal pull",
+  vertical_pull: "Vertical pull",
+  dip: "Dip",
+  squat: "Squat",
+  lunge: "Lunge / single-leg",
+  hinge: "Hinge",
+  calf: "Calves",
+  core_anti_extension: "Core — anti-extension",
+  core_flexion: "Core — flexion",
+  core_lateral: "Core — lateral / anti-rotation",
+  scapular: "Scapular control",
+  shoulder_isolation: "Shoulder isolation",
+  arms: "Arms",
+  carry: "Carry",
+  balance: "Balance",
+  plyometric: "Jumping & landing",
+  conditioning: "Conditioning",
+  skill: "Skill",
+  mobility: "Mobility",
+};
+
+export const LIMITATION_LABELS: Record<string, string> = {
+  shoulder: "Shoulder discomfort",
+  wrist: "Wrist discomfort",
+  elbow: "Elbow discomfort",
+  lower_back: "Lower-back discomfort",
+  knee: "Knee discomfort",
+  ankle: "Ankle discomfort",
+  hip: "Hip discomfort",
+  neck: "Neck discomfort",
+  high_impact: "Avoid jumping / high impact",
+};
+
+export const DIFFICULTY_LABELS = ["", "Foundation", "Beginner", "Intermediate", "Advanced", "Elite"];
