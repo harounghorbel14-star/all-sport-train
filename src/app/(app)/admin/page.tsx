@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/server";
 import { allExercises } from "@/lib/services/exercises";
 import { db } from "@/lib/server/db";
-import { Card, CardTitle, PageHeader, Stat } from "@/components/ui/primitives";
+import { ButtonLink, Card, CardTitle, PageHeader, Stat } from "@/components/ui/primitives";
 import { ExerciseAdmin } from "./form";
 
 export const metadata = { title: "Admin" };
@@ -13,7 +13,7 @@ export default async function AdminPage() {
   const [exercises, users, reports] = await Promise.all([allExercises(), db.user.count(), db.report.findMany({ where: { status: "open" }, orderBy: { createdAt: "desc" }, take: 20 })]);
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Administration" title="Admin" subtitle="Manage the exercise library and review community reports." />
+      <PageHeader eyebrow="Administration" title="Admin" subtitle="Manage the exercise library and review community reports." action={<ButtonLink href="/admin/sports" variant="secondary">Sports content</ButtonLink>} />
       <div className="grid gap-4 sm:grid-cols-3">
         <Card><Stat label="Users" value={users} /></Card>
         <Card><Stat label="Exercises" value={exercises.length} hint={`${exercises.filter((e) => e.isCustom).length} custom`} /></Card>

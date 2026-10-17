@@ -13,6 +13,8 @@ import { AiUnavailableError, aiStatus, chat, type ChatMessage } from "./provider
 import { detectIntent, type Intent } from "./intents";
 import { areasFromText, COACH_RULES, SAFETY_MESSAGES, screen } from "./safety";
 import { buildCoachContext, type FourWeekStats } from "./context";
+import { detectSport, sportContext, sportDraft, SPORT_RULES } from "./sport-coach";
+import { sportBySlug } from "../services/sports";
 
 export const coachActionSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("workout"), planId: z.string(), title: z.string(), minutes: z.number(), exercises: z.array(z.string()) }),
@@ -20,6 +22,9 @@ export const coachActionSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("skill"), slug: z.string(), name: z.string() }),
   z.object({ type: z.literal("analysis"), weeks: z.array(z.object({ start: z.string(), workouts: z.number(), minutes: z.number() })), adherence: z.number() }),
   z.object({ type: z.literal("link"), href: z.string(), label: z.string() }),
+  z.object({ type: z.literal("sport"), slug: z.string(), name: z.string() }),
+  z.object({ type: z.literal("practice"), planId: z.string(), title: z.string(), minutes: z.number(), sport: z.string() }),
+  z.object({ type: z.literal("lesson"), sport: z.string(), slug: z.string(), title: z.string() }),
 ]);
 export type CoachAction = z.infer<typeof coachActionSchema>;
 
@@ -127,15 +132,30 @@ async function draftReply(userId: string, text: string, intent: Intent, minutes?
   }
 }
 
-const SYSTEM = (ctx: string) => `You are APEX Coach, a knowledgeable, encouraging strength & calisthenics coach inside a fitness app.
+const SYSTEM = (ctx: string, sport?: string) => `You are APEX Coach, a knowledgeable, encouraging strength & calisthenics coach inside a fitness app${sport ? " that also coaches many sports" : ""}.
 Be concise, practical and warm. Use short paragraphs or bullet points. Never shame the user.
 
 ${COACH_RULES}
-
+${sport ? `\n${SPORT_RULES}\n` : ""}
 User context (from their logged data):
-${ctx}`;
+${ctx}${sport ? `\n\nSport context:\n${sport}` : ""}`;
 
-export async function coachReply(userId: string, text: string) {
+/** General fitness modalities: only treated as a sport conversation when the user picked them explicitly. */
+const FITNESS_MODALITIES = new Set(["mobility", "hiit", "yoga", "pilates", "gym", "strength", "athletic", "walking"]);
+
+/** Which sport (if any) this message should be answered for. */
+async function resolveSport(text: string, intent: Intent, explicit?: string) {
+  const slug = explicit ?? (await detectSport(text));
+  if (!slug) return null;
+  const sport = await sportBySlug(slug);
+  if (!sport) return null;
+  if (!explicit && FITNESS_MODALITIES.has(slug)) return null;
+  // Workout-based sports (calisthenics, strength…) use the workout engine for workout requests.
+  if (sport.workoutBased && intent !== "general") return null;
+  return sport.slug;
+}
+
+export async function coachReply(userId: string, text: string, sportSlug?: string) {
   await db.coachMessage.create({ data: { userId, role: "user", content: text } });
   const flags = screen(text);
   const { intent, minutes } = detectIntent(text);
@@ -146,7 +166,9 @@ export async function coachReply(userId: string, text: string) {
     return db.coachMessage.create({ data: { userId, role: "assistant", content: msg, provider: "rules" } });
   }
 
-  const draft = await draftReply(userId, text, flags.includes("injury") && intent === "general" ? "fatigue_adapt" : intent, minutes);
+  const effective = flags.includes("injury") && intent === "general" ? "fatigue_adapt" : intent;
+  const sport = effective === "fatigue_adapt" && !sportSlug ? null : await resolveSport(text, effective, sportSlug);
+  const draft = sport ? await sportDraft(userId, sport, text) : await draftReply(userId, text, effective, minutes);
   const prefix = flags.map((f) => SAFETY_MESSAGES[f]).join("\n\n");
   let content = draft.text;
   let provider: "ai" | "rules" = "rules";
@@ -154,6 +176,7 @@ export async function coachReply(userId: string, text: string) {
   if (aiStatus().configured) {
     try {
       const ctx = await buildCoachContext(userId);
+      const sportCtx = sport ? await sportContext(userId, sport) : undefined;
       const history = await db.coachMessage.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 12 });
       const messages: ChatMessage[] = history
         .reverse()
@@ -170,9 +193,9 @@ export async function coachReply(userId: string, text: string) {
       if (merged.length && merged[merged.length - 1].role === "user") merged.pop();
       merged.push({
         role: "user",
-        content: `${text}\n\n<app_data>\nThe app computed the following for this request (intent: ${intent}). Base your answer on it; do not invent other exercises, numbers or plans:\n${draft.facts || "(no extra data)"}\n</app_data>`,
+        content: `${text}\n\n<app_data>\nThe app computed the following for this request (intent: ${sport ? `sport:${sport}` : intent}). Base your answer on it; do not invent other exercises, numbers or plans:\n${draft.facts || "(no extra data)"}\n</app_data>`,
       });
-      const res = await chat({ system: SYSTEM(ctx.text), messages: merged, maxTokens: 2000, effort: "low" });
+      const res = await chat({ system: SYSTEM(ctx.text, sportCtx), messages: merged, maxTokens: 2000, effort: "low" });
       content = res.text;
       provider = "ai";
     } catch (e) {

@@ -46,7 +46,7 @@ npm start
 | `npm test` | Vitest unit and integration tests (creates `prisma/test.db` automatically) |
 | `npm run test:e2e` | Playwright tests (builds nothing; run `npm run build` first). Uses `prisma/e2e.db`. |
 | `npm run db:migrate` | Create a new migration during development |
-| `npm run db:seed` | Seed or refresh the catalog (idempotent; keeps admin-added exercises) |
+| `npm run db:seed` | Seed or refresh the catalog (idempotent; keeps admin-added exercises and admin-edited sports). `SEED_OVERWRITE=1` re-applies the seeded sports content over existing rows. |
 
 For Playwright in a custom environment, set `PLAYWRIGHT_CHROMIUM_PATH` to a Chromium binary if needed.
 
@@ -84,15 +84,65 @@ Secrets are only read on the server (`src/lib/server/env.ts`, validated with Zod
 | **Calisthenics Academy** | 19 skill paths across foundations, upper, core, legs and advanced (L-sit, handstand, muscle-up, front lever, back lever, planche). Each has prerequisites checked against logged data or self-tests, equipment checks, step targets, supporting exercises, errors, rest, safety and an honest timeline. |
 | **Exercise library** | 125 exercises with setup, steps, breathing, cues, mistakes, safety, easier/harder variations and related moves. Filters: muscle (body map), pattern, difficulty, equipment, sport, location, type, favorites, "fits my equipment". Honest media fallback (no invented video URLs); admins can add verified video URLs. |
 | **Nutrition** | Diary by meal, food search with serving sizes, custom foods, edit/delete, water, saved meals, 7-day chart, macro and calorie goals. AI or text meal estimates show confidence and an editable review step, and are labelled as estimates. No calorie deficit is suggested for under-18s. |
-| **Activity** | 19 sports with sport-specific validated fields; MET-based net energy estimates with ±20–35% ranges (pace-based for running, cycling and walking); separate Mifflin–St Jeor TDEE; workouts create exactly one activity entry (no double counting) |
+| **Activity** | Every published sport, with sport-specific validated fields from its metric definitions; MET-based net energy estimates with ±20–35% ranges (pace-based for running, cycling and walking); separate Mifflin–St Jeor TDEE; workouts create exactly one activity entry (no double counting) |
 | **Progress** | 4/12/24/52-week analytics from persisted data only: workouts, minutes, reps, load volume, activity, nutrition, exercise performance line, skills. Optional measurements with trends; private photo journal with consent, gallery, date comparison and deletion; data export. |
 | **Recovery** | Check-ins (sleep, energy, soreness, stress, pain, rest day) → readiness band; 8 guided mobility routines with a timer player; educational posture self-check |
 | **Form Check AI** | Photo or video. Video is sampled into frames in the browser, so the raw video is never uploaded. Explicit consent; media is not kept unless chosen. Results are split into observed / uncertain / can't be assessed. Delete anytime. |
 | **Challenges** | Sustainable streaks (rest days count, one forgiven miss per week), weekly streaks, 16-week calendar, XP and levels, 13 data-driven achievements, weekly missions, monthly community challenges |
 | **Community** | Feed (friends / public / group), reactions, comments, friend requests, groups, report (auto-hide at 3 reports) and block. Text-only posts, so body photos can never be published. |
-| **Sports Explorer** | Per-sport tracking fields, beginner guidance, templates, personal stats, weekly multisport schedule |
+| **Sports** | Searchable catalog of 143 sports and disciplines in 8 categories, with alias and accent-insensitive search. Each sport has a status label: *learning system*, *in development* or *requires external instruction*. Sport hub tabs: Overview, Learn, Drills, Practice, Rules, Progress, Conditioning & safety. Weekly multisport schedule. See [Sports knowledge system](#sports-knowledge-system). |
 | **Profile & settings** | Profile, training setup, language (EN / FR / AR with RTL), units, theme (dark / light / system), time zone, reduced motion, nutrition goals, notification preferences with quiet hours, privacy, accountability, export, account deletion |
 | **AI Coach** | Intent detection for the example requests; real actions (saved workouts, technique links, 4-week analysis charts, roadmap and meal guidance) computed from your data; safety screening for emergencies, injury, disordered eating and self-harm; the model gets compact factual context and is told not to invent plans |
+
+## Sports knowledge system
+
+Sports live in the database, not in code. Admins can add sports, disciplines (`parentSlug`) and regional variants from **Admin → Sports content** (`/admin/sports`) without a deploy.
+
+**Catalog coverage, stated plainly.** The catalog has 143 entries across combat, team ball, racket, athletics/endurance, strength/gymnastics/fitness, water, outdoor/adventure, and dance/adaptive/other. It is not a list of every sport in the world.
+- **Learning system** (8 sports): full lessons, drills, rules summaries, practice builder and sport-specific metrics. The 8 are calisthenics, boxing, football, basketball, baseball, swimming, running and tennis.
+- **In development** (most of the rest): an overview, beginner tips, activity tracking and metrics, with no lessons yet.
+- **Requires external instruction** (e.g. diving, kitesurfing, climbing, mountaineering, gymnastics, equestrian, archery): tracking and general conditioning only, plus a pointer to certified instructors.
+
+**Content model.** Each sport has a flexible profile, validated with zod and shared by every sport. A sport only fills the sections that make sense for it:
+- Introduction, history, equipment, terminology.
+- Positions and formations (team sports).
+- Technique areas, tactics, conditioning and mobility (linked to real exercises in the library).
+- Injury prevention, safety, age guidance and supervision notes.
+- Milestones, weekly structure, templates and external resources.
+
+Lessons have prerequisites and levels. Drills carry focus, setting, minimum players, a contact level (none/light/controlled/full) and a "requires supervision" flag. Metrics are typed per sport:
+- Kinds: number, time (stored in seconds), ratio (made/attempts, with a minimum number of attempts before a result can count as a personal best) and select.
+- Each metric has a scope (session vs. performance) and a direction.
+- Examples: free-throw percentage for basketball, 5 km time for running, pitch count and exit velocity for baseball, and prerequisite-based skills for calisthenics through the Academy.
+
+**Rules and sources.**
+- Rulesets are plain-language summaries, never the rulebook.
+- Each one names its governing body and scope, has an edition note and a verification label (*summary checked against source* / *general overview* / *unverified*), and records the date it was last reviewed.
+- Each ruleset cites at least one entry from the source registry, which admins manage. Seeded sources only include URLs for well-known official sites.
+- Basketball has separate FIBA and NBA rulesets; boxing separates amateur and professional.
+
+**Workflow.** New or edited sports, lessons, drills and rulesets are saved as **draft**. They move to **review** and then **published**, and only published content is shown to users. Publishing a sport or ruleset records the review date.
+
+**Practice builder** (`lib/engine/practice.ts`). It builds warm-up → main work (split by focus) → cooldown from the sport's drill library. It respects:
+- the user's level, the setting (solo/partner/team) and player count;
+- preferred drills from the user's next lesson.
+
+Safety rules are in one function:
+- Full-contact drills are never generated.
+- Controlled contact is only for supervised adult advanced athletes.
+- Coach-only drills require the user to say they train with a qualified coach.
+- Under-18s get partner contact only when supervised.
+
+Every drill that is left out is listed with its reason. Completing a practice creates one activity entry (MET-based estimated energy) and the results entered.
+
+**Sport-aware coach.** The coach uses the sport the user opened it from (`/coach?sport=…`) or detects one from the message. Rule-based answers are split into labelled sections:
+- **Official rules — <ruleset>**, with source and review date;
+- **Coaching suggestion**;
+- **Uncertain / check locally**.
+
+When there is no reviewed ruleset, the coach says so instead of inventing rules. When an AI key is configured, the model gets the same data and explicit instructions to keep those labels and never invent rules, rankings or statistics. Workout requests for workout-based sports (calisthenics, strength) still go through the workout engine.
+
+**Tracking honesty.** Progress is only what the user logs. There are no universal "sport scores", invented sensor data, rankings or match results.
 
 ## Architecture
 
@@ -101,11 +151,11 @@ src/
   app/                 routes: (auth), onboarding, (app) shell pages, (focus)/live, api/*
   components/          ui/ primitives, charts, motion, overlays; shell; workout; muscle map
   lib/
-    content/           exercise catalog, skills, mobility, sports, foods (typed data)
-    engine/            workout generator, 24-week roadmap (pure, unit-tested)
+    content/           exercise catalog, skills, mobility, foods, sports/ (seed content + zod schemas)
+    engine/            workout generator, 24-week roadmap, sport practice builder (pure, unit-tested)
     domain/            dates/time zones, streaks, energy, nutrition maths, readiness, levels, achievements
     services/          DB-backed business logic (every query scoped by userId)
-    ai/                provider, context, intents, safety, coach, meal estimate, form check
+    ai/                provider, context, intents, safety, coach, sport coach, meal estimate, form check
     server/            db, env, API wrapper (auth, origin check, Zod, errors), rate limiter, logger
     i18n/              dictionaries + RTL support
 prisma/                schema, migrations, seed
@@ -122,7 +172,7 @@ Design decisions:
 
 ### Database
 
-The schema is in `prisma/schema.prisma`; the migration is in `prisma/migrations/`. Models: User, Session, Profile, Exercise, FavoriteExercise, WorkoutPlan, WorkoutSession, SetLog, PersonalRecord, SkillProgress, Food, FoodEntry, SavedMeal, WaterLog, ActivityEntry, CheckIn, MobilitySession, BodyMeasurement, MediaUpload, FormCheck, UserAchievement, XpEvent, WeeklyReview, CoachMessage, Notification, Challenge, ChallengeParticipant, Friendship, Block, Report, Group, GroupMember, Post, Comment, Reaction.
+The schema is in `prisma/schema.prisma`; the migration is in `prisma/migrations/`. Sports models: SportCategory, Sport, SportMetric, ContentSource, Ruleset, Lesson, Drill, UserSport, LessonProgress, PracticePlan, SportMetricEntry. Core models: User, Session, Profile, Exercise, FavoriteExercise, WorkoutPlan, WorkoutSession, SetLog, PersonalRecord, SkillProgress, Food, FoodEntry, SavedMeal, WaterLog, ActivityEntry, CheckIn, MobilitySession, BodyMeasurement, MediaUpload, FormCheck, UserAchievement, XpEvent, WeeklyReview, CoachMessage, Notification, Challenge, ChallengeParticipant, Friendship, Block, Report, Group, GroupMember, Post, Comment, Reaction.
 
 All user data cascades on account deletion. Indexes cover per-user date lookups, and unique constraints make XP, achievements, notifications and imports idempotent.
 
@@ -139,9 +189,9 @@ To use PostgreSQL, change `provider` in `schema.prisma` to `postgresql`, set `DA
 
 - `npm run typecheck`: passes
 - `npm run lint`: passes with no warnings
-- `npm test`: **84 tests in 6 files, all passing**. They cover: content integrity; engine (equipment, limitations, start-from-zero, time budget, readiness, determinism, V-taper legs, progression rules, substitutions); roadmap and reviews; dates and time zones; streaks (rest days, grace, pending today, late-night workouts across time zones); energy and TDEE (under-18 guard); nutrition maths and the text parser; readiness; levels and achievements; and API integration (auth, cookies, rate limit, 401s, CSRF origin, admin, onboarding persistence, ownership, plan generation/editing/validation, live session start/pause/resume/sets/refresh/complete, PRs, substitutions, skills and prerequisites, reviews, food logging and serving maths, water, saved meals, estimator fallback, activity estimates and import de-duplication, coach fallback and safety, uploads, private media, form check, export/delete, analytics empty state, community privacy and blocking, challenges, notifications).
+- `npm test`: **117 tests in 8 files, all passing**. Sports-specific tests cover: catalog integrity (unique slugs, valid references, https sources, full sports have lessons/drills/rulesets/metrics); practice-builder safety (no full contact, supervision, under-18, level, setting, time budget); personal bests and the ratio minimum-attempts rule; milestones; next lesson; weekly plan; API (search, hub, enrolment, lesson progress, practice create/complete/ownership, metric validation and personal bests, review, admin draft → publish visibility and required sources, non-admin 403); coach rule labels and "no verified summary" fallback; account export. The earlier tests cover: They cover: content integrity; engine (equipment, limitations, start-from-zero, time budget, readiness, determinism, V-taper legs, progression rules, substitutions); roadmap and reviews; dates and time zones; streaks (rest days, grace, pending today, late-night workouts across time zones); energy and TDEE (under-18 guard); nutrition maths and the text parser; readiness; levels and achievements; and API integration (auth, cookies, rate limit, 401s, CSRF origin, admin, onboarding persistence, ownership, plan generation/editing/validation, live session start/pause/resume/sets/refresh/complete, PRs, substitutions, skills and prerequisites, reviews, food logging and serving maths, water, saved meals, estimator fallback, activity estimates and import de-duplication, coach fallback and safety, uploads, private media, form check, export/delete, analytics empty state, community privacy and blocking, challenges, notifications).
 - `npm run build`: passes
-- `npm run test:e2e`: **6 Playwright tests passing**: anonymous redirect; register → start-from-zero onboarding → live workout → refresh → finish → summary; food logging; rule-based coach; responsive navigation on desktop and mobile.
+- `npm run test:e2e`: **7 Playwright tests passing**: sports search → join → lesson → practice → complete → log a result and see the personal best; anonymous redirect; register → start-from-zero onboarding → live workout → refresh → finish → summary; food logging; rule-based coach; responsive navigation on desktop and mobile.
 
 ## Known limitations
 
@@ -151,6 +201,7 @@ To use PostgreSQL, change `provider` in `schema.prisma` to `postgresql`, set `DA
 - **Exercise media**: there are no videos. The catalog uses illustrated fallbacks plus written tutorials until verified media is added.
 - **Form check**: video is analysed as sampled still frames. There is no pose-estimation model, and no tempo or range measurement.
 - **Community**: no real-time updates (refresh-based), no admin moderation workflow beyond auto-hide plus a report list, and no images in posts by design.
+- **Sports content depth**: only 8 sports have a full learning system. The rest have overviews and tracking until lessons are written and reviewed. The seeded rules summaries were written from general knowledge of the cited rulebooks and need periodic re-review against current editions — the review date is shown to users for that reason.
 - **Rate limiting and caching** are in-memory (single instance).
 - **Offline**: queued sets sync on reconnect, but pages themselves need a connection (no service worker).
 

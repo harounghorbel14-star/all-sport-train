@@ -1,7 +1,7 @@
 import { Activity, Flame, Link2, Watch } from "lucide-react";
 import { requireUser } from "@/lib/auth/server";
 import { activityOverview } from "@/lib/services/activity";
-import { SPORT_BY_SLUG, SPORTS } from "@/lib/content/sports";
+import { publishedSports } from "@/lib/services/sports";
 import { formatDateKey, formatDistance, kcalRange } from "@/lib/format";
 import { Badge, Card, CardTitle, EmptyState, PageHeader, Stat } from "@/components/ui/primitives";
 import { BarChart } from "@/components/ui/charts";
@@ -12,7 +12,8 @@ export const metadata = { title: "Activity & Calories" };
 export default async function ActivityPage({ searchParams }: { searchParams: Promise<{ sport?: string }> }) {
   const { user, profile } = await requireUser();
   const { sport } = await searchParams;
-  const o = await activityOverview(user.id);
+  const [o, sports] = await Promise.all([activityOverview(user.id), publishedSports()]);
+  const bySlug = new Map(sports.map((x) => [x.slug, x]));
   const units = profile.units as "metric" | "imperial";
   return (
     <div className="space-y-6">
@@ -49,7 +50,7 @@ export default async function ActivityPage({ searchParams }: { searchParams: Pro
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardTitle>Log an activity</CardTitle>
-          <ActivityLogger today={o.today} units={units} initialSport={sport && SPORT_BY_SLUG.has(sport) ? sport : (profile.sports.find((s) => !SPORT_BY_SLUG.get(s)?.workoutBased) ?? "walking")} sports={SPORTS.map((s) => ({ slug: s.slug, name: s.name, distance: s.distance, fields: s.fields }))} />
+          <ActivityLogger today={o.today} units={units} initialSport={sport && bySlug.has(sport) ? sport : (profile.sports.find((s) => bySlug.has(s) && !bySlug.get(s)?.workoutBased) ?? "walking")} sports={sports.map((s) => ({ slug: s.slug, name: s.name, distance: s.distanceUnit, fields: s.metrics.filter((m) => m.scope === "session").map((m) => ({ key: m.key, label: m.label, kind: m.kind, unit: m.unit, options: m.options })) }))} />
         </Card>
         <Card>
           <CardTitle>Recent</CardTitle>
@@ -60,7 +61,7 @@ export default async function ActivityPage({ searchParams }: { searchParams: Pro
               {o.recent.map((a) => (
                 <li key={a.id} className="flex items-center justify-between gap-2 py-2.5">
                   <span className="min-w-0">
-                    <span className="block truncate text-sm font-medium">{a.title ?? SPORT_BY_SLUG.get(a.sport)?.name}</span>
+                    <span className="block truncate text-sm font-medium">{a.title ?? bySlug.get(a.sport)?.name ?? a.sport}</span>
                     <span className="text-xs text-subtle">
                       {formatDateKey(a.dateKey, profile.locale)} · {Math.round(a.durationMin)} min{a.distanceKm ? ` · ${formatDistance(a.distanceKm, units)}` : ""} · {kcalRange(a.kcalLow, a.kcalHigh)} kcal
                     </span>

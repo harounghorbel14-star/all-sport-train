@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { EXERCISE_BY_SLUG, EXERCISE_CATALOG } from "@/lib/content/exercises";
 import { SKILLS } from "@/lib/content/skills";
 import { MOBILITY_ROUTINES } from "@/lib/content/mobility";
-import { SPORTS } from "@/lib/content/sports";
+import { SPORT_SEEDS } from "@/lib/content/sports";
 import { LOCAL_FOODS } from "@/lib/content/foods";
 import { kcalFromMacros } from "@/lib/domain/nutrition";
 
@@ -47,9 +47,9 @@ describe("content catalog integrity", () => {
   });
 
   it("has sane MET values for every sport intensity", () => {
-    for (const s of SPORTS) {
-      expect(s.met.light).toBeLessThanOrEqual(s.met.moderate);
-      expect(s.met.moderate).toBeLessThanOrEqual(s.met.vigorous);
+    for (const s of SPORT_SEEDS) {
+      expect(s.met[0], s.slug).toBeLessThanOrEqual(s.met[1]);
+      expect(s.met[1], s.slug).toBeLessThanOrEqual(s.met[2]);
     }
   });
 

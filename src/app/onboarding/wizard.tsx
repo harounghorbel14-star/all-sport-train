@@ -9,7 +9,6 @@ import { useI18n, fmt } from "@/components/providers";
 import { Button, Chip, Field, Input, Notice, Select, Textarea, cx } from "@/components/ui/primitives";
 import { MuscleMap, emphasisFromRegions, type RegionId } from "@/components/muscle-map";
 import { EQUIPMENT_LABELS, LIMITATION_LABELS } from "@/lib/content/exercises";
-import { SPORTS } from "@/lib/content/sports";
 import { ACTIVITY_LABELS, AGE_LABELS, DIET_LABELS, EMPHASIS_LABELS, EXPERIENCE_LABELS, GOAL_LABELS, LOCATION_LABELS, PREF_LABELS, WEEKDAYS } from "@/lib/labels";
 import { inToCm, lbToKg } from "@/lib/format";
 
@@ -42,7 +41,8 @@ const STEPS = ["Welcome", "Goals", "Focus", "Sports", "Where & what", "Schedule"
 
 const toggle = <T,>(list: T[], v: T) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
 
-export function OnboardingWizard({ name, initial }: { name: string; initial?: Partial<State> }) {
+export function OnboardingWizard({ name, initial, sports }: { name: string; initial?: Partial<State>; sports: { slug: string; name: string }[] }) {
+  const [sportQuery, setSportQuery] = useState("");
   const { t } = useI18n();
   const router = useRouter();
   const [step, setStep] = useState(0);
@@ -236,8 +236,9 @@ export function OnboardingWizard({ name, initial }: { name: string; initial?: Pa
               <div>
                 <h1 id="step-title" className="num text-4xl font-bold uppercase">Which sports do you enjoy?</h1>
                 <p className="mt-2 text-sm text-muted">We&apos;ll add relevant tracking and conditioning ideas. Optional.</p>
-                <div className="mt-5 flex flex-wrap gap-2">
-                  {SPORTS.map((sp) => (
+                <Input className="mt-4" placeholder="Search sports…" value={sportQuery} onChange={(e) => setSportQuery(e.target.value)} aria-label="Search sports" />
+                <div className="mt-3 flex max-h-72 flex-wrap gap-2 overflow-y-auto">
+                  {sports.filter((sp) => s.sports.includes(sp.slug) || !sportQuery || sp.name.toLowerCase().includes(sportQuery.toLowerCase())).slice(0, sportQuery ? 60 : 30).map((sp) => (
                     <Chip key={sp.slug} selected={s.sports.includes(sp.slug)} onClick={() => set("sports", toggle(s.sports, sp.slug))}>
                       {sp.name}
                     </Chip>

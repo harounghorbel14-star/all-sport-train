@@ -31,6 +31,10 @@ export async function exportAccount(userId: string) {
       posts: { include: { comments: true } },
       comments: true,
       reactions: true,
+      userSports: { include: { sport: { select: { slug: true, name: true } } } },
+      lessonProgress: true,
+      practicePlans: true,
+      sportMetrics: true,
     },
   });
   if (!user) return null;
