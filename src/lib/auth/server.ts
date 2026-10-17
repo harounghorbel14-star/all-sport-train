@@ -5,9 +5,11 @@ import { cache } from "react";
 import { getUserFromToken, SESSION_COOKIE } from "./session";
 import { profileView } from "../services/profile";
 import { safeNext } from "./redirect";
+import { configProblems } from "../server/env";
 
 /** Current user for server components (memoised per request). */
 export const currentUser = cache(async () => {
+  if (configProblems().length) return null; // misconfigured server: pages show the setup notice instead of crashing
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   return getUserFromToken(token);
 });

@@ -1,10 +1,26 @@
 import { db } from "@/lib/server/db";
+import { configProblems } from "@/lib/server/env";
 
+export const dynamic = "force-dynamic";
+
+/**
+ * Deployment health: configuration (variable names only), database reachability,
+ * migrations applied and seed content present. 503 until everything is ready.
+ */
 export async function GET() {
-  try {
-    await db.$queryRaw`SELECT 1`;
-    return Response.json({ status: "ok" });
-  } catch {
-    return Response.json({ status: "degraded" }, { status: 503 });
+  const problems = configProblems();
+  if (!problems.length) {
+    try {
+      await db.$queryRaw`SELECT 1`;
+      try {
+        const [exercises, sports] = await Promise.all([db.exercise.count(), db.sport.count()]);
+        if (!exercises || !sports) problems.push("Database is empty — run the seed (npm run db:seed, or start with npm run start:prod)");
+      } catch {
+        problems.push("Database tables are missing — run migrations (npx prisma migrate deploy, or start with npm run start:prod)");
+      }
+    } catch {
+      problems.push("Database is unreachable — check DATABASE_URL");
+    }
   }
+  return Response.json(problems.length ? { status: "misconfigured", problems } : { status: "ok" }, { status: problems.length ? 503 : 200 });
 }

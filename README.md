@@ -216,6 +216,23 @@ Goal: every sports fact a user sees should be traceable to a source, and anythin
 - Because nobody has checked the seeded rules summaries against the current rulebooks, all of them are now labelled **"General overview — not yet verified against the current rulebook"**. A migration downgraded the old "checked against source" label.
 - To do real verification: allow the federation and journal domains in the environment's network settings (or run in an environment with internet access), re-run the research, and have a reviewer verify claims and apply suggestions in `/admin/research`.
 
+## Deployment (Railway or similar)
+
+`railway.json` builds with `npm run build` and starts with `npm run start:prod`, which applies migrations (`prisma migrate deploy`), runs the idempotent seed (exercises, foods, sports, research queue) and then `next start` on `$PORT`. The healthcheck is `/api/health`; it returns **503 with the reason** until configuration, database, migrations and seed are all OK, so a broken deploy fails visibly instead of serving error pages.
+
+Set these in the service's **Variables** (the repository's `.env` is never committed, so a fresh deploy has none of them):
+
+| Variable | Value |
+| --- | --- |
+| `SESSION_SECRET` | **Required.** A random string of 32+ characters, e.g. the output of `openssl rand -base64 48`. |
+| `DATABASE_URL` | **Required.** For SQLite, use a file on a persistent volume, e.g. `file:/data/apex.db` with a Railway volume mounted at `/data` — without a volume every redeploy starts with an empty database. Or use PostgreSQL (switch the provider in `schema.prisma` and create a fresh migration). |
+| `UPLOAD_DIR` | `/data/uploads` (same volume) so private photos survive redeploys. |
+| `APP_BASE_URL` | Your public URL, e.g. `https://your-app.up.railway.app` (needed for Google sign-in and reset links). |
+| `ADMIN_EMAILS` | Your email, to get admin access when you register. |
+| Optional | `ANTHROPIC_API_KEY`, `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`, `RESEND_API_KEY` / `MAIL_FROM`, `FDC_API_KEY`. |
+
+If `SESSION_SECRET` or `DATABASE_URL` is missing, the sign-in pages show **"Server setup incomplete"** with the variable names (never values), the server logs the problem at startup, and `/api/health` explains it.
+
 ## Architecture
 
 ```

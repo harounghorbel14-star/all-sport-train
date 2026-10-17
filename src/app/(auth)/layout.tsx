@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SetupNotice } from "@/components/setup-notice";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -9,7 +10,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <span className="grid size-10 place-items-center rounded-xl bg-accent font-black text-accent-fg">A</span>
           <span className="num text-3xl font-bold">APEX FIT</span>
         </Link>
-        {children}
+        <SetupNotice>{children}</SetupNotice>
       </div>
     </main>
   );
