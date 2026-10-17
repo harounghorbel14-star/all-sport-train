@@ -5,7 +5,9 @@ export async function registerAndOnboard(page: Page, opts: { zero?: boolean } = 
   await page.goto("/register");
   await page.getByLabel("What should we call you?").fill("Sam");
   await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill("password123");
+  await page.getByLabel("Password", { exact: true }).fill("password123");
+  await page.getByLabel("Confirm password").fill("password123");
+  await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page).toHaveURL(/onboarding/);
   if (opts.zero) await page.getByRole("button", { name: /Start from zero/ }).click();

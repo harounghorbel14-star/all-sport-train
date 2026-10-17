@@ -8,7 +8,7 @@ import { FormCheckApp } from "./app";
 export const metadata = { title: "Form Check AI" };
 
 export default async function FormCheckPage() {
-  const { user } = await requireUser();
+  const { user } = await requireUser({ guest: false });
   const [checks, exercises] = await Promise.all([listFormChecks(user.id), allExercises()]);
   return (
     <div>

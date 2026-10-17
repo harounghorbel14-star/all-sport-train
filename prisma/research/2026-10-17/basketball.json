@@ -1,0 +1,681 @@
+{
+  "sport": "basketball",
+  "accessedDate": "2026-10-17",
+  "sources": [
+    {
+      "id": "s1",
+      "title": "FIBA Official Basketball Rules 2026 (v1.0)",
+      "publisher": "FIBA",
+      "url": "https://assets.fiba.basketball/image/upload/documents-corporate-fiba-official-rules-2026-v1-0.pdf",
+      "edition": "2026 (in force 1 October 2026)",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "table of contents: Art. 41 foul limits, Art. 42 team fouls (search snippet only)"
+      ]
+    },
+    {
+      "id": "s2",
+      "title": "FIBA Official Basketball Rules 2026 to take effect October 1",
+      "publisher": "FIBA",
+      "url": "https://about.fiba.basketball/en/news/fiba-official-basketball-rules-2026-to-take-effect-october-1",
+      "edition": "2026",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "summary of main changes (search snippet only)"
+      ]
+    },
+    {
+      "id": "s3",
+      "title": "FIBA Official Basketball Rules Changes 2026 (summary)",
+      "publisher": "FIBA",
+      "url": "https://assets.fiba.basketball/image/upload/documents-corporate-fiba-official-rules-2026-rule-changes-v10a.pdf",
+      "edition": "2026 v1.0a",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "disruptive/flagrant fouls",
+        "technical foul categories",
+        "Instant Replay System",
+        "Art. 15 act of shooting (search snippets)"
+      ]
+    },
+    {
+      "id": "s4",
+      "title": "FIBA Official Basketball Rules 2024 (v1.0)",
+      "publisher": "FIBA",
+      "url": "https://assets.fiba.basketball/image/upload/documents-corporate-fiba-official-rules-2024-v10.pdf",
+      "edition": "2024 (superseded 1 Oct 2026)",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "article numbering (Art. 40 foul limits, Art. 41 team fouls) via snippet"
+      ]
+    },
+    {
+      "id": "s5",
+      "title": "New rules introduced to NBL",
+      "publisher": "NBL (Australia)",
+      "url": "https://nbl.com.au/news/fiba-introduces-new-rules-for-nbl",
+      "edition": "2026",
+      "kind": "other",
+      "accessed": false,
+      "sectionsUsed": [
+        "disqualification combinations under 2026 rules (snippet)"
+      ]
+    },
+    {
+      "id": "s6",
+      "title": "Tough Calls (BCL) — shot clock after ring touch",
+      "publisher": "FIBA / Basketball Champions League",
+      "url": "https://www.fiba.basketball/en/news/bcl-22-23-news-tough-calls-round-of-16-week-6",
+      "edition": "2022-23",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "Art. 29.2 shot clock reset 24/14 (snippet)"
+      ]
+    },
+    {
+      "id": "s7",
+      "title": "Basketball court",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Basketball_court",
+      "edition": null,
+      "kind": "other",
+      "accessed": false,
+      "sectionsUsed": [
+        "three-point line dimensions FIBA/NBA (snippet)"
+      ]
+    },
+    {
+      "id": "s8",
+      "title": "Free throw",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Free_throw",
+      "edition": null,
+      "kind": "other",
+      "accessed": false,
+      "sectionsUsed": [
+        "team-foul penalty FIBA (snippet)"
+      ]
+    },
+    {
+      "id": "s9",
+      "title": "Official NBA Rule Book 2025-26",
+      "publisher": "NBA",
+      "url": "https://official.nba.com/",
+      "edition": "2025-26",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s10",
+      "title": "NBA approves coach's challenge rule change ahead of 2025-26 regular season / NBA Cup semifinal host sites",
+      "publisher": "NBA (pr.nba.com)",
+      "url": "https://pr.nba.com/nba-cup-semifinal-host-sites-coachs-challenge-rules",
+      "edition": "2025",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "out-of-bounds challenge: Replay Center decides proximate foul (snippet)"
+      ]
+    },
+    {
+      "id": "s11",
+      "title": "NBA heaves rule change: early results",
+      "publisher": "NBA.com",
+      "url": "https://www.nba.com/news/nba-heaves-rule-change-early-results",
+      "edition": "2025-26",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "end-of-period heave statistical rule (snippet)"
+      ]
+    },
+    {
+      "id": "s12",
+      "title": "Interventions for preventing ankle ligament injuries (Cochrane review)",
+      "publisher": "Cochrane Database of Systematic Reviews (Handoll et al.)",
+      "url": "https://read.qxmd.com/read/11686947/interventions-for-preventing-ankle-ligament-injuries",
+      "edition": "2001 (search to July 2000)",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": [
+        "conclusions (snippet)"
+      ]
+    },
+    {
+      "id": "s13",
+      "title": "The effect of bracing and balance training on ankle sprain incidence among athletes: systematic review with meta-analysis (Bellows & Wong)",
+      "publisher": "International Journal of Sports Physical Therapy 2018",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6044595",
+      "edition": "2018",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": [
+        "abstract (snippet)"
+      ]
+    },
+    {
+      "id": "s14",
+      "title": "Sure Steps: Key Strategies for Protecting Basketball Players from Injuries — A Systematic Review",
+      "publisher": "Journal of Clinical Medicine 2024 (via Epistemonikos)",
+      "url": "https://www.epistemonikos.org/en/documents/44ff9d07fdbde474d24cd65a114659be25a6d8b4",
+      "edition": "2024",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": [
+        "conclusions on ankle sprain prevention (snippet)"
+      ]
+    },
+    {
+      "id": "s15",
+      "title": "Neuromuscular training and ACL injury prevention — meta-analyses (Sugimoto et al.; summarised in PMC)",
+      "publisher": "PubMed Central",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5502078",
+      "edition": null,
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": [
+        "program components / compliance findings (snippet)"
+      ]
+    },
+    {
+      "id": "s16",
+      "title": "Prevention of anterior cruciate ligament injuries (evidence summary)",
+      "publisher": "American Family Physician 2011",
+      "url": "https://www.aafp.org/pubs/afp/issues/2011/0115/p210.pdf",
+      "edition": "2011",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": [
+        "sport coverage of NMT evidence (snippet)"
+      ]
+    },
+    {
+      "id": "s17",
+      "title": "Optimal release conditions for the free throw in men's basketball (Tran & Silverberg)",
+      "publisher": "Journal of Sports Sciences 2008 (record on SPONET)",
+      "url": "https://www.sponet.de/sponet/Record/4014972?lng=en",
+      "edition": "2008",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": [
+        "abstract (snippet)"
+      ]
+    },
+    {
+      "id": "s18",
+      "title": "Basketball free throw: individual optimal conditions (Barzykina)",
+      "publisher": "arXiv 1702.07234",
+      "url": "https://arxiv.org/pdf/1702.07234.pdf",
+      "edition": "2017",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": [
+        "abstract (snippet)"
+      ]
+    },
+    {
+      "id": "s19",
+      "title": "Mini Basketball",
+      "publisher": "FIBA (World Association of Basketball Coaches)",
+      "url": "https://wabc.fiba.com/?p=187",
+      "edition": null,
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "ball size and basket height by age (snippet)"
+      ]
+    },
+    {
+      "id": "s20",
+      "title": "DBB letter on new mini-basketball basket height",
+      "publisher": "Deutscher Basketball Bund",
+      "url": "https://dbb-cms-04.basketball-bund.net/content/uploads/2021/11/DBB-Schreiben-zur-neuen-Korbhoehe-Minibasketball.pdf",
+      "edition": "2021",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "2.60 m FIBA mini-basketball height since 2005 (snippet)"
+      ]
+    },
+    {
+      "id": "s21",
+      "title": "Consensus statement on concussion in sport: 6th International Conference, Amsterdam 2022 (Patricios et al.)",
+      "publisher": "British Journal of Sports Medicine 2023;57:695-711",
+      "url": "https://bjsm.bmj.com/content/57/11/695",
+      "edition": "2023",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": [
+        "tools CRT6/SCAT6 (snippet)"
+      ]
+    }
+  ],
+  "rulesetReview": [
+    {
+      "rulesetSlug": "fiba",
+      "topic": "Teams",
+      "currentText": "Five players per team on court. Substitutions can be made at stoppages when the officials allow.",
+      "verdict": "unverifiable",
+      "sourceId": "s1",
+      "section": "Arts. 4 and 19 (2024 numbering; may shift in 2026)",
+      "note": "Believed correct; OBR 2026 PDF could not be opened."
+    },
+    {
+      "rulesetSlug": "fiba",
+      "topic": "Game length",
+      "currentText": "Four quarters of 10 minutes. Overtime periods are 5 minutes.",
+      "verdict": "unverifiable",
+      "sourceId": "s1",
+      "section": "Art. 8 (2024 numbering)",
+      "note": "Believed correct (FIBA 4x10, OT 5 min); not verified in an opened source."
+    },
+    {
+      "rulesetSlug": "fiba",
+      "topic": "Scoring",
+      "currentText": "Field goals count 2 points, or 3 points from beyond the three-point line (6.75 m from the basket). Each successful free throw counts 1 point.",
+      "verdict": "corrected",
+      "correctedText": "Field goals count 2 points, or 3 points from behind the three-point line. The line is 6.75 m from the point under the centre of the basket, except near the corners where the straight sections are 6.60 m away. Each successful free throw counts 1 point.",
+      "sourceId": "s7",
+      "section": "Court dimensions (OBR Art. 2 / Basketball Equipment)",
+      "note": "Correction adds the 6.60 m corner distance (secondary source snippet; some sites reverse the two figures). Confirm against the FIBA Equipment document."
+    },
+    {
+      "rulesetSlug": "fiba",
+      "topic": "Shot clock",
+      "currentText": "The offence has 24 seconds to attempt a shot that hits the rim. In some situations, such as an offensive rebound, the clock resets to 14 seconds.",
+      "verdict": "corrected",
+      "correctedText": "The team in control has 24 seconds to shoot: the ball must leave the shooter's hand before the signal and then touch the ring or go in. If a shot touches the ring and the same team regains control, the clock resets to 14 seconds; if the opponents gain control it resets to 24.",
+      "sourceId": "s6",
+      "section": "Art. 29 (2024 numbering)",
+      "note": "Original wording ('attempt a shot that hits the rim') blurred the release requirement. Other 14-second resets (e.g. some fouls/violations in the frontcourt) exist but were not verified."
+    },
+    {
+      "rulesetSlug": "fiba",
+      "topic": "8-second rule",
+      "currentText": "A team must move the ball from its backcourt into its frontcourt within 8 seconds.",
+      "verdict": "unverifiable",
+      "sourceId": "s1",
+      "section": "Art. 28 (2024 numbering)",
+      "note": "Believed correct; not verified."
+    },
+    {
+      "rulesetSlug": "fiba",
+      "topic": "3-second rule",
+      "currentText": "An offensive player may not stay in the opponents' restricted area for more than 3 consecutive seconds while their team controls the ball in the frontcourt.",
+      "verdict": "unverifiable",
+      "sourceId": "s1",
+      "section": "Art. 26 (2024 numbering)",
+      "note": "Believed correct (game clock running is also a condition); not verified. FIBA has no defensive 3-second rule — that is NBA-only."
+    },
+    {
+      "rulesetSlug": "fiba",
+      "topic": "Violations",
+      "currentText": "Travelling (moving the pivot foot illegally), double dribble, carrying the ball and returning it to the backcourt give possession to the opponents.",
+      "verdict": "unverifiable",
+      "sourceId": "s1",
+      "section": "Arts. 24, 25, 30 (2024 numbering)",
+      "note": "Broadly correct as a summary; 'carrying' is treated under illegal dribble rather than as a separately named violation. Not verified."
+    },
+    {
+      "rulesetSlug": "fiba",
+      "topic": "Fouls",
+      "currentText": "A player is disqualified after 5 fouls. From the fifth team foul in a quarter, fouls (other than offensive fouls) lead to two free throws.",
+      "verdict": "unverifiable",
+      "sourceId": "s1",
+      "section": "Arts. 41 (foul limits) and 42 (team fouls) in the 2026 edition",
+      "note": "Team-foul part matches secondary sources (s8). But the 2026 edition (in force 1 Oct 2026) changed foul categories: flagrant fouls and Category-1 technicals count towards game disqualification, disruptive fouls and Category-2 technicals do not (s2/s3 snippets). How these interact with the 5-foul limit could not be verified — review once the OBR 2026 text is opened. Article numbers moved by one in 2026 (s1)."
+    },
+    {
+      "rulesetSlug": "fiba",
+      "topic": "Goaltending",
+      "currentText": "Touching a shot on its downward flight above the rim, or touching the ball while it is in the basket area, is not allowed.",
+      "verdict": "unverifiable",
+      "sourceId": "s1",
+      "section": "Art. 31 (2024 numbering)",
+      "note": "Simplified: FIBA goaltending requires the ball to be entirely above ring level on its downward flight; basket interference covers touching the ball/ring/backboard in various situations. 2026: Instant Replay may review goaltending/interference after a foul at any time in the game (s3)."
+    },
+    {
+      "rulesetSlug": "nba",
+      "topic": "Game length",
+      "currentText": "Four quarters of 12 minutes; overtime periods are 5 minutes.",
+      "verdict": "unverifiable",
+      "sourceId": "s9",
+      "section": "Rule 5 (believed)",
+      "note": "Widely known to be correct, but the NBA rulebook could not be opened and snippets did not show the text."
+    },
+    {
+      "rulesetSlug": "nba",
+      "topic": "Three-point line",
+      "currentText": "23 ft 9 in (7.24 m) from the basket at the top, 22 ft (6.71 m) in the corners.",
+      "verdict": "unverifiable",
+      "sourceId": "s7",
+      "section": "Court dimensions",
+      "note": "Consistent with secondary sources (s7); official NBA Rule 1 text not opened."
+    },
+    {
+      "rulesetSlug": "nba",
+      "topic": "Fouls",
+      "currentText": "A player is disqualified after 6 personal fouls.",
+      "verdict": "unverifiable",
+      "sourceId": "s9",
+      "section": "Rule 12B (believed)",
+      "note": "Believed correct; not verified."
+    },
+    {
+      "rulesetSlug": "nba",
+      "topic": "Defensive three seconds",
+      "currentText": "A defender may not stay in the lane for more than 3 seconds unless actively guarding an opponent.",
+      "verdict": "unverifiable",
+      "sourceId": "s9",
+      "section": "Rule 10 Section VII (believed)",
+      "note": "Believed correct; penalty is a technical foul (one free throw). Only low-quality secondary pages were found."
+    }
+  ],
+  "newRulePoints": [
+    {
+      "rulesetSlug": "fiba",
+      "topic": "Current edition",
+      "text": "A new edition of the FIBA Official Basketball Rules (2026) came into force worldwide on 1 October 2026, replacing the 2024 rules; some national bodies may phase it in later. Article numbers shifted, e.g. foul limits are now Art. 41 and team fouls Art. 42.",
+      "sourceId": "s2",
+      "section": "FIBA news 2026; OBR 2026 contents"
+    },
+    {
+      "rulesetSlug": "fiba",
+      "topic": "Disruptive and flagrant fouls",
+      "text": "From 2026 the unsportsmanlike foul is replaced by two types: a disruptive foul (e.g. a tactical foul stopping a fast break without a legitimate play on the ball) that does not count towards game disqualification, and a flagrant foul (reckless, dangerous or excessive contact) that does.",
+      "sourceId": "s3",
+      "section": "Rule changes 2026 summary (Arts. 37-38 per secondary sources)"
+    },
+    {
+      "rulesetSlug": "fiba",
+      "topic": "Technical foul categories",
+      "text": "From 2026 technical fouls are split into two categories. Category 1 (e.g. disrespect to officials, taunting, offensive language/gestures, simulation) counts towards game disqualification; Category 2 does not.",
+      "sourceId": "s3",
+      "section": "Rule changes 2026 summary"
+    },
+    {
+      "rulesetSlug": "fiba",
+      "topic": "Disqualification combinations",
+      "text": "Reported (NBL summary, not yet verified in the OBR text): a player is disqualified after two Category-1 technicals, two flagrant fouls, or one of each.",
+      "sourceId": "s5",
+      "section": "NBL summary of FIBA 2026 changes"
+    },
+    {
+      "rulesetSlug": "fiba",
+      "topic": "Instant replay",
+      "text": "From 2026 the Instant Replay System may review a goaltending or basket-interference violation after a foul at any time, and whether the thrower-in still held the ball when a defensive foul occurred in the last 2 minutes of the 4th quarter or overtime.",
+      "sourceId": "s3",
+      "section": "Rule changes 2026 summary"
+    },
+    {
+      "rulesetSlug": "fiba",
+      "topic": "Act of shooting",
+      "text": "The 2026 rules clarify (Art. 15) what counts as continuous movement and when a player is in the act of shooting, which affects whether a foul gives free throws.",
+      "sourceId": "s3",
+      "section": "Art. 15 (2026)"
+    },
+    {
+      "rulesetSlug": "fiba",
+      "topic": "Mini-basketball",
+      "text": "FIBA mini-basketball (U12) uses a 2.60 m basket and size 5 ball; national federations may use lower baskets and smaller balls for younger groups.",
+      "sourceId": "s19",
+      "section": "Mini-basketball guidance"
+    },
+    {
+      "rulesetSlug": "nba",
+      "topic": "End-of-period heaves (2025-26)",
+      "text": "From 2025-26, an unsuccessful shot from at least 36 ft in the last 3 seconds of quarters 1–3, on a play starting in the backcourt, counts as a team shot attempt, not a player's — a statistics rule, not a scoring change.",
+      "sourceId": "s11",
+      "section": "NBA 2025-26 statistical rule"
+    },
+    {
+      "rulesetSlug": "nba",
+      "topic": "Coach's challenge (2025-26)",
+      "text": "From 2025-26, when a coach challenges an out-of-bounds call, the Replay Center official (not the on-court crew chief) decides whether a proximate foul should have been called.",
+      "sourceId": "s10",
+      "section": "Board of Governors approval 2025"
+    }
+  ],
+  "claims": [
+    {
+      "topic": "Ankle bracing",
+      "category": "equipment",
+      "level": "all",
+      "statement": "A Cochrane review found good evidence that semi-rigid or air-cast ankle braces reduce ankle sprains in high-risk sports including basketball, while a protective effect of high-top shoes was not established.",
+      "sourceIds": [
+        "s12"
+      ],
+      "section": "Cochrane conclusions",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Balance and neuromuscular training for ankles",
+      "category": "training",
+      "level": "all",
+      "statement": "Systematic reviews support balance/neuromuscular exercise programmes and ankle braces as the most effective measures against ankle sprains in basketball. Trials are few and varied, so exact effect sizes are uncertain.",
+      "sourceIds": [
+        "s13",
+        "s14"
+      ],
+      "section": "Bellows & Wong 2018; J Clin Med 2024 review",
+      "confidence": "medium"
+    },
+    {
+      "topic": "ACL prevention: who benefits most",
+      "category": "safety",
+      "level": "all",
+      "statement": "Meta-analyses of neuromuscular training report the largest ACL-risk reductions in athletes under 18. Programmes emphasising plyometrics and strengthening did better than balance-only work.",
+      "sourceIds": [
+        "s15"
+      ],
+      "section": "meta-analysis summaries (snippet)",
+      "confidence": "low"
+    },
+    {
+      "topic": "ACL prevention: dose and feedback",
+      "category": "training",
+      "level": "all",
+      "statement": "In meta-regression, more completed sessions, more exercise variety and coach verbal feedback on technique were linked to better injury reduction. Compliance matters as much as programme choice.",
+      "sourceIds": [
+        "s15"
+      ],
+      "section": "Sugimoto et al. meta-analyses (snippet)",
+      "confidence": "low"
+    },
+    {
+      "topic": "Landing mechanics",
+      "category": "technique",
+      "level": "beginner",
+      "statement": "Knee collapsing inward (abduction), stiff landings with little knee bend and asymmetric landings are linked to later ACL injury in young female athletes. Coach soft, knees-over-toes, two-footed landings, though lab gains do not always translate into fewer injuries.",
+      "sourceIds": [
+        "s15"
+      ],
+      "section": "review summary (snippet)",
+      "confidence": "low"
+    },
+    {
+      "topic": "Evidence base by sport",
+      "category": "science",
+      "level": "all",
+      "statement": "Most strong evidence for ACL-prevention programmes comes from soccer and handball players over 14; basketball-specific trials are fewer, so results are partly extrapolated.",
+      "sourceIds": [
+        "s16"
+      ],
+      "section": "AAFP evidence summary",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Free-throw release angle",
+      "category": "technique",
+      "level": "intermediate",
+      "statement": "A large simulation study recommended a launch angle around 52° with slight backspin, aiming slightly towards the back of the rim. Many players release flatter than this.",
+      "sourceIds": [
+        "s17"
+      ],
+      "section": "Tran & Silverberg 2008 abstract",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Individual shooting optimum",
+      "category": "science",
+      "level": "advanced",
+      "statement": "Modelling work argues the optimal release conditions differ by player (height, release speed and consistency), so a single 'perfect angle' should not be forced on everyone.",
+      "sourceIds": [
+        "s18"
+      ],
+      "section": "Barzykina 2017 abstract",
+      "confidence": "low"
+    },
+    {
+      "topic": "Youth equipment scaling",
+      "category": "equipment",
+      "level": "beginner",
+      "statement": "FIBA mini-basketball scales equipment: U12 plays on a 2.60 m basket with a size 5 ball; FIBA guidance lists lower baskets for younger groups (e.g. 2.43 m for U10) and smaller or softer balls.",
+      "sourceIds": [
+        "s19",
+        "s20"
+      ],
+      "section": "Mini-basketball guidance",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Tactical fouls under FIBA 2026",
+      "category": "rules",
+      "level": "advanced",
+      "statement": "Under the 2026 FIBA rules, a deliberate foul to stop a fast break becomes a 'disruptive foul' that does not count towards disqualification. Coaches should re-teach transition-defence fouling policies.",
+      "sourceIds": [
+        "s3"
+      ],
+      "section": "Rule changes 2026 summary",
+      "confidence": "medium"
+    },
+    {
+      "topic": "14-second reset tactics",
+      "category": "rules",
+      "level": "intermediate",
+      "statement": "In FIBA play an offensive rebound after the ball touches the ring resets the shot clock to 14, not 24. Teams should run a short 'second-chance' set rather than a full possession.",
+      "sourceIds": [
+        "s6"
+      ],
+      "section": "Art. 29",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Concussion recognition",
+      "category": "safety",
+      "level": "all",
+      "statement": "The Amsterdam 2022 consensus provides the CRT6 tool for coaches and parents to recognise suspected concussion, and SCAT6/Child SCAT6 for clinicians. Use these instead of older SCAT5 versions.",
+      "sourceIds": [
+        "s21"
+      ],
+      "section": "Consensus tools",
+      "confidence": "medium"
+    }
+  ],
+  "safetyReview": [
+    {
+      "currentText": "Keep the court clear of loose balls during drills.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s14",
+      "section": "No source opened on this point"
+    },
+    {
+      "currentText": "Outdoor courts: check for wet patches and broken rims.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s14",
+      "section": "No source opened on this point"
+    },
+    {
+      "currentText": "Ankle sprains are the most common injury: balance training and well-fitting shoes help; tape or bracing can help after a sprain.",
+      "verdict": "corrected",
+      "correctedText": "Ankle sprains are among the most common basketball injuries. Balance/neuromuscular training and semi-rigid or air-cast braces have the best evidence for preventing them; high-top shoes have not been shown to protect.",
+      "sourceId": "s12",
+      "section": "Cochrane review; s13/s14 reviews"
+    },
+    {
+      "currentText": "Practise soft landings with knees tracking over toes.",
+      "verdict": "confirmed",
+      "correctedText": "",
+      "sourceId": "s15",
+      "section": "Landing-mechanics risk factors (snippet; low confidence)"
+    },
+    {
+      "currentText": "Build jump volume gradually.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s15",
+      "section": "No load-progression source opened"
+    },
+    {
+      "currentText": "Stop and get assessed after any head impact.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s21",
+      "section": "Consistent with consensus removal principle as we understand it; wording not seen"
+    }
+  ],
+  "gaps": [
+    {
+      "topic": "All primary sources",
+      "reason": "WebFetch and curl could not reach any source host (DNS failure / proxy connect rejected). Everything rests on search snippets plus prior knowledge; re-run with network access before publishing."
+    },
+    {
+      "topic": "FIBA 2026 foul limits",
+      "reason": "How disruptive/flagrant/technical categories combine with the 5-foul limit, and whether disruptive fouls count as team fouls, is unclear; secondary sources conflict."
+    },
+    {
+      "topic": "NBA rulebook text and rule numbers",
+      "reason": "official.nba.com rulebook not reachable; no snippet reproduced rule text."
+    },
+    {
+      "topic": "NBA 2026-27 rule changes",
+      "reason": "Only the NBA Cup semifinal venue change and draft-lottery change (2027 draft) were found; neither is a playing rule. Officiating points of emphasis unconfirmed."
+    },
+    {
+      "topic": "Lesson technique cues (ball-handling, layups, passing, defence, pick-and-roll)",
+      "reason": "No coaching-education source could be opened; existing key points left unreviewed."
+    },
+    {
+      "topic": "Ankle sprain incidence ranking",
+      "reason": "'Most common injury' not verified with epidemiology data."
+    }
+  ],
+  "notAccessed": [
+    {
+      "url": "https://refereeing.fiba.basketball/en/rules",
+      "reason": "WebFetch: getaddrinfo ENOTFOUND"
+    },
+    {
+      "url": "https://assets.fiba.basketball/image/upload/documents-corporate-fiba-official-rules-2024-v10.pdf",
+      "reason": "WebFetch: getaddrinfo ENOTFOUND; curl: no response through agent proxy"
+    },
+    {
+      "url": "https://assets.fiba.basketball/image/upload/documents-corporate-fiba-official-rules-2026-v1-0.pdf",
+      "reason": "Same host blocked (assets.fiba.basketball)"
+    },
+    {
+      "url": "https://about.fiba.basketball/en/news/fiba-official-basketball-rules-2026-to-take-effect-october-1",
+      "reason": "WebFetch: getaddrinfo ENOTFOUND"
+    },
+    {
+      "url": "https://official.nba.com/",
+      "reason": "Not reachable (NBA hosts tried by curl returned no response)"
+    },
+    {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6044595",
+      "reason": "WebFetch: getaddrinfo ENOTFOUND"
+    },
+    {
+      "url": "https://en.wikipedia.org/wiki/Basketball_court",
+      "reason": "curl: no response through agent proxy"
+    }
+  ]
+}

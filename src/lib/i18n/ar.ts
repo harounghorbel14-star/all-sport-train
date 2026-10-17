@@ -25,7 +25,7 @@ const ar: DeepPartial<Dictionary> = {
     notifications: "الإشعارات",
   },
   common: { save: "حفظ", cancel: "إلغاء", delete: "حذف", edit: "تعديل", add: "إضافة", close: "إغلاق", back: "رجوع", next: "التالي", skip: "تخطي", done: "تم", start: "ابدأ", loading: "جارٍ التحميل…", retry: "حاول مجددًا", search: "بحث", today: "اليوم" },
-  auth: { login: "تسجيل الدخول", register: "إنشاء حساب", email: "البريد الإلكتروني", password: "كلمة المرور", welcomeBack: "مرحبًا بعودتك", startJourney: "ابدأ رحلتك" },
+  auth: { login: "تسجيل الدخول", register: "إنشاء حساب", email: "البريد الإلكتروني", password: "كلمة المرور", welcomeBack: "مرحبًا بعودتك", startJourney: "ابدأ رحلتك", forgot: "نسيت كلمة المرور؟", google: "المتابعة باستخدام Google", guest: "المتابعة كضيف", or: "أو", confirmPassword: "تأكيد كلمة المرور", backToLogin: "العودة إلى تسجيل الدخول" },
   today: { greeting: "جاهز يا {name}؟", todaysSession: "حصة اليوم", startWorkout: "ابدأ التمرين", resume: "استئناف", restDay: "يوم راحة مخطط", weekly: "هذا الأسبوع", streak: "سلسلة الأيام" },
   workout: { warmup: "الإحماء", main: "التمرين الرئيسي", cooldown: "التهدئة", sets: "مجموعات", reps: "تكرارات", rest: "راحة", pause: "إيقاف مؤقت", resume: "استئناف", finish: "إنهاء التمرين" },
 };

@@ -14,7 +14,7 @@ export const metadata = { title: "Challenges & Achievements" };
 const ICONS: Record<string, typeof Flame> = { flame: Flame, calendar: Calendar, zap: Zap, "arrow-up": ArrowUp, timer: Timer, trophy: Trophy, star: Star, mountain: Mountain, dumbbell: Dumbbell, medal: Medal, stretch: StretchHorizontal, award: Award, compass: Compass };
 
 export default async function ChallengesPage() {
-  const { user, profile } = await requireUser();
+  const { user, profile } = await requireUser({ guest: false });
   const [streak, achievements, missions, challenges] = await Promise.all([streakSummary(user.id), achievementsOverview(user.id), weeklyMissions(user.id), listChallenges(user.id)]);
   const active = new Set(streak.activeDays);
   const start = addDays(weekStart(streak.today), -7 * 15);

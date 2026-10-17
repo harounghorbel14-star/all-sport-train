@@ -95,7 +95,7 @@ export const FOOTBALL: SportSeed = {
       governingBody: "IFAB",
       scope: "Standard 11-a-side football. Competitions and youth leagues may modify match length, substitutions and pitch size.",
       editionNote: "Plain-language summary of key Laws as reviewed by our editors. The Laws are updated every year — always check the current edition for exact wording.",
-      verification: "summary",
+      verification: "general",
       sources: ["ifab-laws"],
       points: [
         { topic: "Players", text: "Each team has up to 11 players including one goalkeeper. A match may not start or continue if either team has fewer than seven players. The number of substitutes is set by the competition rules." },

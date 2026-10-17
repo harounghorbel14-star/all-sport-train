@@ -532,7 +532,10 @@ export async function adminUpsertContent(sportSlug: string, type: "lesson" | "dr
   const v = adminRulesetSchema.parse(raw);
   const known = await db.contentSource.count({ where: { slug: { in: v.sources } } });
   if (known !== v.sources.length) throw badRequest("Every ruleset source must exist in the source registry");
-  const data = { name: v.name, governingBody: v.governingBody, scope: v.scope, editionNote: v.editionNote, points: JSON.stringify(v.points), verification: v.verification, sources: JSON.stringify(v.sources), contentStatus: "draft", reviewedAt: null };
+  const data = { name: v.name, governingBody: v.governingBody, scope: v.scope, editionNote: v.editionNote, points: JSON.stringify(v.points), verification: v.verification, sources: JSON.stringify(v.sources), contentStatus: "draft", reviewedAt: null, reviewFlag: null, flaggedAt: null };
+  // Keep the previous version before overwriting it.
+  const previous = await db.ruleset.findUnique({ where: { sportId_slug: { sportId: sport.id, slug: v.slug } } });
+  if (previous) await db.rulesetVersion.create({ data: { rulesetId: previous.id, snapshot: JSON.stringify(previous), reason: "admin edit" } });
   return db.ruleset.upsert({ where: { sportId_slug: { sportId: sport.id, slug: v.slug } }, create: { sportId: sport.id, slug: v.slug, ...data }, update: data });
 }
 

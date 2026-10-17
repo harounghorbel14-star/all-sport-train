@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { authedRoute } from "@/lib/server/api";
+import { AppError } from "@/lib/server/errors";
 import { LIMITS, rateLimit } from "@/lib/server/rate-limit";
 import { estimateMeal } from "@/lib/ai/meal-estimate";
 
@@ -12,6 +13,7 @@ const body = z.object({
 
 export const POST = authedRoute({ body }, async ({ user, body }) => {
   rateLimit(`ai:${user.id}`, LIMITS.ai.limit, LIMITS.ai.windowMs);
+  if (body.image && user.isGuest) throw new AppError(403, "guest_restricted", "Photo estimates need a free account. Text estimates work as a guest.");
   if (body.image) {
     // Validate the decoded bytes rather than trusting the declared type.
     const { validateUpload } = await import("@/lib/services/media");

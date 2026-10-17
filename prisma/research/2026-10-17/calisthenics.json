@@ -1,0 +1,328 @@
+{
+  "sport": "calisthenics",
+  "accessedDate": "2026-10-17",
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Battle of the Bars — event rules / Street Sport",
+      "publisher": "World Calisthenics Organization (WCO)",
+      "url": "https://worldcalisthenics.org/",
+      "edition": null,
+      "kind": "other",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s2",
+      "title": "Streetlifting: Weighted Pull-Ups, Dips, Rules, and Training",
+      "publisher": "sportscategory.info",
+      "url": "https://www.sportscategory.info/en/articles/streetlifting",
+      "edition": null,
+      "kind": "other",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s3",
+      "title": "About Streetlifting (FinalRep rulebook overview)",
+      "publisher": "FinalRep",
+      "url": "https://final-rep.com/weighted/about",
+      "edition": null,
+      "kind": "other",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s4",
+      "title": "Effect of Progressive Calisthenic Push-up Training on Muscle Strength and Thickness (Kotarsky et al., J Strength Cond Res 2018;32(3):651–659)",
+      "publisher": "NSCA / Journal of Strength and Conditioning Research",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29466268/",
+      "edition": "2018",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s5",
+      "title": "Bench press and push-up at comparable levels of muscle activity results in similar strength gains (Calatayud et al., J Strength Cond Res 2015)",
+      "publisher": "NSCA / Journal of Strength and Conditioning Research",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/24983847/",
+      "edition": "2015",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s6",
+      "title": "Strength and hypertrophy adaptations between low- vs. high-load resistance training: a systematic review and meta-analysis (Schoenfeld et al., J Strength Cond Res 2017;31(12))",
+      "publisher": "NSCA / Journal of Strength and Conditioning Research",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/28834797/",
+      "edition": "2017",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s7",
+      "title": "Position statement on youth resistance training: the 2014 International Consensus (Lloyd et al., Br J Sports Med 2014;48:498–505)",
+      "publisher": "BMJ (endorsed by NSCA, AAP and others)",
+      "url": "https://bjsm.bmj.com/content/48/7/498",
+      "edition": "2014",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s8",
+      "title": "Wrist pain in gymnasts — meta-analysis / handstand biomechanics studies (search results)",
+      "publisher": "BJSM / PMC (various)",
+      "url": "https://bjsm.bmj.com/content/49/18/1189",
+      "edition": null,
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s9",
+      "title": "The best way to improve pull-ups, Part III: results and verdict",
+      "publisher": "Mountain Tactical Institute (Adam Scott, MS, CSCS)",
+      "url": "https://mtntactical.com/all-articles/the-best-way-to-improve-pull-ups-part-iii-the-results-and-the-verdict/",
+      "edition": null,
+      "kind": "education",
+      "accessed": false,
+      "sectionsUsed": []
+    }
+  ],
+  "rulesetReview": [
+    {
+      "rulesetSlug": "competition-formats",
+      "topic": "Governing body (ruleset header)",
+      "currentText": "Various federations and organisers / There is no single global rulebook.",
+      "verdict": "confirmed",
+      "sourceId": "s1",
+      "section": "",
+      "note": "Searches found several independent organisers (WCO Battle of the Bars; World Street Workout & Calisthenics Federation mentioned only in third-party blogs; streetlifting federations ISF, WSF, FinalRep) and no IOC/GAISF-recognised global authority. Statement holds; confidence medium. [Search-snippet evidence only; page not opened — egress proxy blocked host.]"
+    },
+    {
+      "rulesetSlug": "competition-formats",
+      "topic": "Freestyle",
+      "currentText": "Athletes perform routines on bars, judged on difficulty of dynamic and static elements, execution and creativity.",
+      "verdict": "unverifiable",
+      "sourceId": "s1",
+      "section": "",
+      "note": "General description is plausible, but no freestyle rulebook (e.g. WSWCF) could be found or opened. [Search-snippet evidence only; page not opened — egress proxy blocked host.]"
+    },
+    {
+      "rulesetSlug": "competition-formats",
+      "topic": "Endurance / reps",
+      "currentText": "Maximum repetitions of set exercises (e.g. pull-ups, dips, push-ups) under strict standards, sometimes with added weight.",
+      "verdict": "unverifiable",
+      "sourceId": "s2",
+      "section": "",
+      "note": "Streetlifting 'multilift'/endurance formats (max reps with added weight) are described in snippets; no primary rulebook opened. [Search-snippet evidence only; page not opened — egress proxy blocked host.]"
+    },
+    {
+      "rulesetSlug": "competition-formats",
+      "topic": "Battles",
+      "currentText": "Head-to-head freestyle rounds judged by a panel.",
+      "verdict": "confirmed",
+      "sourceId": "s1",
+      "section": "",
+      "note": "WCO Battle of the Bars (snippet): 1-v-1 battles by weight class, 10-point must scoring by 3 neutral judges, timed rounds (sources conflict: 3x4 min main events with 90 s rest vs 3x2 min prelims; a 2017 report mentions 3 min). Medium confidence. [Search-snippet evidence only; page not opened — egress proxy blocked host.]"
+    },
+    {
+      "rulesetSlug": "competition-formats",
+      "topic": "Standards",
+      "currentText": "Typical standards include full lockout at the top, chin over the bar for pull-ups, no kipping, and controlled holds for a minimum time.",
+      "verdict": "unverifiable",
+      "sourceId": "s2",
+      "section": "",
+      "note": "Streetlifting summaries: pull-up from dead hang to chin clearly above bar, dip requires full lockout and federation-defined depth, strong swinging forbidden. Hold-time minimums not verified. Standards differ by federation. [Search-snippet evidence only; page not opened — egress proxy blocked host.]"
+    }
+  ],
+  "newRulePoints": [
+    {
+      "rulesetSlug": "competition-formats",
+      "topic": "Streetlifting (weighted calisthenics)",
+      "text": "Streetlifting meets test 1-rep-max weighted lifts with 3 attempts each: some federations use 4 lifts (muscle-up, pull-up, dip, squat), others a pull-up + dip total. Depth/lockout standards differ between ISF, WSF and FinalRep. [Snippet-level]",
+      "sourceId": "s2",
+      "section": ""
+    },
+    {
+      "rulesetSlug": "competition-formats",
+      "topic": "Battle scoring (WCO)",
+      "text": "WCO Battle of the Bars uses a 10-point must system with 3 neutral judges scoring strength, endurance, agility, creativity and technique over timed rounds; mouthguards reported mandatory in its Street Sport rules. [Snippet-level]",
+      "sourceId": "s1",
+      "section": ""
+    }
+  ],
+  "claims": [
+    {
+      "topic": "Push-up progression works",
+      "category": "training",
+      "level": "beginner",
+      "statement": "In moderately trained men, 4 weeks (3x/week) of progressively harder push-up variations increased bench-press 1RM similarly to bench-press training; muscle thickness changes were not significant in the abstract. [Abstract snippet]",
+      "sourceIds": [
+        "s4"
+      ],
+      "section": "Abstract",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Loaded push-ups vs bench press",
+      "category": "science",
+      "level": "intermediate",
+      "statement": "Elastic-band push-ups matched to bench-press muscle activation (≈6RM) produced similar 6RM strength gains over 5 weeks in trained students. Adding resistance (bands/vest) keeps push-ups effective once reps get high. [Snippet]",
+      "sourceIds": [
+        "s5"
+      ],
+      "section": "Abstract",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Push-up load",
+      "category": "science",
+      "level": "beginner",
+      "statement": "A standard push-up loads the hands with about 64% of body weight and a bent-knee push-up about 49% — a measurable regression step. [Snippet of review citing GRF data]",
+      "sourceIds": [
+        "s5"
+      ],
+      "section": "",
+      "confidence": "low"
+    },
+    {
+      "topic": "High reps still build muscle",
+      "category": "science",
+      "level": "all",
+      "statement": "Meta-analysis: low-load training (≤60% 1RM) taken close to failure gives hypertrophy similar to high-load, but heavier loading tends to give bigger max-strength gains — so add harder variations or weight for strength, not just more reps. [Snippet]",
+      "sourceIds": [
+        "s6"
+      ],
+      "section": "",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Pull-up from zero",
+      "category": "training",
+      "level": "beginner",
+      "statement": "Practitioner data (CSCS coach) found eccentric-focused pull-up training helped athletes starting at zero reps; band-assisted vs eccentric comparisons circulate online but the primary study could not be verified. [Snippet; low]",
+      "sourceIds": [
+        "s9"
+      ],
+      "section": "",
+      "confidence": "low"
+    },
+    {
+      "topic": "Youth bodyweight/resistance training",
+      "category": "safety",
+      "level": "all",
+      "statement": "The 2014 International Consensus (endorsed by NSCA, AAP) supports supervised, progressive resistance training for youth with qualified instruction; app youth guidance should align with it. [Snippet; specifics not read]",
+      "sourceIds": [
+        "s7"
+      ],
+      "section": "",
+      "confidence": "low"
+    },
+    {
+      "topic": "Handstand wrist load",
+      "category": "safety",
+      "level": "intermediate",
+      "statement": "Wrist pain is very common in gymnasts (pooled ~53% in a meta-analysis, low-certainty evidence) and in recreational handstand practitioners; risk links to training intensity and hours, supporting gradual handstand volume and wrist preparation. [Snippet]",
+      "sourceIds": [
+        "s8"
+      ],
+      "section": "",
+      "confidence": "low"
+    }
+  ],
+  "safetyReview": [
+    {
+      "currentText": "Warm up wrists before handstands and planche work.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s8",
+      "section": ""
+    },
+    {
+      "currentText": "Increase straight-arm skill volume slowly — elbows and wrists adapt over months.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s8",
+      "section": ""
+    },
+    {
+      "currentText": "Balance pushing with pulling to protect the shoulders.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s6",
+      "section": ""
+    },
+    {
+      "currentText": "Practise inversions with a safe bail-out and clear space.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s8",
+      "section": ""
+    }
+  ],
+  "gaps": [
+    {
+      "topic": "Network access",
+      "reason": "WebFetch/curl to every source host was blocked by the session's egress proxy (connect_rejected / DNS failure). Nothing could be opened; all sources are accessed:false and evidence is snippet-level."
+    },
+    {
+      "topic": "NSCA guidance on pull-up/dip/handstand progressions",
+      "reason": "No NSCA position statement specific to these progressions was found; peer-reviewed dip and handstand progression studies not found."
+    },
+    {
+      "topic": "Freestyle judging codes",
+      "reason": "No WSWCF or other freestyle rulebook located; element values unverifiable."
+    },
+    {
+      "topic": "Lesson specifics (elbow ~45°, '5 strict reps', 'muscle-up needs 10 pull-ups', front-lever prerequisites)",
+      "reason": "Coaching heuristics with no located evidence base; treat as app conventions, not research findings."
+    },
+    {
+      "topic": "Pull-up band vs eccentric study",
+      "reason": "Cited only by commercial blogs with inconsistent years/figures; primary paper not identified."
+    }
+  ],
+  "notAccessed": [
+    {
+      "url": "https://worldcalisthenics.org/",
+      "reason": "Egress proxy blocked the host (connect_rejected / ENOTFOUND); only search snippets seen."
+    },
+    {
+      "url": "https://www.sportscategory.info/en/articles/streetlifting",
+      "reason": "Egress proxy blocked the host (connect_rejected / ENOTFOUND); only search snippets seen."
+    },
+    {
+      "url": "https://final-rep.com/weighted/about",
+      "reason": "Egress proxy blocked the host (connect_rejected / ENOTFOUND); only search snippets seen."
+    },
+    {
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29466268/",
+      "reason": "Egress proxy blocked the host (connect_rejected / ENOTFOUND); only search snippets seen."
+    },
+    {
+      "url": "https://pubmed.ncbi.nlm.nih.gov/24983847/",
+      "reason": "Egress proxy blocked the host (connect_rejected / ENOTFOUND); only search snippets seen."
+    },
+    {
+      "url": "https://pubmed.ncbi.nlm.nih.gov/28834797/",
+      "reason": "Egress proxy blocked the host (connect_rejected / ENOTFOUND); only search snippets seen."
+    },
+    {
+      "url": "https://bjsm.bmj.com/content/48/7/498",
+      "reason": "Egress proxy blocked the host (connect_rejected / ENOTFOUND); only search snippets seen."
+    },
+    {
+      "url": "https://bjsm.bmj.com/content/49/18/1189",
+      "reason": "Egress proxy blocked the host (connect_rejected / ENOTFOUND); only search snippets seen."
+    },
+    {
+      "url": "https://mtntactical.com/all-articles/the-best-way-to-improve-pull-ups-part-iii-the-results-and-the-verdict/",
+      "reason": "Egress proxy blocked the host (connect_rejected / ENOTFOUND); only search snippets seen."
+    }
+  ]
+}

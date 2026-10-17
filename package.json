@@ -2,7 +2,7 @@
   "name": "apex-fit-ai",
   "version": "0.1.0",
   "private": true,
-  "description": "APEX FIT AI — calisthenics-first training, nutrition and coaching platform",
+  "description": "APEX FIT AI \u2014 calisthenics-first training, nutrition and coaching platform",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -16,7 +16,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset --force",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "research": "tsx scripts/research.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -28,6 +29,7 @@
     "@prisma/client": "^6.19.3",
     "clsx": "^2.1.1",
     "framer-motion": "^12.43.0",
+    "jose": "^6.2.12",
     "lucide-react": "^1.59.0",
     "next": "^15.5.28",
     "react": "^19.3.1",

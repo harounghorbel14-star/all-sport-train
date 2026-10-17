@@ -29,7 +29,7 @@ let counter = 0;
 export async function newUser(overrides: Partial<Record<string, unknown>> = {}, onboard = true) {
   resetRateLimits();
   const email = `user${Date.now()}${counter++}@example.com`;
-  const r = await call(register.POST, { body: { email, password: "password123", displayName: `Tester ${counter}`, timezone: "UTC" } });
+  const r = await call(register.POST, { body: { email, password: "password123", displayName: `Tester ${counter}`, timezone: "UTC", acceptTerms: true } });
   if (r.status !== 201) throw new Error(`register failed: ${JSON.stringify(r.json)}`);
   const cookie = r.res.headers.get("set-cookie")!.split(";")[0];
   if (onboard) {

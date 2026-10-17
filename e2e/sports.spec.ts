@@ -14,7 +14,7 @@ test("sports: search → join → lesson → practice → log a result", async (
 
   await page.getByRole("tab", { name: "Rules" }).click();
   await expect(page).toHaveURL(/tab=rules/);
-  await expect(page.getByText("Summary checked against source").first()).toBeVisible();
+  await expect(page.getByText("not yet verified against the current rulebook").first()).toBeVisible();
 
   await page.getByRole("tab", { name: "Learn" }).click();
   await expect(page).toHaveURL(/tab=learn/);

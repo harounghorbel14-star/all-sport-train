@@ -79,7 +79,7 @@ export const BASKETBALL: SportSeed = {
       governingBody: "FIBA",
       scope: "International competition and most national leagues outside North America.",
       editionNote: "Plain-language summary reviewed by our editors. Check the current FIBA rulebook and interpretations for exact wording.",
-      verification: "summary",
+      verification: "general",
       sources: ["fiba-rules"],
       points: [
         { topic: "Teams", text: "Five players per team on court. Substitutions can be made at stoppages when the officials allow." },
@@ -99,7 +99,7 @@ export const BASKETBALL: SportSeed = {
       governingBody: "NBA",
       scope: "NBA professional games. Many differences from FIBA; this is not a complete list.",
       editionNote: "Summary of notable differences only. Check the current NBA rulebook.",
-      verification: "summary",
+      verification: "general",
       sources: ["nba-rules"],
       points: [
         { topic: "Game length", text: "Four quarters of 12 minutes; overtime periods are 5 minutes." },

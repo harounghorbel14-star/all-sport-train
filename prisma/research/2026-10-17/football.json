@@ -1,0 +1,659 @@
+{
+  "sport": "football",
+  "accessedDate": "2026-10-17",
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Changes to the Laws of the Game 2026/27",
+      "publisher": "The IFAB",
+      "url": "https://downloads.theifab.com/downloads/changes-to-the-laws-of-the-game-202627?l=en",
+      "edition": "2026/27",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "Law 3 substitution time limit",
+        "Law 5 injured players",
+        "Laws 15/16 five-second countdown (search snippet only)"
+      ]
+    },
+    {
+      "id": "s2",
+      "title": "Laws of the Game 2026/27 (double pages)",
+      "publisher": "The IFAB",
+      "url": "https://downloads.theifab.com/downloads/laws-of-the-game-202627-double-pages?l=en",
+      "edition": "2026/27",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s3",
+      "title": "Concacaf Confirms Implementation of the IFAB 2026/27 Laws of the Game Amendments",
+      "publisher": "Concacaf",
+      "url": "https://www.concacaf.com/competitions/concacaf/news/concacaf-confirms-implementation-of-the-ifab-2026-27-laws-of-the-game-amendments",
+      "edition": "2026",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "injured-player one-minute rule",
+        "implementation date 20 July 2026"
+      ]
+    },
+    {
+      "id": "s4",
+      "title": "Referees reminded of key IFAB law changes for the 2026/27 season",
+      "publisher": "Irish Football Association",
+      "url": "https://www.irishfa.com/news/2026/july/referees-reminded-of-key-ifab-law-changes-for-the-202627-season",
+      "edition": "2026",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "substitution 10-second limit"
+      ]
+    },
+    {
+      "id": "s5",
+      "title": "Law changes 2025/26: goalkeepers controlling the ball with their hand(s)/arm(s)",
+      "publisher": "The IFAB",
+      "url": "https://downloads.theifab.com/downloads/law-changes-2025-26-goalkeepers-controlling-the-ball-with-their-hand-s-arm-s-back",
+      "edition": "2025/26",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "Law 12 eight-second rule",
+        "Law 17 corner location"
+      ]
+    },
+    {
+      "id": "s6",
+      "title": "What's new in 2025/26: IFAB Laws and Premier League Football Principles",
+      "publisher": "Premier League",
+      "url": "https://www.premierleague.com/en/news/4373884",
+      "edition": "2025/26",
+      "kind": "other",
+      "accessed": false,
+      "sectionsUsed": [
+        "goalkeeper 8-second rule",
+        "penalty double touch",
+        "captain-only"
+      ]
+    },
+    {
+      "id": "s7",
+      "title": "Law 11 - Offside (Football 11-a-side)",
+      "publisher": "The Football Association",
+      "url": "https://www.thefa.com/football-rules-governance/lawsandrules/laws/football-11-11/law-11---offside",
+      "edition": "2025/26 (republished IFAB text)",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "Law 11.1 offside position"
+      ]
+    },
+    {
+      "id": "s8",
+      "title": "The IFAB clarifies handball Law and confirms decision on concussion substitute trials",
+      "publisher": "FIFA (Inside FIFA)",
+      "url": "https://inside.fifa.com/en/news/the-ifab-clarifies-handball-law-and-confirms-decision-on-concussion-substitute-t",
+      "edition": "2021 (for Laws 2021/22)",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "Law 12 handball scoring offence",
+        "accidental team-mate handball"
+      ]
+    },
+    {
+      "id": "s9",
+      "title": "Effect of specific exercise-based football injury prevention programmes on the overall injury rate in football: a systematic review and meta-analysis of the FIFA 11 and 11+ programmes (Thorborg et al.)",
+      "publisher": "British Journal of Sports Medicine 2017;51(7):562-571",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/28087568/",
+      "edition": "2017",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": [
+        "abstract results (search snippet only)"
+      ]
+    },
+    {
+      "id": "s10",
+      "title": "Including the Nordic hamstring exercise in injury prevention programmes halves the rate of hamstring injuries (van Dyk, Behan, Whiteley)",
+      "publisher": "British Journal of Sports Medicine 2019;53(21):1362-1370",
+      "url": "https://bjsm.bmj.com/content/53/21/1362",
+      "edition": "2019",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": [
+        "abstract results (search snippet only)"
+      ]
+    },
+    {
+      "id": "s11",
+      "title": "Why methods matter in a meta-analysis: a reappraisal showed inconclusive injury preventive effect of Nordic hamstring exercise (review summary)",
+      "publisher": "Physio Network (summary of peer-reviewed reappraisal)",
+      "url": "https://physio-network.com/research-reviews/thigh/why-methods-matter-in-a-meta-analysis-a-reappraisal-showed-inconclusive-injury-preventive-effect-of-nordic-hamstring-exercise",
+      "edition": null,
+      "kind": "education",
+      "accessed": false,
+      "sectionsUsed": [
+        "title/summary (search snippet only)"
+      ]
+    },
+    {
+      "id": "s12",
+      "title": "Scanning, contextual factors and association with performance in English Premier League footballers (Jordet et al.)",
+      "publisher": "Frontiers in Psychology 2020 (doi 10.3389/fpsyg.2020.553813)",
+      "url": "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2020.553813/text",
+      "edition": "2020",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": [
+        "results summary (search snippet only)"
+      ]
+    },
+    {
+      "id": "s13",
+      "title": "New heading rules (FA phased removal of deliberate heading in youth matches)",
+      "publisher": "Hertfordshire FA",
+      "url": "https://hertfordshirefa.com/news/2024/may/17/new-heading-rules",
+      "edition": "2024",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "U7-U11 phase-in schedule"
+      ]
+    },
+    {
+      "id": "s14",
+      "title": "FA advises coaches not to train children in heading but denies blanket ban",
+      "publisher": "Sky Sports",
+      "url": "https://www.skysports.com/football/news/11095/11942126/fa-advises-coaches-not-to-train-children-in-heading-but-denies-blanket-ban",
+      "edition": "2020",
+      "kind": "other",
+      "accessed": false,
+      "sectionsUsed": [
+        "2020 FA training guidance"
+      ]
+    },
+    {
+      "id": "s15",
+      "title": "US Soccer announces ban on heading for U-11 players",
+      "publisher": "Athletic Business",
+      "url": "https://www.athleticbusiness.com/operations/legal/article/15147197/us-soccer-announces-ban-on-heading-for-u-11-players",
+      "edition": "2015",
+      "kind": "other",
+      "accessed": false,
+      "sectionsUsed": [
+        "US Soccer heading guidelines"
+      ]
+    },
+    {
+      "id": "s16",
+      "title": "Guidelines for Movable Soccer Goal Safety",
+      "publisher": "U.S. Consumer Product Safety Commission",
+      "url": "https://www.cpsc.gov/safety-education/safety-guides/sports-fitness-and-recreation/guidelines-movable-soccer-goals",
+      "edition": null,
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "anchoring/counterweighting guidance (search snippet only)"
+      ]
+    },
+    {
+      "id": "s17",
+      "title": "Consensus statement on concussion in sport: the 6th International Conference on Concussion in Sport - Amsterdam, October 2022 (Patricios et al.)",
+      "publisher": "British Journal of Sports Medicine 2023;57:695-711",
+      "url": "https://bjsm.bmj.com/content/57/11/695",
+      "edition": "2023",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": [
+        "tools: CRT6, SCAT6, Child SCAT6, SCOAT6 (search snippet only)"
+      ]
+    },
+    {
+      "id": "s18",
+      "title": "Annual General Meeting 2026 agenda",
+      "publisher": "The IFAB",
+      "url": "https://downloads.theifab.com/downloads/annual-general-meeting-2026-agenda?l=en",
+      "edition": "2026",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "'Only the captain' guidelines item (search snippet only)"
+      ]
+    }
+  ],
+  "rulesetReview": [
+    {
+      "rulesetSlug": "ifab-laws",
+      "topic": "Players",
+      "currentText": "Each team has up to 11 players including one goalkeeper. A match may not start or continue if either team has fewer than seven players. The number of substitutes is set by the competition rules.",
+      "verdict": "unverifiable",
+      "sourceId": "s2",
+      "section": "Law 3",
+      "note": "Matches long-standing Law 3 wording to our knowledge, but the IFAB Laws PDF could not be opened (host blocked). 2026/27 adds: senior 'A' friendlies allow up to 8 substitutes by default (up to 11 by agreement) and outgoing substitutes must leave within 10 seconds (s1, snippet only)."
+    },
+    {
+      "rulesetSlug": "ifab-laws",
+      "topic": "Duration",
+      "currentText": "Two equal halves of 45 minutes, with a half-time interval of no more than 15 minutes. Time lost to stoppages is added by the referee.",
+      "verdict": "unverifiable",
+      "sourceId": "s2",
+      "section": "Law 7",
+      "note": "Believed correct (Law 7 also allows shorter halves by agreement before the match where competition rules permit). Not verified against an opened source."
+    },
+    {
+      "rulesetSlug": "ifab-laws",
+      "topic": "Scoring",
+      "currentText": "A goal is scored when the whole ball passes over the goal line between the posts and under the crossbar, provided no offence was committed.",
+      "verdict": "unverifiable",
+      "sourceId": "s2",
+      "section": "Law 10",
+      "note": "Believed correct; Law 10 text not opened."
+    },
+    {
+      "rulesetSlug": "ifab-laws",
+      "topic": "Ball out of play",
+      "currentText": "The ball is out only when the whole ball has crossed the goal line or touchline. Play restarts with a throw-in, goal kick or corner kick.",
+      "verdict": "unverifiable",
+      "sourceId": "s2",
+      "section": "Law 9",
+      "note": "Incomplete rather than wrong: Law 9 also stops play when the referee stops it, and when the ball touches a match official and a team starts a promising attack, the ball goes directly into goal or possession changes (restart: dropped ball). Not verified against an opened source."
+    },
+    {
+      "rulesetSlug": "ifab-laws",
+      "topic": "Offside position",
+      "currentText": "A player is in an offside position if any part of the head, body or feet is in the opponents' half and nearer to the opponents' goal line than both the ball and the second-last opponent. Hands and arms are not considered.",
+      "verdict": "confirmed",
+      "sourceId": "s7",
+      "section": "Law 11.1",
+      "note": "Supported by The FA's republished Law 11 text (search snippet, page not opened): hands/arms of all players including goalkeepers are not considered; the arm's upper boundary is level with the bottom of the armpit; a player level with the second-last opponent is not offside. The opponents' half excludes the halfway line."
+    },
+    {
+      "rulesetSlug": "ifab-laws",
+      "topic": "Offside offence",
+      "currentText": "Being in an offside position is not an offence on its own. It is penalised only if the player becomes involved in active play when a teammate plays or touches the ball. There is no offside offence directly from a goal kick, throw-in or corner kick.",
+      "verdict": "unverifiable",
+      "sourceId": "s7",
+      "section": "Law 11.2-11.3",
+      "note": "Believed correct per Law 11; only the offside-position part was visible in search snippets."
+    },
+    {
+      "rulesetSlug": "ifab-laws",
+      "topic": "Fouls",
+      "currentText": "Kicking, tripping, pushing, striking, charging, jumping at or tackling an opponent carelessly, recklessly or with excessive force, holding, and deliberate handball give a direct free kick — or a penalty kick if committed by a defender inside their own penalty area.",
+      "verdict": "corrected",
+      "correctedText": "A direct free kick (or a penalty if the offence is by a defender in their own penalty area while the ball is in play) is given for kicking, tripping, pushing, striking, charging, jumping at or tackling an opponent carelessly, recklessly or with excessive force, and for holding, impeding with contact, biting, spitting and handball offences. Handball offences are not limited to deliberate handling — see Law 12.",
+      "sourceId": "s8",
+      "section": "Law 12.1",
+      "note": "'Deliberate handball' is outdated wording: since the 2019-2021 revisions, some non-deliberate handling (e.g. scoring directly from the hand/arm) is an offence (s8, snippet). The extra offences listed (impeding with contact, biting, spitting) are from our knowledge of Law 12 and were not verified in an opened source."
+    },
+    {
+      "rulesetSlug": "ifab-laws",
+      "topic": "Handball",
+      "currentText": "Deliberately handling the ball, or making the body unnaturally bigger with the hand or arm, is an offence. A goal scored directly from a player's hand or arm is not allowed even if accidental. Law 12 contains the detailed criteria.",
+      "verdict": "confirmed",
+      "sourceId": "s8",
+      "section": "Law 12.1 (handling the ball)",
+      "note": "FIFA/IFAB 2021 release (snippet): offence if a player scores directly from their hand/arm, or immediately after the ball touched it, even if accidental (goalkeeper included). Accidental handball that leads to a TEAM-MATE scoring is no longer an offence — worth adding."
+    },
+    {
+      "rulesetSlug": "ifab-laws",
+      "topic": "Goalkeeper",
+      "currentText": "The goalkeeper may handle the ball only inside their own penalty area, and may not handle a ball deliberately kicked to them by a teammate or received directly from a teammate's throw-in.",
+      "verdict": "unverifiable",
+      "sourceId": "s2",
+      "section": "Law 12.2",
+      "note": "Believed correct but not verified. Missing the 2025/26 change: goalkeeper may control the ball in the hands for max 8 seconds, otherwise a corner kick is awarded (see newRulePoints)."
+    },
+    {
+      "rulesetSlug": "ifab-laws",
+      "topic": "Discipline",
+      "currentText": "Referees show a yellow card for cautions and a red card for sending-offs. A second caution in the same match results in a sending-off. A sent-off player cannot be replaced.",
+      "verdict": "unverifiable",
+      "sourceId": "s2",
+      "section": "Laws 3 and 12.3",
+      "note": "Nuance we believe applies but could not verify: a player sent off BEFORE kick-off may be replaced by a named substitute (Law 3). 2026/27 lets VAR review a red card from a clearly incorrect second yellow (s1, snippet)."
+    },
+    {
+      "rulesetSlug": "ifab-laws",
+      "topic": "Throw-in",
+      "currentText": "Taken with both hands from behind and over the head, with part of each foot on or behind the touchline. A goal cannot be scored directly from a throw-in.",
+      "verdict": "unverifiable",
+      "sourceId": "s2",
+      "section": "Law 15",
+      "note": "Believed correct (thrower also faces the field; opponents at least 2 m away). 2026/27 adds a visible five-second countdown for deliberate delay; exceeding it awards the throw-in to the opponents (s1/s3 snippets)."
+    },
+    {
+      "rulesetSlug": "ifab-laws",
+      "topic": "Penalty kick",
+      "currentText": "Taken from the penalty mark 11 m from goal. The goalkeeper must stay on the goal line between the posts, with at least part of one foot touching or level with the line, until the ball is kicked.",
+      "verdict": "unverifiable",
+      "sourceId": "s2",
+      "section": "Law 14",
+      "note": "Believed correct (goalkeeper also faces the kicker and must not touch the posts/crossbar/net). An accidental double touch by the kicker that goes in is now retaken (IFAB clarification 2025, incorporated in 2026/27 per s6 snippet); deliberate double touch remains an indirect free kick."
+    }
+  ],
+  "newRulePoints": [
+    {
+      "rulesetSlug": "ifab-laws",
+      "topic": "Edition",
+      "text": "The 2026/27 Laws of the Game took effect on 1 July 2026; competitions may implement slightly earlier or later (e.g. Concacaf from 20 July 2026). Check your competition's start date.",
+      "sourceId": "s1",
+      "section": "Changes to the Laws 2026/27 (snippet); s3"
+    },
+    {
+      "rulesetSlug": "ifab-laws",
+      "topic": "Goalkeeper 8-second limit",
+      "text": "From 2025/26 a goalkeeper may hold the ball in the hands for up to 8 seconds; the referee visibly counts the last 5. Exceeding it gives the opponents a corner kick on the side nearest where the offence occurred (formerly 6 seconds and an indirect free kick).",
+      "sourceId": "s5",
+      "section": "Law 12.2 / Law 17 (2025/26)"
+    },
+    {
+      "rulesetSlug": "ifab-laws",
+      "topic": "Substitution time limit",
+      "text": "From 2026/27 a player being substituted must leave the field within 10 seconds of the board/signal. If not, the substitute may enter only at the first stoppage at least one minute after play restarts.",
+      "sourceId": "s1",
+      "section": "Law 3 (2026/27)"
+    },
+    {
+      "rulesetSlug": "ifab-laws",
+      "topic": "Injured players",
+      "text": "From 2026/27 an outfield player whose injury stops play or who receives on-field treatment must leave and stay off for one minute after the restart, except in the situations Law 5 already exempts.",
+      "sourceId": "s3",
+      "section": "Law 5 (2026/27)"
+    },
+    {
+      "rulesetSlug": "ifab-laws",
+      "topic": "Restart delays",
+      "text": "From 2026/27 the referee may use a visible five-second countdown when a throw-in or goal kick is deliberately delayed. Exceeding it gives a throw-in to the opponents (throw-in) or a corner kick to the opponents (goal kick).",
+      "sourceId": "s1",
+      "section": "Laws 15 and 16 (2026/27)"
+    },
+    {
+      "rulesetSlug": "ifab-laws",
+      "topic": "VAR scope",
+      "text": "From 2026/27 VAR may also review a sending-off from a clearly incorrect second caution, cases of mistaken identity, and — where the competition opts in — clearly incorrect corner kick decisions.",
+      "sourceId": "s1",
+      "section": "VAR protocol (2026/27, snippet only)"
+    },
+    {
+      "rulesetSlug": "ifab-laws",
+      "topic": "Accidental handball by team-mate",
+      "text": "Since 2021/22 an accidental handball that leads to a team-mate scoring or getting a goal-scoring chance is not an offence; only the player who scores directly from (or immediately after) their own hand/arm contact is penalised.",
+      "sourceId": "s8",
+      "section": "Law 12.1"
+    },
+    {
+      "rulesetSlug": "ifab-laws",
+      "topic": "Penalty double touch",
+      "text": "If the penalty taker accidentally touches the ball twice (e.g. slips and kicks it with both feet) and it goes in, the kick is retaken; a deliberate second touch is an indirect free kick to the defenders.",
+      "sourceId": "s6",
+      "section": "Law 14 (2025 clarification; 2026/27 text)"
+    },
+    {
+      "rulesetSlug": "ifab-laws",
+      "topic": "Mouth covering in confrontations",
+      "text": "Search summaries of the 2026/27 changes report that a player who covers their mouth with hand, arm or shirt in a confrontation is sent off. Not verified in the Laws text — confirm before publishing.",
+      "sourceId": "s1",
+      "section": "Law 12 (2026/27) — unconfirmed"
+    }
+  ],
+  "claims": [
+    {
+      "topic": "FIFA 11+ effectiveness",
+      "category": "safety",
+      "level": "all",
+      "statement": "A 2017 meta-analysis of four cluster-randomised trials found FIFA 11+ lowered overall football injury rates by about 39% (IRR 0.61) in recreational/sub-elite players. The original 'FIFA 11' programme showed no clear effect (IRR 0.99), so use the 11+ version.",
+      "sourceIds": [
+        "s9"
+      ],
+      "section": "Thorborg et al. 2017, results",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Nordic hamstring exercise",
+      "category": "training",
+      "level": "intermediate",
+      "statement": "A 2019 meta-analysis (15 studies, 8,459 athletes) found programmes including the Nordic hamstring exercise reduced hamstring injury rates by up to 51%. A later methodological reappraisal judged the effect less certain, so present it as promising rather than proven.",
+      "sourceIds": [
+        "s10",
+        "s11"
+      ],
+      "section": "van Dyk et al. 2019 abstract; reappraisal summary",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Scanning before receiving",
+      "category": "tactics",
+      "level": "advanced",
+      "statement": "In a 2020 study of 27 Premier League players over 21 matches, central midfielders and centre-backs scanned most and forwards least; scanning dropped under tight pressure. More scanning was associated with a higher chance of completing the next pass, but the effect was small.",
+      "sourceIds": [
+        "s12"
+      ],
+      "section": "Jordet et al. 2020, results",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Scanning effect size caution",
+      "category": "science",
+      "level": "all",
+      "statement": "Large figures often quoted for scanning (e.g. 12-23% better pass completion) come from an older 2013 broadcast-footage study, not the 2020 club study. Coaches should treat scanning as helpful but not a guaranteed large gain.",
+      "sourceIds": [
+        "s12"
+      ],
+      "section": "search summary of Jordet 2013 vs 2020",
+      "confidence": "low"
+    },
+    {
+      "topic": "Youth heading in England",
+      "category": "safety",
+      "level": "beginner",
+      "statement": "The FA advised in 2020 that heading should not be taught in training for younger children, with graduated introduction up to U16. Deliberate heading in matches is being removed in phases: U7–U9 from 2024-25, U10 from 2025-26 and U11 from 2026-27.",
+      "sourceIds": [
+        "s13",
+        "s14"
+      ],
+      "section": "FA heading guidance / county FA notice",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Youth heading in the USA",
+      "category": "safety",
+      "level": "beginner",
+      "statement": "US Soccer guidance (2015) bars heading for players 10 and under and limits heading for ages 11–13 to practice with weekly caps. Secondary sources disagree on exact age bands and caps, so check the current US Soccer/US Youth Soccer text.",
+      "sourceIds": [
+        "s15"
+      ],
+      "section": "US Soccer heading guidelines (secondary report)",
+      "confidence": "low"
+    },
+    {
+      "topic": "Movable goal safety",
+      "category": "safety",
+      "level": "all",
+      "statement": "US CPSC links dozens of deaths since 1979, mostly children, to movable goals tipping over, typically when someone climbs or hangs on the crossbar. Anchor or counterweight goals at all times, never let anyone climb them, and secure or chain unused goals.",
+      "sourceIds": [
+        "s16"
+      ],
+      "section": "CPSC movable goal guidelines",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Concussion tools",
+      "category": "safety",
+      "level": "all",
+      "statement": "The 6th International Consensus (Amsterdam 2022, published 2023) updated sideline tools: the Concussion Recognition Tool 6 (CRT6) for non-medical people, SCAT6/Child SCAT6 for clinicians, and the new SCOAT6 for office follow-up. Coaches should use the CRT6 to recognise and remove a suspected concussion.",
+      "sourceIds": [
+        "s17"
+      ],
+      "section": "Patricios et al. 2023, tools",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Goalkeeper distribution under 2025/26 Laws",
+      "category": "rules",
+      "level": "intermediate",
+      "statement": "With the 8-second limit and a corner as the sanction, goalkeepers should practise releasing the ball within a few seconds of a catch. Under the guidance, an opponent who blocks the release during the countdown concedes an indirect free kick.",
+      "sourceIds": [
+        "s5",
+        "s6"
+      ],
+      "section": "Law 12.2 (2025/26) summaries",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Injury stoppages under 2026/27 Laws",
+      "category": "rules",
+      "level": "all",
+      "statement": "Because treated outfield players must stay off for one minute after the restart (with Law 5 exceptions), teams briefly play a player short. Coaches should plan who covers the role during that minute.",
+      "sourceIds": [
+        "s3"
+      ],
+      "section": "Law 5 (2026/27)",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Captain-only communication",
+      "category": "rules",
+      "level": "all",
+      "statement": "Under the IFAB 'captain only' approach, when the referee initiates it only one player per team (usually the captain) may approach the referee. Search results indicate guidelines for it will be mandatory from 2027; competitions may already apply it.",
+      "sourceIds": [
+        "s6",
+        "s18"
+      ],
+      "section": "Captain-only guidance; AGM 2026 agenda",
+      "confidence": "low"
+    },
+    {
+      "topic": "Offside line measurement",
+      "category": "rules",
+      "level": "intermediate",
+      "statement": "For offside, the arm counts as starting at the bottom of the armpit, so the shoulder can make a player offside but the arm and hand cannot. A player exactly level with the second-last opponent is onside.",
+      "sourceIds": [
+        "s7"
+      ],
+      "section": "Law 11.1",
+      "confidence": "medium"
+    }
+  ],
+  "safetyReview": [
+    {
+      "currentText": "Goals must be anchored — unanchored goals can tip over and cause serious injuries.",
+      "verdict": "confirmed",
+      "correctedText": "",
+      "sourceId": "s16",
+      "section": "CPSC movable goal guidelines (snippet)"
+    },
+    {
+      "currentText": "Heading practice for children is restricted in some countries; follow your national association's guidance.",
+      "verdict": "confirmed",
+      "correctedText": "",
+      "sourceId": "s13",
+      "section": "FA phased heading rules; also s15 (US Soccer)"
+    },
+    {
+      "currentText": "Children develop best with small-sided games and lots of touches. Several national associations limit heading practice for younger age groups — check yours.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s13",
+      "section": "Heading part supported by s13/s15; the small-sided games claim was not checked against an opened source"
+    },
+    {
+      "currentText": "Use a structured warm-up such as FIFA 11+ before training and matches — it is evidence-based for reducing injuries in amateur players.",
+      "verdict": "confirmed",
+      "correctedText": "",
+      "sourceId": "s9",
+      "section": "Thorborg et al. 2017 (IRR 0.61 for FIFA 11+)"
+    },
+    {
+      "currentText": "Nordic hamstring work 1–2× per week reduces hamstring strain risk; build it up slowly.",
+      "verdict": "corrected",
+      "correctedText": "Programmes that include the Nordic hamstring exercise have been linked to up to ~50% fewer hamstring injuries, though a later reappraisal found the evidence less certain. Build volume up slowly; follow your programme for the exact weekly dose.",
+      "sourceId": "s10",
+      "section": "van Dyk 2019 abstract; s11 reappraisal (dose of 1–2x/week not verified)"
+    },
+    {
+      "currentText": "Wear shin guards in every contact session.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s2",
+      "section": "Law 4 makes shinguards compulsory in matches (our knowledge; not verified in an opened source)"
+    },
+    {
+      "currentText": "Increase training load gradually after breaks; avoid going from no football to multiple matches a week.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s9",
+      "section": "No load-management source opened"
+    },
+    {
+      "currentText": "Concussion: if a head injury is suspected, stop playing immediately and get assessed — 'if in doubt, sit them out'.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s17",
+      "section": "Consistent with the CRT6 removal principle as we understand it, but the removal wording was not seen in a snippet or opened source"
+    }
+  ],
+  "gaps": [
+    {
+      "topic": "All primary sources",
+      "reason": "WebFetch and curl could not reach any source host in this session (DNS failure / proxy connect rejected), so nothing was opened. All verdicts rest on search-result snippets plus prior knowledge; re-run with network access before publishing."
+    },
+    {
+      "topic": "Exact 2026/27 Law wording and numbering",
+      "reason": "IFAB PDFs blocked; new rule points come from search summaries of IFAB/Concacaf/Irish FA pages."
+    },
+    {
+      "topic": "Mouth-covering red card (2026/27)",
+      "reason": "Seen only in a search summary; needs confirmation in the Laws text."
+    },
+    {
+      "topic": "Concussion return-to-play timelines",
+      "reason": "Amsterdam 2022 graded return-to-sport steps and child-specific timing not seen in snippets."
+    },
+    {
+      "topic": "Lesson technique cues (first touch, passing, shooting, 1v1 defending)",
+      "reason": "No coaching-education source could be opened; existing key points left unreviewed."
+    },
+    {
+      "topic": "Small-sided games for children",
+      "reason": "No federation youth-format document opened (e.g. FA/US Soccer player development guidelines)."
+    }
+  ],
+  "notAccessed": [
+    {
+      "url": "https://downloads.theifab.com/downloads/changes-to-the-laws-of-the-game-202627?l=en",
+      "reason": "WebFetch: getaddrinfo ENOTFOUND (host unreachable from this session)"
+    },
+    {
+      "url": "https://theifab.com/news/the-ifab-introduces-further-measures-to-improve-match-flow-and-player-behaviour/",
+      "reason": "WebFetch: getaddrinfo ENOTFOUND"
+    },
+    {
+      "url": "https://www.irishfa.com/news/2026/july/referees-reminded-of-key-ifab-law-changes-for-the-202627-season",
+      "reason": "WebFetch: getaddrinfo ENOTFOUND"
+    },
+    {
+      "url": "https://pubmed.ncbi.nlm.nih.gov/28087568/",
+      "reason": "WebFetch ENOTFOUND; curl: proxy connect_rejected (403)"
+    },
+    {
+      "url": "https://bjsm.bmj.com/content/53/21/1362",
+      "reason": "curl to bjsm.bmj.com failed (no response through agent proxy); WebFetch not usable (DNS failures on all hosts)"
+    },
+    {
+      "url": "https://www.cpsc.gov/safety-education/safety-guides/sports-fitness-and-recreation/guidelines-movable-soccer-goals",
+      "reason": "WebFetch: getaddrinfo ENOTFOUND"
+    },
+    {
+      "url": "https://www.fifa.com",
+      "reason": "curl to www.fifa.com failed (no response through agent proxy); FIFA 11+ manual not reachable"
+    },
+    {
+      "url": "https://www.thefa.com/football-rules-governance/lawsandrules/laws/football-11-11/law-11---offside",
+      "reason": "Not attempted directly; every host tried in this session (IFAB, FIFA, PubMed, BMJ, CPSC, Wikipedia) was unreachable, only search snippets used"
+    }
+  ]
+}

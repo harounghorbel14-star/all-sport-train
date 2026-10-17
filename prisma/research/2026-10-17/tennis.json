@@ -1,0 +1,341 @@
+{
+  "sport": "tennis",
+  "accessedDate": "2026-10-17",
+  "sources": [
+    {
+      "id": "s1",
+      "title": "ITF Rules of Tennis 2026 (English)",
+      "publisher": "International Tennis Federation",
+      "url": "https://www.itftennis.com/media/7221/2026-rules-of-tennis-english.pdf",
+      "edition": "2026",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s2",
+      "title": "2026 Amendments to the Rules of Tennis and Beach Tennis",
+      "publisher": "International Tennis Federation",
+      "url": "https://www.itftennis.com/media/7224/2026-amendments-to-the-rules-of-tennis-and-beach-tennis.pdf",
+      "edition": "2026",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s3",
+      "title": "2025 Amendments to the Rules of Tennis and Beach Tennis",
+      "publisher": "International Tennis Federation",
+      "url": "https://itftennis.com/media/7224/2025-amendments-to-the-rules-of-tennis-and-beach-tennis.pdf",
+      "edition": "2025",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s4",
+      "title": "Breaking the Rules: Making changes to the changeover",
+      "publisher": "Tennis.com",
+      "url": "https://www.tennis.com/baseline/articles/breaking-the-rules-making-changes-to-the-changeover",
+      "edition": null,
+      "kind": "other",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s5",
+      "title": "Court of Appeals: Crossing the line (foot faults)",
+      "publisher": "Tennis.com",
+      "url": "https://tennis.com/news/articles/court-of-appeals-crossing-the-line",
+      "edition": null,
+      "kind": "other",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s6",
+      "title": "Tennis injuries: occurrence, aetiology, and prevention (Pluim et al., Br J Sports Med 2006)",
+      "publisher": "BMJ / PubMed Central",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2577485/",
+      "edition": "2006",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s7",
+      "title": "ITF Tennis Play and Stay",
+      "publisher": "International Tennis Federation",
+      "url": "https://itftennis.com/en/growing-the-game/itf-tennis-play-and-stay",
+      "edition": null,
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s8",
+      "title": "Summary of Changes (2026 Rules of Tennis)",
+      "publisher": "Tennis BC",
+      "url": "https://www.tennisbc.org/wp-content/uploads/2026/02/Summary-of-Changes.pdf",
+      "edition": "2026",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    }
+  ],
+  "rulesetReview": [
+    {
+      "rulesetSlug": "itf-rules",
+      "topic": "Scoring a game",
+      "currentText": "Points are called love (0), 15, 30, 40 and game. At 40–40 (deuce), a player must win two consecutive points: advantage, then game.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s1",
+      "section": "Rule 5 (not opened)",
+      "note": "Matches standard ITF Rule 5 as generally known; the alternative No-Ad method (deciding point at deuce, receiver chooses side in singles) is in an appendix. search snippet only; source not opened"
+    },
+    {
+      "rulesetSlug": "itf-rules",
+      "topic": "Sets",
+      "currentText": "A set is won by the first player to win six games with a margin of two. At 6–6 a tie-break is normally played: first to 7 points with a 2-point margin.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s1",
+      "section": "Rule 6 (not opened)",
+      "note": "Rule 6 allows both 'advantage sets' (no tie-break) and 'tie-break sets'; the organiser chooses. Wording is broadly right but should mention advantage sets. search snippet only; source not opened"
+    },
+    {
+      "rulesetSlug": "itf-rules",
+      "topic": "Match",
+      "currentText": "Matches are best of three or best of five sets. Some events replace the final set with a match tie-break (first to 10 points, win by 2).",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s3",
+      "section": "Appendix VI per 2025 amendments snippet (not opened)",
+      "note": "Snippets of ITF 2025 amendments: an appendix (moved to Appendix VI per snippet) allows a 10-point tie-break at 6-6 in the final set (as used at Grand Slams), and the match tie-break remains an alternative method. Suggest adding the final-set 10-point tie-break at 6-6. search snippet only; source not opened"
+    },
+    {
+      "rulesetSlug": "itf-rules",
+      "topic": "Serving",
+      "currentText": "The server stands behind the baseline, between the centre mark and the sideline, and serves diagonally into the opposite service box. Two attempts are allowed; two faults lose the point (double fault).",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s2",
+      "section": "Rules 16-21; Rule 18 Case 1 (2026 amendment, per snippet)",
+      "note": "Generally consistent. 2026 amendment (snippet) clarifies Rule 18 Case 1: in doubles the server may stand behind the baseline between the singles and doubles sidelines; in singles not. Suggest specifying singles vs doubles sideline. search snippet only; source not opened"
+    },
+    {
+      "rulesetSlug": "itf-rules",
+      "topic": "Let",
+      "currentText": "A serve that touches the net and then lands in the correct service box is a let and is replayed.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s1",
+      "section": "Rules 22-23 (not opened)",
+      "note": "Correct as a description of a service let (Rule 22) per secondary snippets; note No-Let is an alternative method in an appendix, and Rule 23 covers general lets (whole point replayed). search snippet only; source not opened"
+    },
+    {
+      "rulesetSlug": "itf-rules",
+      "topic": "Foot fault",
+      "currentText": "The server may not touch the baseline or the court inside it with either foot before hitting the ball.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s5",
+      "section": "Rule 18 (per secondary snippet)",
+      "note": "Incomplete per snippet of Rule 18: during the service motion the server also may not change position by walking/running (slight foot movements allowed), or touch the area outside the imaginary extension of the sideline or the imaginary extension of the centre mark. Suggested correction pending verification. search snippet only; source not opened"
+    },
+    {
+      "rulesetSlug": "itf-rules",
+      "topic": "Sides & ends",
+      "currentText": "The server alternates between the right and left halves of the court each point, starting from the right. Players change ends after the first, third and every following odd game of each set; in a tie-break, every six points.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s4",
+      "section": "Rule 10 (quoted in secondary source)",
+      "note": "Rule 10 as quoted by tennis.com matches; add that if a set ends on an even total, players change at the end of the first game of the next set. search snippet only; source not opened"
+    },
+    {
+      "rulesetSlug": "itf-rules",
+      "topic": "Ball in or out",
+      "currentText": "A ball that touches any part of a line is in.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s1",
+      "section": "Rule 12 (not opened)",
+      "note": "Consistent with standard rule that lines are part of the court they bound; not verified. search snippet only; source not opened"
+    },
+    {
+      "rulesetSlug": "itf-rules",
+      "topic": "Losing a point",
+      "currentText": "A player loses the point if the ball bounces twice before they hit it, they hit it out or into the net, they touch the net or the opponent's court while the ball is in play, or the ball touches them.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s1",
+      "section": "Rule 24 (partially per snippet)",
+      "note": "Snippet of Rule 24(g) confirms the player, racket or anything worn/carried touching net, posts, cord, strap or opponent's court loses the point; suggest including racket/clothing. Full list not verified. search snippet only; source not opened"
+    }
+  ],
+  "newRulePoints": [
+    {
+      "rulesetSlug": "itf-rules",
+      "topic": "2026 amendment: tie-break at wrong ends",
+      "text": "UNVERIFIED (snippet of 2026 amendments): if players are found to be at the wrong ends during a tie-break, the error is corrected immediately and a fault served before discovery does not stand (Rule 27).",
+      "sourceId": "s2",
+      "section": "Rule 27 (per snippet)"
+    },
+    {
+      "rulesetSlug": "itf-rules",
+      "topic": "2026 amendment: doubles server position",
+      "text": "UNVERIFIED (snippet): from 2026 Rule 18 Case 1 clarifies a doubles server may stand behind the baseline between the singles and doubles sidelines; a singles server may not.",
+      "sourceId": "s2",
+      "section": "Rule 18 Case 1 (per snippet)"
+    },
+    {
+      "rulesetSlug": "itf-rules",
+      "topic": "Final-set tie-break",
+      "text": "UNVERIFIED (snippet of 2025 amendments): an appendix permits a 10-point tie-break (2-point margin) at 6-6 in the deciding set, the format used at Grand Slams.",
+      "sourceId": "s3",
+      "section": "Appendix VI (per snippet)"
+    },
+    {
+      "rulesetSlug": "itf-rules",
+      "topic": "Tennis 10s",
+      "text": "UNVERIFIED (snippet): since 2012 ITF rules require 10-and-under competition to use slower red, orange or green balls on appropriately sized courts; yellow balls are not permitted. Court sizes in Appendix (check current numbering).",
+      "sourceId": "s7",
+      "section": "not opened"
+    },
+    {
+      "rulesetSlug": "itf-rules",
+      "topic": "Alternative scoring",
+      "text": "UNVERIFIED: ITF appendices list alternative methods such as No-Ad scoring, short sets (first to 4 games, tie-break at 4-all) and the match tie-break (first to 10, win by 2). Exact appendix numbers for 2026 not confirmed.",
+      "sourceId": "s1",
+      "section": "Appendices (not opened)"
+    }
+  ],
+  "claims": [
+    {
+      "topic": "Injury location",
+      "category": "science",
+      "level": "all",
+      "statement": "Systematic review (Pluim et al. 2006) reported most tennis injuries occur in the lower limb, then upper limb, then trunk, with wide variation in reported incidence.",
+      "sourceIds": [
+        "s6"
+      ],
+      "section": "search snippet only; source not opened",
+      "confidence": "low"
+    },
+    {
+      "topic": "Prevention evidence",
+      "category": "science",
+      "level": "all",
+      "statement": "The same 2006 review found no randomised controlled trials of injury-prevention measures in tennis, so prevention advice (e.g. for tennis elbow) rests on low-level evidence.",
+      "sourceIds": [
+        "s6"
+      ],
+      "section": "search snippet only; source not opened",
+      "confidence": "low"
+    },
+    {
+      "topic": "Foot-fault timing",
+      "category": "rules",
+      "level": "beginner",
+      "statement": "Per a tennis.com rules column, touching the centre-mark extension at the start of the service motion is a foot fault even if the foot moves off before contact.",
+      "sourceIds": [
+        "s5"
+      ],
+      "section": "search snippet only; source not opened",
+      "confidence": "low"
+    },
+    {
+      "topic": "Changing ends after a set",
+      "category": "rules",
+      "level": "beginner",
+      "statement": "A 7-6 or 6-3 set has an odd number of games, so players change ends straight after it; the tie-break itself does not change this logic.",
+      "sourceIds": [
+        "s4"
+      ],
+      "section": "search snippet only; source not opened",
+      "confidence": "low"
+    },
+    {
+      "topic": "Youth equipment",
+      "category": "equipment",
+      "level": "beginner",
+      "statement": "ITF Play and Stay: red, orange and green balls on smaller courts help young beginners rally and serve sooner; red-court dimensions quoted by ITF ~10.97-12.8 m x 4.88-6.1 m.",
+      "sourceIds": [
+        "s7"
+      ],
+      "section": "search snippet only; source not opened",
+      "confidence": "low"
+    }
+  ],
+  "safetyReview": [
+    {
+      "currentText": "Clear balls from the court to avoid rolling an ankle.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s6",
+      "section": "not opened; lower-limb injuries most common per snippet"
+    },
+    {
+      "currentText": "Use sun protection and hydrate outdoors.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s1",
+      "section": "no source checked"
+    },
+    {
+      "currentText": "Tennis elbow: build forearm strength, use correct technique and a racket/string setup suited to you.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s6",
+      "section": "not opened; snippet notes lack of RCT evidence for prevention measures"
+    },
+    {
+      "currentText": "Shoulder: strengthen the rotator cuff and upper back; build serve volume gradually.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s6",
+      "section": "not opened"
+    },
+    {
+      "currentText": "Warm up with mini-tennis before full rallies.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s6",
+      "section": "no source checked"
+    }
+  ],
+  "gaps": [
+    {
+      "topic": "All rule verification",
+      "reason": "WebFetch could not resolve itftennis.com or any research host from this sandbox; curl via the proxy returned 403. Everything rests on search snippets and must be re-checked against the opened 2026 ITF PDF."
+    },
+    {
+      "topic": "Technique/biomechanics claims",
+      "reason": "No coaching or biomechanics source (ITF Coaching Review, serve kinetic-chain studies) could be opened; only 5 low-confidence claims provided instead of 8-20."
+    },
+    {
+      "topic": "Tour vs ITF differences",
+      "reason": "ATP/WTA/Grand Slam rulebooks (e.g. shot clock, coaching rules) not checked."
+    },
+    {
+      "topic": "Heat policy",
+      "reason": "Not researched."
+    }
+  ],
+  "notAccessed": [
+    {
+      "url": "https://www.itftennis.com/media/7221/2026-rules-of-tennis-english.pdf",
+      "reason": "WebFetch failed (DNS: getaddrinfo ENOTFOUND) - host not reachable from this sandbox's network policy"
+    },
+    {
+      "url": "https://itftennis.com/media/7221/2026-rules-of-tennis-english.pdf",
+      "reason": "WebFetch failed (DNS: getaddrinfo ENOTFOUND) - host not reachable from this sandbox's network policy"
+    },
+    {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2577485/",
+      "reason": "WebFetch failed (DNS: getaddrinfo ENOTFOUND) - host not reachable from this sandbox's network policy"
+    }
+  ]
+}

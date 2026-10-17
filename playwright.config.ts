@@ -16,7 +16,7 @@ export default defineConfig({
   },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },
-    { name: "mobile", use: { ...devices["Pixel 7"] }, testMatch: /responsive\.spec\.ts/ },
+    { name: "mobile", use: { ...devices["Pixel 7"] }, testMatch: /(responsive|auth)\.spec\.ts/ },
   ],
   webServer: {
     // Fresh, migrated and seeded database for every run (the server must not hold the file while it is recreated).

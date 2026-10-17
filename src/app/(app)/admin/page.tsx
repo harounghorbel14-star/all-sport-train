@@ -13,7 +13,7 @@ export default async function AdminPage() {
   const [exercises, users, reports] = await Promise.all([allExercises(), db.user.count(), db.report.findMany({ where: { status: "open" }, orderBy: { createdAt: "desc" }, take: 20 })]);
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Administration" title="Admin" subtitle="Manage the exercise library and review community reports." action={<ButtonLink href="/admin/sports" variant="secondary">Sports content</ButtonLink>} />
+      <PageHeader eyebrow="Administration" title="Admin" subtitle="Manage the exercise library and review community reports." action={<span className="flex gap-2"><ButtonLink href="/admin/sports" variant="secondary">Sports content</ButtonLink><ButtonLink href="/admin/research" variant="secondary">Research coverage</ButtonLink></span>} />
       <div className="grid gap-4 sm:grid-cols-3">
         <Card><Stat label="Users" value={users} /></Card>
         <Card><Stat label="Exercises" value={exercises.length} hint={`${exercises.filter((e) => e.isCustom).length} custom`} /></Card>

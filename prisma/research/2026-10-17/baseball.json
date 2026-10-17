@@ -1,0 +1,482 @@
+{
+  "sport": "baseball",
+  "accessedDate": "2026-10-17",
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Official Baseball Rules (MLB) - rules glossary / printable 2026 edition",
+      "publisher": "Major League Baseball",
+      "url": "https://www.mlb.com/glossary/rules",
+      "edition": "2026",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s2",
+      "title": "Pitch Timer (2023 rule change) - MLB glossary",
+      "publisher": "Major League Baseball",
+      "url": "https://www.mlb.com/glossary/rules/pitch-timer",
+      "edition": "2024 update",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s3",
+      "title": "Pitch Smart - Pitching guidelines ages 9-12",
+      "publisher": "MLB / USA Baseball",
+      "url": "https://www.mlb.com/pitch-smart/pitching-guidelines/ages-9-12",
+      "edition": "guidelines last updated 2017 (per USA Baseball 2021 note)",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s4",
+      "title": "MLB, USA Baseball Supplement Pitch Smart Guidelines for 2021 Season",
+      "publisher": "USA Baseball",
+      "url": "https://www.usabaseball.com/news/mlb-usa-baseball-supplement-pitch-smart-guidelines-for-2021-season",
+      "edition": "2021",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s5",
+      "title": "WBSC Official Rules of Baseball, new edition published for 2025-2026 season",
+      "publisher": "WBSC",
+      "url": "https://worldbaseball.com/news/wbsc-official-rules-of-baseball-new-edition-published-for-2025-2026-season",
+      "edition": "2025-2026",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s6",
+      "title": "5.08 How a Team Scores (OBR text reproduction)",
+      "publisher": "Baseball Rules Academy",
+      "url": "https://baseballrulesacademy.com/?p=17915",
+      "edition": null,
+      "kind": "education",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s7",
+      "title": "Infield Fly (OBR definitions)",
+      "publisher": "Baseball Rules Academy",
+      "url": "https://baseballrulesacademy.com/official-rule/obr-definitions/infield-fly-2/",
+      "edition": null,
+      "kind": "education",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s8",
+      "title": "MLB robot umpires get the green light: ABS challenge system starts in 2026",
+      "publisher": "CBS Sports",
+      "url": "https://www.cbssports.com/mlb/news/mlb-robot-umpires-automated-ball-strike-system-approved-2026-season",
+      "edition": "2025",
+      "kind": "other",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s9",
+      "title": "Risk Factors for Elbow and Shoulder Injuries in Adolescent Baseball Players: A Systematic Review",
+      "publisher": "Penn State (Pure record); Am J Sports Med",
+      "url": "https://pure.psu.edu/en/publications/risk-factors-for-elbow-and-shoulder-injuries-in-adolescent-baseba/",
+      "edition": null,
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s10",
+      "title": "Youth baseball pitching guideline compliance study (PMC8581780)",
+      "publisher": "PubMed Central",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8581780",
+      "edition": null,
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s11",
+      "title": "Rehabilitative and Preventive Effects of the Thrower's Ten Program in Overhead Athletes: A Systematic Review",
+      "publisher": "PubMed Central",
+      "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12633846/",
+      "edition": "2025",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s12",
+      "title": "Rule 7.00 The Runner FAQs",
+      "publisher": "Little League International",
+      "url": "https://www.littleleague.org/help-center/rule-7-00-the-runner-faqs/",
+      "edition": null,
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s13",
+      "title": "Strike zone (OBR Definition of Terms reproduction)",
+      "publisher": "Baseball-Reference Bullpen",
+      "url": "https://www.baseball-reference.com/bullpen/Strike_zone",
+      "edition": null,
+      "kind": "other",
+      "accessed": false,
+      "sectionsUsed": []
+    }
+  ],
+  "rulesetReview": [
+    {
+      "rulesetSlug": "core-rules",
+      "topic": "Teams & innings",
+      "currentText": "Nine players take the field. A standard game has nine innings; each team bats once per inning until three outs are recorded.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s1",
+      "section": "OBR (section not verified)",
+      "note": "Consistent with general knowledge of OBR, but the rulebook was not opened. Levels differ: many youth and some WBSC/MiLB competitions play 7-inning games. search snippet only; source not opened"
+    },
+    {
+      "rulesetSlug": "core-rules",
+      "topic": "Balls & strikes",
+      "currentText": "Four balls give the batter a walk to first base. Three strikes is a strikeout. A foul ball counts as a strike unless the batter already has two strikes (a foul bunt with two strikes is a strikeout).",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s1",
+      "section": "Definitions: Strike; Rule 5.09(a) (per snippet)",
+      "note": "Snippets of OBR Definition of Terms (Strike) and 5.09(a) agree: foul with <2 strikes is a strike; bunted foul is a strike on any count. Suggest adding: a foul tip legally caught by the catcher is a strike even with two strikes (third strike = out). search snippet only; source not opened"
+    },
+    {
+      "rulesetSlug": "core-rules",
+      "topic": "Strike zone",
+      "currentText": "Roughly the area over home plate from the midpoint between the batter's shoulders and belt down to the hollow below the kneecap, based on the batter's stance as they swing.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s13",
+      "section": "Definitions: Strike Zone (per snippet)",
+      "note": "Snippet of OBR definition: upper limit is the midpoint between the top of the shoulders and the top of the uniform pants; lower limit the hollow beneath the kneecap; judged from the stance as the batter is prepared to swing. Suggested wording: '...top of the shoulders and the top of the uniform pants... judged from the batter's stance as they prepare to swing'. Note MLB's 2026 ABS challenge system uses its own zone dimensions (not verified). search snippet only; source not opened"
+    },
+    {
+      "rulesetSlug": "core-rules",
+      "topic": "Outs",
+      "currentText": "Common ways to be out: strikeout, a batted ball caught in the air, being tagged with the ball while off a base, or a force out at a base.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s1",
+      "section": "Rule 5.09 (not opened)",
+      "note": "Plausible summary; not verified against OBR 5.09 text. search snippet only; source not opened"
+    },
+    {
+      "rulesetSlug": "core-rules",
+      "topic": "Fair & foul",
+      "currentText": "A batted ball that lands or is played in fair territory is in play; balls outside the foul lines are foul.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s1",
+      "section": "Definitions: Fair Ball / Foul Ball (not opened)",
+      "note": "Oversimplified: under OBR definitions, ground balls are judged by where they are when passing first/third base or when they settle/are touched; fly balls by where they first land beyond the bases; foul lines and poles are fair. Could not confirm exact wording. search snippet only; source not opened"
+    },
+    {
+      "rulesetSlug": "core-rules",
+      "topic": "Base running",
+      "currentText": "Runners must touch each base in order. Only one runner may occupy a base. On a caught fly ball, runners must tag up before advancing.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s1",
+      "section": "Rule 5.06 (not opened)",
+      "note": "Plausible; tag-up applies to any legally caught fly ball (retouch original base after the catch is first touched). Not verified. search snippet only; source not opened"
+    },
+    {
+      "rulesetSlug": "core-rules",
+      "topic": "Scoring",
+      "currentText": "A run scores when a runner legally touches all four bases before the third out (a run doesn't count if the third out is a force out or the batter-runner is out before reaching first).",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s6",
+      "section": "Rule 5.08(a) (per snippet)",
+      "note": "Snippet of OBR 5.08(a) lists a third exception the app omits: no run scores if the third out is a preceding runner declared out for failing to touch a base (appeal). Suggested addition. search snippet only; source not opened"
+    },
+    {
+      "rulesetSlug": "core-rules",
+      "topic": "Infield fly",
+      "currentText": "With runners on first and second (or bases loaded) and fewer than two outs, an easily catchable infield pop-up is declared an infield fly and the batter is out, to stop the defence deliberately dropping it for a double play.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s7",
+      "section": "Definitions: Infield Fly (per snippet)",
+      "note": "Snippets of OBR definition agree on runners and outs; add that it must be a FAIR fly ball (not a line drive or attempted bunt) catchable by an infielder with ordinary effort; runners may advance at their own risk. search snippet only; source not opened"
+    },
+    {
+      "rulesetSlug": "core-rules",
+      "topic": "Designated hitter",
+      "currentText": "Many leagues, including MLB, allow a designated hitter to bat in place of the pitcher.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s1",
+      "section": "Rule 5.11 (not opened)",
+      "note": "News reports: MLB adopted the universal DH in 2022 (both leagues), with a two-way-player provision letting a starting pitcher who is also the DH stay in as DH after leaving the mound. Rulebook number (5.11) not confirmed. search snippet only; source not opened"
+    }
+  ],
+  "newRulePoints": [
+    {
+      "rulesetSlug": "core-rules",
+      "topic": "Pitch timer (MLB)",
+      "text": "UNVERIFIED (search snippet only): In MLB the pitcher has 15 s to begin the delivery with bases empty and 18 s with runners on (18 s since 2024). Pitchers get two disengagements (step-offs/pickoffs) per plate appearance; an unsuccessful third advances runners one base. Amateur levels may differ.",
+      "sourceId": "s2",
+      "section": "MLB glossary: Pitch Timer (not opened)"
+    },
+    {
+      "rulesetSlug": "core-rules",
+      "topic": "ABS challenge system (MLB 2026)",
+      "text": "UNVERIFIED (news report): From 2026 MLB umpires still call every pitch, but each team may challenge ball/strike calls to the automated system, starting with two per game; a successful challenge is retained. Applies to MLB only.",
+      "sourceId": "s8",
+      "section": "news report (not opened)"
+    },
+    {
+      "rulesetSlug": "core-rules",
+      "topic": "WBSC rules 2025-2026",
+      "text": "UNVERIFIED (snippet): WBSC competitions use the WBSC Official Rules of Baseball 2025-2026 edition; reported changes include 120-second pitching changes/inning breaks (except U-12 World Cup) and pitch-clock sanctions without prior warning.",
+      "sourceId": "s5",
+      "section": "news item (not opened)"
+    },
+    {
+      "rulesetSlug": "core-rules",
+      "topic": "Extra innings",
+      "text": "UNVERIFIED: Many professional and international competitions start extra innings with a runner placed on second base (MLB, WBC); WBSC Olympic baseball has used runners on first and second. Check your competition rules.",
+      "sourceId": "s1",
+      "section": "not opened"
+    }
+  ],
+  "claims": [
+    {
+      "topic": "Pitch Smart daily limits",
+      "category": "safety",
+      "level": "all",
+      "statement": "Pitch Smart daily pitch maximums (per secondary snippets): ages 7-8: 50, 9-10: 75, 11-12: 85, 13-16: 95, 17-18: 105. These are recommendations; Little League's own limits are mandatory rules.",
+      "sourceIds": [
+        "s3",
+        "s4"
+      ],
+      "section": "search snippet only; source not opened",
+      "confidence": "low"
+    },
+    {
+      "topic": "Pitch Smart rest days (ages 9-14)",
+      "category": "safety",
+      "level": "all",
+      "statement": "Snippet of Pitch Smart table for ages 9-14: 1-20 pitches = 0 rest days, 21-35 = 1, 36-50 = 2, 51-65 = 3, 66+ = 4. Older age bands use higher thresholds; sources disagree on the 17-18 top tiers.",
+      "sourceIds": [
+        "s3"
+      ],
+      "section": "search snippet only; source not opened",
+      "confidence": "low"
+    },
+    {
+      "topic": "No three consecutive days",
+      "category": "safety",
+      "level": "all",
+      "statement": "Pitch Smart (per snippet): no youth pitcher should pitch three consecutive days regardless of count, nor pitch in more than one game in a day.",
+      "sourceIds": [
+        "s3"
+      ],
+      "section": "search snippet only; source not opened",
+      "confidence": "low"
+    },
+    {
+      "topic": "Annual rest",
+      "category": "safety",
+      "level": "all",
+      "statement": "Pitch Smart (per snippet): at least 4 months a year off throwing, with 2-3 months continuous; ages 9-12 cap of 80 innings in 12 months; avoid pitching more than 8 months/year.",
+      "sourceIds": [
+        "s3"
+      ],
+      "section": "search snippet only; source not opened",
+      "confidence": "low"
+    },
+    {
+      "topic": "Catcher and pitcher",
+      "category": "safety",
+      "level": "all",
+      "statement": "Pitch Smart (per snippet) advises youth players not to pitch and catch in the same game.",
+      "sourceIds": [
+        "s3",
+        "s4"
+      ],
+      "section": "search snippet only; source not opened",
+      "confidence": "low"
+    },
+    {
+      "topic": "Pitching while fatigued",
+      "category": "science",
+      "level": "all",
+      "statement": "Systematic review of adolescent players identified arm fatigue, playing for multiple teams, pitch velocity, age and height as independent risk factors for throwing-arm injury; evidence for months/yr, innings/yr and GIRD was inconclusive.",
+      "sourceIds": [
+        "s9"
+      ],
+      "section": "search snippet only; source not opened",
+      "confidence": "low"
+    },
+    {
+      "topic": "Compliance",
+      "category": "safety",
+      "level": "all",
+      "statement": "A study of tournament teams reported Pitch Smart non-compliance in over 90% of teams and about half of pitchers - coaches should actively track counts.",
+      "sourceIds": [
+        "s10"
+      ],
+      "section": "search snippet only; source not opened",
+      "confidence": "low"
+    },
+    {
+      "topic": "Thrower's Ten",
+      "category": "training",
+      "level": "intermediate",
+      "statement": "A 2025 systematic review (8 small, heterogeneous studies) reported gains in rotator cuff strength, scapular stability and shoulder ROM from the Thrower's Ten; evidence for velocity gains is weak.",
+      "sourceIds": [
+        "s11"
+      ],
+      "section": "search snippet only; source not opened",
+      "confidence": "low"
+    },
+    {
+      "topic": "Head-first slides (youth)",
+      "category": "safety",
+      "level": "beginner",
+      "statement": "Little League Rule 7.08(a)(4) (per snippet): in Majors division and below, a runner sliding head-first while advancing is out; diving back to a base is allowed.",
+      "sourceIds": [
+        "s12"
+      ],
+      "section": "search snippet only; source not opened",
+      "confidence": "low"
+    },
+    {
+      "topic": "Breaking balls",
+      "category": "safety",
+      "level": "beginner",
+      "statement": "Pitch Smart-based summaries suggest delaying breaking pitches until fastball and changeup command is consistent; one summary cites ~age 13-14 for curveballs. Exact official wording not confirmed.",
+      "sourceIds": [
+        "s3",
+        "s4"
+      ],
+      "section": "search snippet only; source not opened",
+      "confidence": "low"
+    }
+  ],
+  "safetyReview": [
+    {
+      "currentText": "Youth pitchers: follow Pitch Smart's age-based pitch counts and required rest days, and avoid pitching for multiple teams at once.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s3",
+      "section": "Pitch Smart age pages (not opened; snippets consistent; multiple teams supported as risk factor by s9 snippet)"
+    },
+    {
+      "currentText": "Track every pitch and respect age-based pitch counts and rest days (Pitch Smart).",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s3",
+      "section": "not opened; consistent with snippets"
+    },
+    {
+      "currentText": "Young pitchers should master the fastball and changeup before breaking pitches.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s3",
+      "section": "not opened; consistent with snippets"
+    },
+    {
+      "currentText": "Never throw through elbow or shoulder pain — stop and get assessed.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s9",
+      "section": "not opened; arm fatigue/pain history are reported risk factors"
+    },
+    {
+      "currentText": "Build throwing volume gradually at the start of a season with a structured throwing progression.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s3",
+      "section": "not opened"
+    },
+    {
+      "currentText": "Always wear a batting helmet when batting or running the bases; catchers wear full protective gear.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s1",
+      "section": "not opened"
+    },
+    {
+      "currentText": "Sliding: learn feet-first slides under supervision; head-first sliding is restricted in many youth leagues.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s12",
+      "section": "Little League Rule 7.08(a)(4) per snippet: head-first slide while advancing prohibited in Majors and below"
+    },
+    {
+      "currentText": "Keep a safe distance from swinging bats; use protective screens for batting practice pitchers.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s1",
+      "section": "no source checked"
+    },
+    {
+      "currentText": "Children should play multiple positions and other sports. Pitch counts and rest days for young pitchers are essential — see Pitch Smart.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s3",
+      "section": "not opened"
+    }
+  ],
+  "gaps": [
+    {
+      "topic": "All rule verification",
+      "reason": "WebFetch could not resolve any official host (mlb.com, wbsc.org, ncbi/pmc, sagepub) from this sandbox; curl through the proxy returned 403. Every item rests on search snippets only and must be re-checked against the opened rulebook."
+    },
+    {
+      "topic": "WBSC vs MLB differences",
+      "reason": "WBSC 2025-2026 rulebook not opened; differences (innings, tie-break, DH, pitch clock) unconfirmed."
+    },
+    {
+      "topic": "Long-toss / return-to-throw programmes",
+      "reason": "No source found in searches."
+    },
+    {
+      "topic": "Concussion / head protection",
+      "reason": "Not researched; consensus statement not accessible."
+    }
+  ],
+  "notAccessed": [
+    {
+      "url": "https://www.mlb.com/glossary/rules",
+      "reason": "WebFetch failed (DNS: getaddrinfo ENOTFOUND) - host not reachable from this sandbox's network policy"
+    },
+    {
+      "url": "https://www.mlb.com/pitch-smart/pitching-guidelines/ages-9-12",
+      "reason": "WebFetch failed (DNS: getaddrinfo ENOTFOUND) - host not reachable from this sandbox's network policy"
+    },
+    {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8581780",
+      "reason": "WebFetch failed (DNS: getaddrinfo ENOTFOUND) - host not reachable from this sandbox's network policy"
+    },
+    {
+      "url": "https://journals.sagepub.com/doi/10.1177/2325967120S00234",
+      "reason": "WebFetch failed (DNS: getaddrinfo ENOTFOUND) - host not reachable from this sandbox's network policy"
+    },
+    {
+      "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8581780/",
+      "reason": "WebFetch failed (DNS: getaddrinfo ENOTFOUND) - host not reachable from this sandbox's network policy"
+    },
+    {
+      "url": "https://web.archive.org/",
+      "reason": "WebFetch refuses this domain"
+    }
+  ]
+}

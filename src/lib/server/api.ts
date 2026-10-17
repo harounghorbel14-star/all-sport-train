@@ -16,6 +16,17 @@ interface Options<B, Q> {
 const MUTATING = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 /**
+ * Areas a guest session may not use: anything social (visible to other people), private
+ * media/uploads, photo-based AI and administration. Checked centrally so new routes in
+ * these areas are covered automatically.
+ */
+export const GUEST_BLOCKED_PREFIXES = ["/api/community", "/api/challenges", "/api/media", "/api/form-check", "/api/progress/photos", "/api/admin"];
+
+export function guestBlocked(pathname: string) {
+  return GUEST_BLOCKED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
+/**
  * Reject cross-site mutations. Cookies are SameSite=Lax already; this adds a
  * same-origin check so a forged form post from another site cannot act.
  */
@@ -98,6 +109,7 @@ export function authedRoute<B = undefined, Q = undefined>(
       assertSameOrigin(req);
       const user = await getUserFromToken(readCookie(req.headers.get("cookie"), SESSION_COOKIE));
       if (!user) throw unauthorized();
+      if (user.isGuest && guestBlocked(new URL(req.url).pathname)) throw new AppError(403, "guest_restricted", "Create a free account to use this feature. Your guest progress will be kept.");
       if (opts.admin && user.role !== "admin") throw forbidden("Administrator access required");
       const params = (await route?.params) ?? {};
       const { body, query } = await parseInput(req, opts);

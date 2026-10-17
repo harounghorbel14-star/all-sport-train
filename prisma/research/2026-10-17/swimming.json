@@ -1,0 +1,497 @@
+{
+  "sport": "swimming",
+  "accessedDate": "2026-10-17",
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Swimming Reference Card (in force as from 13 March 2026)",
+      "publisher": "World Aquatics",
+      "url": "https://resources.fina.org/fina/document/2026/03/16/b5e32601-4fdf-4943-9879-947b42f79c56/Swimming-Reference-Card-13.03.2026.docx",
+      "edition": "13 March 2026",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "SW 5.3",
+        "SW 5.4",
+        "SW 7.1",
+        "SW 8.3",
+        "SW 9.1",
+        "SW 9.2",
+        "SW 10.4.4",
+        "SW 10.4.5"
+      ]
+    },
+    {
+      "id": "s2",
+      "title": "Swimming Reference Card 01032023",
+      "publisher": "World Aquatics",
+      "url": "https://resources.fina.org/fina/document/2023/03/01/ee885d0b-4baf-4192-b289-9b3a17eed476/Swimming-Reference-Card_01032023.pdf",
+      "edition": "1 March 2023",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "SW 4.4",
+        "SW 8.3"
+      ]
+    },
+    {
+      "id": "s3",
+      "title": "World Aquatics Competition Regulations, Part Two Swimming (federation-hosted copy)",
+      "publisher": "World Aquatics (hosted by Plavalna zveza Slovenije)",
+      "url": "https://www.plavalna-zveza.si/wp-content/uploads/2024/03/Swimming_January-2025_Clean_240125.pdf",
+      "edition": "in force from 1 January 2025",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s4",
+      "title": "World Aquatics Competition Regulations, swimming extract (5 July 2023, final revised)",
+      "publisher": "World Aquatics (hosted by Banbury ASC)",
+      "url": "https://uk.gomotionapp.com/banburyasc/UserFiles/File/Officials/world-aquatics-competition-regulations-5th-july-2023-final-revised-swimming-extract_000240.pdf",
+      "edition": "5 July 2023",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "SW 5.1",
+        "SW 5.2"
+      ]
+    },
+    {
+      "id": "s5",
+      "title": "FINA Swimming Rules interpretations (17 March 2021)",
+      "publisher": "FINA (now World Aquatics), hosted by Liga de Natacion de Bogota",
+      "url": "https://liganatacionbogota.com/interpretation_swimmingrules_17032021-carreras",
+      "edition": "2021",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "SW 4.4",
+        "SW 6.1",
+        "SW 2.1.6"
+      ]
+    },
+    {
+      "id": "s6",
+      "title": "FINA Medley interpretation (2015)",
+      "publisher": "FINA, hosted by USA Swimming",
+      "url": "https://www.usaswimming.org/docs/default-source/officialsdocuments/officials-training-resources/interpretations-and-recommendations/fina-medley-interpretation-9-08-15.pdf",
+      "edition": "2015",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "SW 9.1"
+      ]
+    },
+    {
+      "id": "s7",
+      "title": "World Aquatics 2023-2025 infraction codes (March 2023)",
+      "publisher": "World Aquatics (club-hosted copy)",
+      "url": "https://uk.gomotionapp.com/reczznsc/UserFiles/File/Documents/world-aquatics-2023-2025-infraction-codes-march-2023_079813.pdf",
+      "edition": "March 2023",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": [
+        "SW 7.4",
+        "SW 7.6"
+      ]
+    },
+    {
+      "id": "s8",
+      "title": "Science supports safety: new research reinforces 16C World Aquatics threshold for open water swimming",
+      "publisher": "World Aquatics",
+      "url": "https://www.worldaquatics.com/news/4479872/science-supports-safety-new-research-reinforces-16c-world-aquatics-threshold-open-water-swimming",
+      "edition": null,
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s9",
+      "title": "Drowning (fact sheet)",
+      "publisher": "World Health Organization",
+      "url": "https://www.who.int/news-room/fact-sheets/detail/drowning",
+      "edition": "updated 2026 (per search result; not verified)",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s10",
+      "title": "AAP updates recommendations on drowning prevention (news release)",
+      "publisher": "American Academy of Pediatrics",
+      "url": "https://www.aap.org/en/news-room/news-releases/aap/2026/american-academy-of-pediatrics-updates-recommendations-on-drowning-prevention/",
+      "edition": "2026",
+      "kind": "education",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s11",
+      "title": "Joint Statement on Hypoxic Blackout (2022)",
+      "publisher": "American Red Cross, YMCA of the USA, USA Swimming",
+      "url": "https://www.redcross.org/content/dam/redcross/training-services/scientific-advisory-council/2022 Hypoxic Blackout - Joint Statement - Red Cross Y USA Swimming 10-31-2022.pdf",
+      "edition": "31 October 2022",
+      "kind": "education",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s12",
+      "title": "Swim-Training Volume and Shoulder Pain Across the Life Span of the Competitive Swimmer: A Systematic Review (Feijen et al., J Athl Train 55(1):32)",
+      "publisher": "Journal of Athletic Training (NATA)",
+      "url": "https://nata.kglmeridian.com/view/journals/attr/55/1/article-p32.xml",
+      "edition": "2020",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": [
+        "Abstract"
+      ]
+    },
+    {
+      "id": "s13",
+      "title": "Breaststroker's knee: epidemiology summary (PMC review article)",
+      "publisher": "PubMed Central",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3435931",
+      "edition": null,
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s14",
+      "title": "Survival and rescue: water safety (float to live / cold water shock)",
+      "publisher": "London Fire Brigade",
+      "url": "https://www.london-fire.gov.uk/safety/water-safety/survival-and-rescue",
+      "edition": null,
+      "kind": "education",
+      "accessed": false,
+      "sectionsUsed": []
+    }
+  ],
+  "rulesetReview": [
+    {
+      "rulesetSlug": "world-aquatics-strokes",
+      "topic": "Starts",
+      "currentText": "Freestyle, breaststroke and butterfly races start with a dive from the blocks; backstroke starts in the water facing the wall. A swimmer who starts before the signal is disqualified.",
+      "verdict": "unverifiable",
+      "sourceId": "s5",
+      "section": "SW 4.4, SW 6.1",
+      "note": "Source not opened (network policy blocked all rulebook hosts). Search excerpts of the 2021 interpretation and 2023 card are consistent: starting before the signal = DQ under SW 4.4; if declared before the signal the field is recalled, otherwise the race continues and the swimmer is DQ'd at the finish. Also applies to IM and medley-relay legs. Backstroke start: hands on grips, standing in/on gutter or curling toes over the lip prohibited. Likely accurate."
+    },
+    {
+      "rulesetSlug": "world-aquatics-strokes",
+      "topic": "Freestyle",
+      "currentText": "Any stroke may be swum (in medley events 'freestyle' means any stroke other than backstroke, breaststroke or butterfly). Some part of the body must touch the wall at each turn and at the finish.",
+      "verdict": "unverifiable",
+      "sourceId": "s4",
+      "section": "SW 5.1, SW 5.2",
+      "note": "Search excerpt of the 2023 extract matches SW 5.1 (any style; in medley not back/breast/fly) and SW 5.2 (touch wall each length and finish). Not opened; likely accurate."
+    },
+    {
+      "rulesetSlug": "world-aquatics-strokes",
+      "topic": "Backstroke",
+      "currentText": "Swimmers stay on their back throughout, except during the turn. They must finish on their back.",
+      "verdict": "unverifiable",
+      "sourceId": "s1",
+      "section": "SW 6",
+      "note": "Consistent with excerpts: shoulders may pass vertical toward the breast for a turn with an immediate continuous single or double arm pull, and swimmer must be back on the back on leaving the wall; finish touch on the back. Rule sub-numbering differs between editions (6.2-6.5). Not opened."
+    },
+    {
+      "rulesetSlug": "world-aquatics-strokes",
+      "topic": "Breaststroke",
+      "currentText": "Arm movements are simultaneous and in the same horizontal plane, and leg movements are simultaneous. Swimmers touch the wall with both hands at the same time at each turn and at the finish. The head must break the surface during each stroke cycle, apart from the first cycle after the start and each turn.",
+      "verdict": "corrected",
+      "correctedText": "Arms move simultaneously in the same horizontal plane with no alternating movement; legs kick simultaneously (no alternating or downward butterfly kick except as allowed after start/turns). Two separated hands touch together at each turn and the finish. After the start and each turn, one arm stroke back to the legs and a single downward butterfly kick (before the first breaststroke kick) are allowed underwater; the head must break the surface before the hands turn inward at the widest part of the second stroke, and during every cycle thereafter.",
+      "sourceId": "s1",
+      "section": "SW 7.1, SW 7.4, SW 7.6",
+      "note": "PROVISIONAL (source not opened; based on search excerpts of the March 2026 reference card and 2023 infraction codes). Current text omits the single butterfly kick and states the surfacing exception imprecisely. 'Separated' hands means not stacked; visible gap not required (interpretation excerpt)."
+    },
+    {
+      "rulesetSlug": "world-aquatics-strokes",
+      "topic": "Butterfly",
+      "currentText": "Both arms are brought forward together over the water and pulled back together. The legs move up and down together; a breaststroke kick is not allowed. Two-hand simultaneous touch at turns and finish.",
+      "verdict": "unverifiable",
+      "sourceId": "s1",
+      "section": "SW 8.3",
+      "note": "Reference cards (2023, 2026) list 'breaststroke kicking movement' as an SW 8.3 infraction. Note: legs need not be at the same level but may not alternate. US Masters Swimming allows a breaststroke kick in butterfly for masters, unlike World Aquatics rules (per open-water news excerpts, not opened). Not opened."
+    },
+    {
+      "rulesetSlug": "world-aquatics-strokes",
+      "topic": "Underwater limit",
+      "currentText": "In freestyle, backstroke and butterfly, swimmers may be fully submerged for no more than 15 m after the start and each turn.",
+      "verdict": "unverifiable",
+      "sourceId": "s1",
+      "section": "SW 5.3/5.4, SW 6, SW 8",
+      "note": "Consistent with excerpts: head must break the surface by the 15 m mark. Search summary of the March 2026 card suggests freestyle submersion is now under SW 5.4 with an exception in the final 5 m approaching the finish; this could not be confirmed and needs checking against the card itself."
+    },
+    {
+      "rulesetSlug": "world-aquatics-strokes",
+      "topic": "Medley order",
+      "currentText": "Individual medley: butterfly, backstroke, breaststroke, freestyle. Medley relay: backstroke, breaststroke, butterfly, freestyle.",
+      "verdict": "unverifiable",
+      "sourceId": "s6",
+      "section": "SW 9.1, SW 9.2",
+      "note": "IM order confirmed in excerpt of the 2015 FINA interpretation (each stroke one quarter of distance). Medley relay order matches long-standing rule; snippet did not quote SW 9.2 text. Not opened; very likely accurate."
+    }
+  ],
+  "newRulePoints": [
+    {
+      "rulesetSlug": "world-aquatics-strokes",
+      "topic": "Breaststroke start/turn underwater pull",
+      "text": "After the start and each turn a breaststroker may take one arm stroke all the way back to the legs while submerged, plus one downward butterfly kick before the first breaststroke kick. More than one butterfly kick is a disqualification. (Provisional - from reference-card excerpt.)",
+      "sourceId": "s1",
+      "section": "SW 7.1"
+    },
+    {
+      "rulesetSlug": "world-aquatics-strokes",
+      "topic": "False start procedure",
+      "text": "If a false start is called before the signal, the signal is not given and the rest are recalled. If the signal has already gone, the race continues and the offender is disqualified afterwards. Both starter and referee must observe and confirm movement for a DQ. (Provisional.)",
+      "sourceId": "s5",
+      "section": "SW 4.4, SW 2.1.6"
+    },
+    {
+      "rulesetSlug": "world-aquatics-strokes",
+      "topic": "Backstroke start position",
+      "text": "Backstrokers start in the water holding the grips; standing in or on the gutter or curling toes over its lip is not allowed. When a backstroke ledge is used, toes of both feet must touch the wall or touchpad. (Provisional.)",
+      "sourceId": "s5",
+      "section": "SW 6.1 (numbering may differ in current edition)"
+    },
+    {
+      "rulesetSlug": "world-aquatics-strokes",
+      "topic": "Relay takeovers",
+      "text": "In relays the outgoing swimmer's feet must still be in contact with the starting platform when the incoming team-mate touches the wall; leaving early is a team disqualification. Exchanges must start from the platform. (Provisional; no timing tolerance figure found.)",
+      "sourceId": "s1",
+      "section": "SW 10.4.4, SW 10.4.5"
+    },
+    {
+      "rulesetSlug": "world-aquatics-strokes",
+      "topic": "Open water wetsuits and temperature",
+      "text": "In World Aquatics open water races wetsuits are compulsory below 18 C and the minimum water temperature is 16 C, measured two hours before the race at set points 40 cm deep. Masters open water rules set 18-31 C. (Provisional - from a World Aquatics news article excerpt.)",
+      "sourceId": "s8",
+      "section": "Open Water Swimming rules (OWS)"
+    }
+  ],
+  "claims": [
+    {
+      "topic": "Drowning burden",
+      "category": "safety",
+      "level": "all",
+      "statement": "WHO estimates roughly 300,000 drowning deaths a year worldwide; drowning is among the leading causes of death for children aged 1-4 and 5-14.",
+      "sourceIds": [
+        "s9"
+      ],
+      "section": "Key facts",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Layered drowning prevention",
+      "category": "safety",
+      "level": "all",
+      "statement": "Swim lessons are one layer only: paediatric guidance pairs them with constant capable adult supervision, four-sided pool fencing, life jackets and CPR training. The AAP's 2026 update says lessons can start after age 1.",
+      "sourceIds": [
+        "s10"
+      ],
+      "section": "News release",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Hypoxic blackout",
+      "category": "safety",
+      "level": "all",
+      "statement": "Never hyperventilate before underwater swimming or do prolonged breath-hold games: it can cause sudden unconsciousness without warning, in water of any depth. Red Cross/YMCA/USA Swimming call it 'hypoxic blackout', not 'shallow water blackout'.",
+      "sourceIds": [
+        "s11"
+      ],
+      "section": "Joint statement",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Cold water shock",
+      "category": "safety",
+      "level": "all",
+      "statement": "On sudden immersion in cold water, fight the urge to thrash or swim hard: float on your back, ears in, sculling gently, for about 60-90 s until the gasp reflex and breathing settle, then call for help or swim to safety.",
+      "sourceIds": [
+        "s14"
+      ],
+      "section": "Survival and rescue",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Training volume and shoulder pain",
+      "category": "science",
+      "level": "intermediate",
+      "statement": "A systematic review (12 studies, 1,460 swimmers) linked swim volume to shoulder pain, especially in adolescents, but found no safe volume cut-off. Avoid sudden large jumps in weekly distance.",
+      "sourceIds": [
+        "s12"
+      ],
+      "section": "Abstract / conclusions",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Breaststroker's knee",
+      "category": "science",
+      "level": "intermediate",
+      "statement": "Medial knee pain is common in breaststroke specialists (survey data around 73% vs 48% in other swimmers); risk rises with breaststroke distance and years swimming, and is inversely linked to warm-up distance.",
+      "sourceIds": [
+        "s13"
+      ],
+      "section": "Epidemiology",
+      "confidence": "low"
+    },
+    {
+      "topic": "Breaststroke pull-out DQ trap",
+      "category": "rules",
+      "level": "intermediate",
+      "statement": "Coach a single downward dolphin kick during the pull-out, before the first breaststroke kick. A second dolphin kick, or not surfacing the head before the hands turn in on the second stroke, is a common DQ.",
+      "sourceIds": [
+        "s1"
+      ],
+      "section": "SW 7.1",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Two-hand touch",
+      "category": "rules",
+      "level": "beginner",
+      "statement": "In breaststroke and butterfly the hands must touch separated (not stacked) and at the same time; a visible gap between the hands is not required.",
+      "sourceIds": [
+        "s7"
+      ],
+      "section": "SW 7.6 / SW 8 interpretation",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Backstroke flip turn",
+      "category": "technique",
+      "level": "intermediate",
+      "statement": "In a backstroke flip turn the swimmer may roll to the breast, but must go straight into one continuous arm pull (or simultaneous double pull) into the turn and be back on the back when the feet leave the wall. Gliding or kicking on the front before the flip is a DQ.",
+      "sourceIds": [
+        "s1"
+      ],
+      "section": "SW 6",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Masters rule differences",
+      "category": "rules",
+      "level": "advanced",
+      "statement": "Masters bodies can differ from World Aquatics: e.g. US Masters Swimming permits a breaststroke kick in butterfly events, which World Aquatics SW 8.3 prohibits. Check the governing rules of each meet.",
+      "sourceIds": [
+        "s2"
+      ],
+      "section": "SW 8.3",
+      "confidence": "low"
+    }
+  ],
+  "safetyReview": [
+    {
+      "currentText": "Never swim alone; swim where a lifeguard is on duty.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s9",
+      "section": "Prevention"
+    },
+    {
+      "currentText": "Only dive into water you know is deep enough — never into shallow water.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s9",
+      "section": ""
+    },
+    {
+      "currentText": "Open water: swim with a group or supervised event, wear a bright cap, use a tow float, and check water temperature, currents and conditions.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s14",
+      "section": ""
+    },
+    {
+      "currentText": "Weak or non-swimmers should learn in supervised lessons in shallow water.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s10",
+      "section": ""
+    },
+    {
+      "currentText": "Children should learn through accredited learn-to-swim programmes; constant adult supervision is essential.",
+      "verdict": "corrected",
+      "correctedText": "Children can start learn-to-swim lessons after age 1 (AAP 2026). Lessons do not make a child drown-proof: keep constant, within-reach adult supervision, fence home pools on all four sides, use life jackets in open water, and learn CPR.",
+      "sourceId": "s10",
+      "section": "News release"
+    },
+    {
+      "currentText": "Swimmer's shoulder is common: vary strokes, build volume gradually, and strengthen the upper back and rotator cuff.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s12",
+      "section": "Abstract"
+    },
+    {
+      "currentText": "Breaststroke kick can stress the knees — warm up well and don't overdo kick sets.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s13",
+      "section": ""
+    },
+    {
+      "currentText": "(missing) Breath-holding / hyperventilation warning",
+      "verdict": "corrected",
+      "correctedText": "Never hyperventilate before swimming underwater and avoid breath-holding contests or long hypoxic sets: hypoxic blackout can occur suddenly and without warning in water of any depth.",
+      "sourceId": "s11",
+      "section": "Joint statement"
+    }
+  ],
+  "gaps": [
+    {
+      "topic": "All World Aquatics SW rule wording",
+      "reason": "worldaquatics.com, resources.fina.org and every federation mirror were blocked by this session's network policy (proxy 403 / WebFetch DNS failure). All rule verdicts are based on search-result excerpts only and must be checked against the current Competition Regulations Part Two."
+    },
+    {
+      "topic": "SW 5.4 finish-approach exception",
+      "reason": "A search summary of the March 2026 reference card mentions a new submersion exception in the last 5 m before the finish; wording could not be checked."
+    },
+    {
+      "topic": "Relay takeover tolerance (e.g. -0.03 s)",
+      "reason": "No source found for any timing tolerance; omitted."
+    },
+    {
+      "topic": "Dryland strength training and performance",
+      "reason": "Search returned no usable systematic review."
+    },
+    {
+      "topic": "Technique biomechanics (catch, kick, breathing)",
+      "reason": "No peer-reviewed or federation coaching sources could be opened to verify lesson key points."
+    }
+  ],
+  "notAccessed": [
+    {
+      "url": "https://www.worldaquatics.com/rules/competition-regulations",
+      "reason": "Blocked by session network policy (proxy 403 / DNS failure in WebFetch)."
+    },
+    {
+      "url": "https://resources.fina.org/fina/document/2026/03/16/b5e32601-4fdf-4943-9879-947b42f79c56/Swimming-Reference-Card-13.03.2026.docx",
+      "reason": "Blocked by session network policy (proxy 403)."
+    },
+    {
+      "url": "https://www.plavalna-zveza.si/wp-content/uploads/2024/03/Swimming_January-2025_Clean_240125.pdf",
+      "reason": "Blocked by session network policy (WebFetch DNS failure)."
+    },
+    {
+      "url": "https://media.specialolympics.org/resources/sports-essentials/swimming/m-e-r-c/World-Aquatics-Swimming-Rules-EN.pdf",
+      "reason": "Blocked by session network policy (WebFetch DNS failure)."
+    },
+    {
+      "url": "https://www.who.int/news-room/fact-sheets/detail/drowning",
+      "reason": "Blocked by session network policy (WebFetch DNS failure)."
+    },
+    {
+      "url": "https://www.usaswimming.org/",
+      "reason": "Blocked by session network policy (proxy 403)."
+    },
+    {
+      "url": "https://pubmed.ncbi.nlm.nih.gov/",
+      "reason": "Blocked by session network policy (proxy 403)."
+    }
+  ]
+}

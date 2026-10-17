@@ -1,0 +1,407 @@
+{
+  "sport": "boxing",
+  "accessedDate": "2026-10-17",
+  "sources": [
+    {
+      "id": "s1",
+      "title": "World Boxing responds to the decision by the Executive Board of the IOC to grant provisional Olympic recognition",
+      "publisher": "World Boxing",
+      "url": "https://worldboxing.org/world-boxing-responds-to-the-decision-by-the-executive-board-of-the-ioc-to-grant-provisional-olympic-recognition/",
+      "edition": "2025",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s2",
+      "title": "World Boxing Competition Rules (Feb 2024, v3.9) — copy hosted by Norwegian Boxing Federation",
+      "publisher": "World Boxing / Norges Bokseforbund",
+      "url": "https://boksing.no/media/vzifckvx/world-boxing-competition-rules-feb-2024-v3-9-clean.pdf",
+      "edition": "Feb 2024 v3.9",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s3",
+      "title": "Proposal for Rulebook amendments bundle (Congress document 10)",
+      "publisher": "World Boxing",
+      "url": "https://worldboxing.org/wp-content/uploads/2025/11/10.-Proposal-for-Rulebook-amendments-bundle.pdf",
+      "edition": "Nov 2025 (proposal)",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s4",
+      "title": "Amateur combative sport rules: Boxing — Part IV Competition requirements",
+      "publisher": "Government of Ontario",
+      "url": "https://www.ontario.ca/document/amateur-combative-sport-rules-boxing/part-iv-competition-requirements",
+      "edition": "effective 1 Jan 2025 (per snippet)",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s5",
+      "title": "Unified Rules of Boxing",
+      "publisher": "Association of Boxing Commissions (ABC)",
+      "url": "https://www.abcboxing.com/unified-rules-boxing",
+      "edition": null,
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s6",
+      "title": "Consensus statement on concussion in sport: the 6th International Conference on Concussion in Sport–Amsterdam, October 2022 (Patricios et al., BJSM 2023;57:695–711)",
+      "publisher": "BMJ / Concussion in Sport Group",
+      "url": "https://bjsm.bmj.com/content/57/11/695",
+      "edition": "2023",
+      "kind": "research",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s7",
+      "title": "Boxing not for children and teens (CPS/AAP joint statement 'Boxing participation by children and adolescents', Pediatrics 2011)",
+      "publisher": "Canadian Paediatric Society",
+      "url": "https://cps.ca/en/media/Boxing-not-for-children-and-teens",
+      "edition": "2011",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s8",
+      "title": "World Boxing mandates sex testing for boxers in its competitions",
+      "publisher": "ESPN",
+      "url": "https://africa.espn.com/olympics/story/_/id/45393101/world-boxing-mandates-sex-testing-boxers-competitions",
+      "edition": "2025",
+      "kind": "other",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s9",
+      "title": "Concussion guideline review (summary of Amsterdam 2022 consensus)",
+      "publisher": "EMRA (Emergency Medicine Residents' Association)",
+      "url": "https://www.emra.org/emresident/article/concussion-guideline-review",
+      "edition": null,
+      "kind": "education",
+      "accessed": false,
+      "sectionsUsed": []
+    },
+    {
+      "id": "s10",
+      "title": "Match Guidelines Club Events 2025",
+      "publisher": "Boxing Ontario",
+      "url": "https://boxingontario.com/wp-content/uploads/2025/07/Match-Guidelines-Club-Events-2025.pdf",
+      "edition": "2025",
+      "kind": "governing_body",
+      "accessed": false,
+      "sectionsUsed": []
+    }
+  ],
+  "rulesetReview": [
+    {
+      "rulesetSlug": "olympic-style",
+      "topic": "Governing body (ruleset header)",
+      "currentText": "International and national boxing federations",
+      "verdict": "corrected",
+      "sourceId": "s1",
+      "section": "",
+      "note": "Search results (World Boxing release, multiple news reports) indicate the IOC Executive Board granted World Boxing PROVISIONAL recognition in Feb 2025 and the IOC Session added boxing to LA28 in Mar 2025; IBA's recognition was withdrawn in 2023. Could not confirm whether recognition became full by Oct 2026. Evidence from web-search snippet only; source page could not be opened (egress proxy blocked host). Re-verify against the opened document.",
+      "correctedText": "World Boxing (founded 2023) is the international federation recognised (provisionally, from Feb 2025) by the IOC and will run Olympic boxing at LA 2028; it replaced the IBA, which lost IOC recognition. National federations affiliated to World Boxing apply its rules."
+    },
+    {
+      "rulesetSlug": "olympic-style",
+      "topic": "Bouts",
+      "currentText": "Elite bouts are commonly three rounds of three minutes with one minute of rest; youth and junior bouts are shorter. Check your federation for your category.",
+      "verdict": "unverifiable",
+      "sourceId": "s4",
+      "section": "",
+      "note": "3x3 min with 1 min rest for elite is consistent across snippets (Olympic guide, Ontario rules). Ontario's World Boxing-based rules (snippet) also give 3x3 min for Youth open class, so 'youth bouts are shorter' may be wrong for 17–18-year-old Youth open bouts; Junior classes are shorter (3x2, 3x1.5, 3x1 min) and novices shorter. World Boxing rulebook not opened. Suggested wording: 'Elite and youth (open class) bouts: 3x3 min, 1 min rest; junior and novice bouts are shorter.' Evidence from web-search snippet only; source page could not be opened (egress proxy blocked host). Re-verify against the opened document."
+    },
+    {
+      "rulesetSlug": "olympic-style",
+      "topic": "Scoring",
+      "currentText": "Judges typically use a 10-point must system, rewarding clean, scoring punches, competitiveness and technical and tactical superiority.",
+      "verdict": "unverifiable",
+      "sourceId": "s2",
+      "section": "",
+      "note": "Snippets of World Boxing-derived rules state the approved scoring system is based on the 'Ten Point Must' system, five judges, quantity/quality of clean blows as the main criterion, every round must have a winner (10-9, 10-8, 10-7). Not confirmed from the opened rulebook. Evidence from web-search snippet only; source page could not be opened (egress proxy blocked host). Re-verify against the opened document."
+    },
+    {
+      "rulesetSlug": "olympic-style",
+      "topic": "Legal target",
+      "currentText": "Punches must land with the knuckle part of the closed glove on the front or sides of the head and the front or sides of the body above the belt.",
+      "verdict": "unverifiable",
+      "sourceId": "s2",
+      "section": "",
+      "note": "Standard wording in amateur rulebooks, but World Boxing text not opened. Evidence from web-search snippet only; source page could not be opened (egress proxy blocked host). Re-verify against the opened document."
+    },
+    {
+      "rulesetSlug": "olympic-style",
+      "topic": "Fouls",
+      "currentText": "Not allowed: hitting below the belt, hitting the back of the head or neck, the kidneys or the back, holding and hitting, headbutting, using the elbow or forearm, hitting with an open glove, pushing, and hitting after the referee says 'Stop' or 'Break'.",
+      "verdict": "unverifiable",
+      "sourceId": "s2",
+      "section": "",
+      "note": "Consistent with long-standing AIBA/World Boxing foul lists, not verified in an opened document. Evidence from web-search snippet only; source page could not be opened (egress proxy blocked host). Re-verify against the opened document."
+    },
+    {
+      "rulesetSlug": "olympic-style",
+      "topic": "Referee",
+      "currentText": "The referee can give warnings, deduct points, give a standing count, or stop the contest to protect a boxer.",
+      "verdict": "unverifiable",
+      "sourceId": "s2",
+      "section": "",
+      "note": "Standing (8) counts exist in amateur rules but are prohibited in ABC professional rules (s5 snippet) — worth stating the contrast. World Boxing text not opened."
+    },
+    {
+      "rulesetSlug": "olympic-style",
+      "topic": "Equipment",
+      "currentText": "Approved gloves, mouthguard and groin protection are compulsory; headguards are required in many age categories and competitions.",
+      "verdict": "unverifiable",
+      "sourceId": "s3",
+      "section": "",
+      "note": "Historically elite men box without headguards (AIBA 2013) and elite women also without (from 2018 under AIBA/IBA). A Nov 2025 World Boxing amendment proposal (s3, snippet) sought to make headgear mandatory for all including elite men, with fallback 'optional for elite men'; adoption status unknown as of this review. Youth/junior: headguard mandatory in national rules seen (Boxing Ontario club guideline s10). Glove weight 10 oz up to ~64 kg and 12 oz above is reported for other amateur codes (WBC amateur) but not verified for World Boxing. Evidence from web-search snippet only; source page could not be opened (egress proxy blocked host). Re-verify against the opened document."
+    },
+    {
+      "rulesetSlug": "olympic-style",
+      "topic": "Medical",
+      "currentText": "Competitors need medical examinations; mandatory rest periods apply after a stoppage due to head blows.",
+      "verdict": "unverifiable",
+      "sourceId": "s2",
+      "section": "",
+      "note": "Principle correct for amateur codes, but World Boxing suspension periods not verified. Note also: since 20 Aug 2025 World Boxing requires a one-time PCR sex-screening test for athletes over 18 (s8, news snippet)."
+    },
+    {
+      "rulesetSlug": "professional",
+      "topic": "Rounds",
+      "currentText": "Bouts are scheduled from 4 up to 12 rounds, typically of three minutes.",
+      "verdict": "unverifiable",
+      "sourceId": "s5",
+      "section": "",
+      "note": "ABC Unified Rules (snippet) confirm 3-minute rounds with 1-minute rest. Minimum scheduled rounds vary by commission (some allow 4-round, others 4–6 minimum; women's title bouts are often 2-minute rounds under some sanctioning bodies) — not verified. Evidence from web-search snippet only; source page could not be opened (egress proxy blocked host). Re-verify against the opened document."
+    },
+    {
+      "rulesetSlug": "professional",
+      "topic": "Equipment",
+      "currentText": "No headguards; smaller gloves than in most amateur competition.",
+      "verdict": "unverifiable",
+      "sourceId": "s5",
+      "section": "",
+      "note": "Generally true but glove weights are set by each commission/weight class; not verified in opened source."
+    },
+    {
+      "rulesetSlug": "professional",
+      "topic": "Licensing",
+      "currentText": "Boxers, coaches and officials must be licensed by the relevant commission, with medical requirements.",
+      "verdict": "unverifiable",
+      "sourceId": "s5",
+      "section": "",
+      "note": "Principle correct for US state commissions/Ontario but not verified in an opened document."
+    }
+  ],
+  "newRulePoints": [
+    {
+      "rulesetSlug": "professional",
+      "topic": "Counts (ABC Unified Rules)",
+      "text": "Under the ABC Unified Rules of Boxing (US commissions) there is no standing eight count and no three-knockdown rule; a mandatory eight count follows every knockdown. Amateur rules differ (standing counts allowed). [Snippet-level; rule page not opened]",
+      "sourceId": "s5",
+      "section": "Unified Rules of Boxing (section not identified)"
+    },
+    {
+      "rulesetSlug": "olympic-style",
+      "topic": "Governance (recent change)",
+      "text": "IBA lost IOC recognition in 2023; World Boxing (formed 2023) received IOC provisional recognition in Feb 2025 and boxing was confirmed on the LA 2028 programme in Mar 2025. [Snippet-level]",
+      "sourceId": "s1",
+      "section": ""
+    },
+    {
+      "rulesetSlug": "olympic-style",
+      "topic": "Eligibility – sex screening",
+      "text": "From 20 Aug 2025 World Boxing requires a one-time PCR-based genetic sex-screening test for athletes over 18 entering its competitions (adopted by the Executive Board). [News snippet; not verified in World Boxing policy text]",
+      "sourceId": "s8",
+      "section": ""
+    },
+    {
+      "rulesetSlug": "olympic-style",
+      "topic": "Bout length by class (national example)",
+      "text": "Example of a World Boxing-based national code (Ontario, eff. 2025): open Elite and Youth 3x3 min; Junior C 3x2 min; Junior B 3x1.5 min; Junior A 3x1 min; novices shorter; 1-min rests. Use your own federation's table. [Snippet-level]",
+      "sourceId": "s4",
+      "section": "Part IV, 1. Bout/match duration"
+    }
+  ],
+  "claims": [
+    {
+      "topic": "Concussion: early activity",
+      "category": "safety",
+      "level": "all",
+      "statement": "Amsterdam 2022 consensus (CISG) discourages strict rest; symptom-limited daily activity and light walking can start in the first 24–48 h, with only mild, brief symptom increases allowed (about ≤2/10). [Snippet of summary; primary not opened]",
+      "sourceIds": [
+        "s6",
+        "s9"
+      ],
+      "section": "Return-to-sport strategy",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Concussion: graded return",
+      "category": "safety",
+      "level": "all",
+      "statement": "Return to sport is stepwise, each step generally at least 24 h, and contact activity needs medical clearance first. [Snippet of summary]",
+      "sourceIds": [
+        "s9",
+        "s6"
+      ],
+      "section": "Return-to-sport strategy",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Concussion tools",
+      "category": "safety",
+      "level": "all",
+      "statement": "The 2022 Amsterdam conference released SCAT6, Child SCAT6, SCOAT6 and CRT6 (Concussion Recognition Tool) — CRT6 is meant for non-medical people such as coaches. [Snippet]",
+      "sourceIds": [
+        "s6"
+      ],
+      "section": "",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Youth boxing – paediatric position",
+      "category": "safety",
+      "level": "all",
+      "statement": "The CPS and AAP (joint statement, 2011) advise paediatricians to strongly discourage boxing for children and adolescents because of head and facial injury risk, and note no evidence that headguards reduce concussion incidence. Not known to be updated since. [Snippet]",
+      "sourceIds": [
+        "s7"
+      ],
+      "section": "",
+      "confidence": "medium"
+    },
+    {
+      "topic": "Headguard policy debate",
+      "category": "equipment",
+      "level": "all",
+      "statement": "Elite headguard removal (men 2013, women 2018 under AIBA) was justified by claims of fewer stoppages/concussions; a Nov 2025 World Boxing proposal argued for reinstating headgear for cuts/superficial-injury protection. Check current World Boxing rules for whether it passed. [Snippet]",
+      "sourceIds": [
+        "s3"
+      ],
+      "section": "",
+      "confidence": "low"
+    },
+    {
+      "topic": "Pro vs amateur scoring",
+      "category": "rules",
+      "level": "intermediate",
+      "statement": "Both amateur (World Boxing) and US professional bouts use 10-point-must scoring, but amateur rules require a round winner from each judge and emphasise clean blows; pro rules give a mandatory 8 count after knockdowns with no standing count. [Snippet]",
+      "sourceIds": [
+        "s2",
+        "s5"
+      ],
+      "section": "",
+      "confidence": "low"
+    }
+  ],
+  "safetyReview": [
+    {
+      "currentText": "Any blow to the head with symptoms (headache, dizziness, confusion) means stop immediately and get medically assessed — no return the same day.",
+      "verdict": "confirmed",
+      "correctedText": "",
+      "sourceId": "s6",
+      "section": "Remove from play / no same-day return"
+    },
+    {
+      "currentText": "Children and teenagers should only do partner contact in registered clubs following their federation's age-specific rules on protective equipment, glove weight and bout length. In this app, under-18s are only offered no-contact and equipment-contact training.",
+      "verdict": "confirmed",
+      "correctedText": "Consider adding: Canadian and US paediatric societies (CPS/AAP, 2011) recommend against boxing for children and teens because of head-injury risk; headguards have not been shown to prevent concussion.",
+      "sourceId": "s7",
+      "section": ""
+    },
+    {
+      "currentText": "Mouthguard for any partner drill, without exception.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s5",
+      "section": ""
+    },
+    {
+      "currentText": "Never spar without a qualified coach, matched partner and correct protective equipment.",
+      "verdict": "unverifiable",
+      "correctedText": "",
+      "sourceId": "s7",
+      "section": ""
+    }
+  ],
+  "gaps": [
+    {
+      "topic": "Network access",
+      "reason": "All WebFetch/curl requests were blocked by the session's egress proxy (connect_rejected / DNS failure) for every source host tried (worldboxing.org, olympics.com, abcboxing.com, bjsm.bmj.com, pubmed, wikipedia, boksing.no). No source could be opened, so nothing is marked accessed:true and no rule numbers are cited."
+    },
+    {
+      "topic": "Current World Boxing rulebook edition",
+      "reason": "Could not confirm the edition in force on 2026-10-17 nor whether the Nov 2025 headgear amendment was adopted."
+    },
+    {
+      "topic": "Full vs provisional IOC recognition",
+      "reason": "Only 2025 provisional-recognition reports found; no 2026 IOC decision located."
+    },
+    {
+      "topic": "Youth glove weights, junior headguard rules, medical suspension periods",
+      "reason": "Not found in snippets for World Boxing."
+    },
+    {
+      "topic": "Technique lessons (stance, punches, defence)",
+      "reason": "No reputable coaching-education source could be opened to verify lesson key points."
+    }
+  ],
+  "notAccessed": [
+    {
+      "url": "https://worldboxing.org/world-boxing-responds-to-the-decision-by-the-executive-board-of-the-ioc-to-grant-provisional-olympic-recognition/",
+      "reason": "Egress proxy blocked the host (connect_rejected / ENOTFOUND); only search snippets seen."
+    },
+    {
+      "url": "https://boksing.no/media/vzifckvx/world-boxing-competition-rules-feb-2024-v3-9-clean.pdf",
+      "reason": "Egress proxy blocked the host (connect_rejected / ENOTFOUND); only search snippets seen."
+    },
+    {
+      "url": "https://worldboxing.org/wp-content/uploads/2025/11/10.-Proposal-for-Rulebook-amendments-bundle.pdf",
+      "reason": "Egress proxy blocked the host (connect_rejected / ENOTFOUND); only search snippets seen."
+    },
+    {
+      "url": "https://www.ontario.ca/document/amateur-combative-sport-rules-boxing/part-iv-competition-requirements",
+      "reason": "Egress proxy blocked the host (connect_rejected / ENOTFOUND); only search snippets seen."
+    },
+    {
+      "url": "https://www.abcboxing.com/unified-rules-boxing",
+      "reason": "Egress proxy blocked the host (connect_rejected / ENOTFOUND); only search snippets seen."
+    },
+    {
+      "url": "https://bjsm.bmj.com/content/57/11/695",
+      "reason": "Egress proxy blocked the host (connect_rejected / ENOTFOUND); only search snippets seen."
+    },
+    {
+      "url": "https://cps.ca/en/media/Boxing-not-for-children-and-teens",
+      "reason": "Egress proxy blocked the host (connect_rejected / ENOTFOUND); only search snippets seen."
+    },
+    {
+      "url": "https://africa.espn.com/olympics/story/_/id/45393101/world-boxing-mandates-sex-testing-boxers-competitions",
+      "reason": "Egress proxy blocked the host (connect_rejected / ENOTFOUND); only search snippets seen."
+    },
+    {
+      "url": "https://www.emra.org/emresident/article/concussion-guideline-review",
+      "reason": "Egress proxy blocked the host (connect_rejected / ENOTFOUND); only search snippets seen."
+    },
+    {
+      "url": "https://boxingontario.com/wp-content/uploads/2025/07/Match-Guidelines-Club-Events-2025.pdf",
+      "reason": "Egress proxy blocked the host (connect_rejected / ENOTFOUND); only search snippets seen."
+    },
+    {
+      "url": "https://www.olympics.com/",
+      "reason": "Egress proxy blocked host"
+    }
+  ]
+}
