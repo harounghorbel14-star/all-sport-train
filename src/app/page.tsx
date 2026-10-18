@@ -4,6 +4,7 @@ import { Bot, CalendarDays, GraduationCap, HeartPulse, Shield, Sparkles } from "
 import { currentUser } from "@/lib/auth/server";
 import { FadeIn } from "@/components/ui/motion";
 import { LandingGuest } from "./landing-guest";
+import { InstallApp } from "@/components/pwa/install";
 
 const FEATURES = [
   { icon: GraduationCap, title: "Calisthenics Academy", body: "Step-by-step progressions from your first push-up to the muscle-up, front lever and handstand — with prerequisite checks and safety notes." },
@@ -51,6 +52,7 @@ export default async function Landing() {
             </Link>
           </div>
           <LandingGuest />
+          <InstallApp className="mt-6" />
           <p className="mt-6 max-w-xl text-xs text-subtle">
             Results depend on consistency, genetics, recovery, nutrition, age and training history. We don&apos;t promise a particular physique or deadline — we help you show up and progress safely.
           </p>

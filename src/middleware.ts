@@ -7,4 +7,4 @@ export function middleware(req: NextRequest) {
   return NextResponse.next({ request: { headers } });
 }
 
-export const config = { matcher: ["/((?!api/|_next/|icon.svg|favicon.ico).*)"] };
+export const config = { matcher: ["/((?!api/|_next/|icon.svg|favicon.ico|sw.js|manifest.webmanifest|icons/).*)"] };

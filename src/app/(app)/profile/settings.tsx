@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { api } from "@/lib/client/api";
+import { clearOfflineData } from "@/lib/client/pwa";
+import { InstallApp } from "@/components/pwa/install";
 import { EQUIPMENT_LABELS, LIMITATION_LABELS } from "@/lib/content/exercises";
 import { LOCALE_NAMES } from "@/lib/i18n";
 import { Badge, Button, ButtonLink, Card, CardTitle, Chip, Field, Input, Notice, Select, Textarea, Toggle } from "@/components/ui/primitives";
@@ -55,6 +57,7 @@ export function SettingsApp({ email, tier, profile, ai, usda, security }: { emai
   async function logoutAll() {
     if (!confirm("Sign out of APEX FIT on every device, including this one?")) return;
     await api("/api/auth/logout", { body: { all: true } }).catch(() => undefined);
+    await clearOfflineData().catch(() => undefined);
     router.push("/login");
     router.refresh();
   }
@@ -62,6 +65,7 @@ export function SettingsApp({ email, tier, profile, ai, usda, security }: { emai
   async function deleteAccount() {
     try {
       await api("/api/account", { method: "DELETE", body: { password: pw, confirm: confirmText } });
+      await clearOfflineData().catch(() => undefined);
       router.push("/");
       router.refresh();
     } catch (e) {
@@ -211,6 +215,11 @@ export function SettingsApp({ email, tier, profile, ai, usda, security }: { emai
             </li>
           </ul>
         )}
+      </Card>
+
+      <Card>
+        <CardTitle icon={<Download className="size-4" />}>Get the app</CardTitle>
+        <InstallApp />
       </Card>
 
       <Card>

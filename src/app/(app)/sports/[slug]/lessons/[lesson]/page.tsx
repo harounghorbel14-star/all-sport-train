@@ -7,6 +7,7 @@ import { getLesson } from "@/lib/services/sports";
 import { Badge, Card, CardTitle, Notice, PageHeader } from "@/components/ui/primitives";
 import { DrillBadges, SourceList } from "@/components/sports/badges";
 import { LessonActions } from "./actions";
+import { SaveOffline } from "@/components/pwa/save-offline";
 
 async function load(userId: string, slug: string, lesson: string) {
   try {
@@ -115,7 +116,10 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
         </Card>
       )}
       {sources.length > 0 && <SourceList sources={sources} />}
-      <LessonActions slug={slug} lesson={lesson.slug} done={done} />
+      <div className="flex flex-wrap items-center gap-2">
+        <LessonActions slug={slug} lesson={lesson.slug} done={done} />
+        <SaveOffline url={`/sports/${slug}/lessons/${lesson.slug}`} title={`${hub.sport.name}: ${lesson.title}`} kind="lesson" />
+      </div>
       <div className="flex justify-between text-sm">
         {previous ? (
           <Link href={`/sports/${slug}/lessons/${previous.slug}`} className="inline-flex items-center gap-1 text-muted hover:text-accent">

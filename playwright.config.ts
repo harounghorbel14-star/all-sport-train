@@ -24,6 +24,6 @@ export default defineConfig({
     url: `http://localhost:${PORT}/api/health`,
     reuseExistingServer: false,
     timeout: 120_000,
-    env: { DATABASE_URL: "file:./e2e.db", SESSION_SECRET: "e2e-secret-e2e-secret-e2e-secret-123456", UPLOAD_DIR: "./storage/e2e-uploads", ANTHROPIC_API_KEY: "" },
+    env: { DATABASE_URL: "file:./e2e.db", SESSION_SECRET: "e2e-secret-e2e-secret-e2e-secret-123456", UPLOAD_DIR: "./storage/e2e-uploads", ANTHROPIC_API_KEY: "", RATE_LIMIT_MULTIPLIER: "20" },
   },
 });
