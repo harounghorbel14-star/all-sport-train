@@ -1,3 +1,537 @@
-import type { EnrichmentGroup } from "../enrichment";
+import type { EnrichmentGroup, SportEnrichment } from "../enrichment";
+import type { DrillSeed } from "../types";
 
-export const TRACK: EnrichmentGroup = { sources: [], sports: [] };
+/*
+ * Track & field, road, trail and walking events. Rules overviews follow the
+ * World Athletics Book of Rules in general terms only — nothing here was
+ * checked against the current edition.
+ */
+
+const ED = ["apex-editorial"];
+const WA_ED = ["world-athletics", "apex-editorial"];
+const RULE_NOTE =
+  "General overview written without access to the current World Athletics Book of Rules; it has not been checked against the current edition. Check the official rules and your competition's regulations before you race.";
+
+/* ---------- Shared drills (re-used by several events; slugs only need to be unique per sport) ---------- */
+
+const RUN_WARMUP: DrillSeed = {
+  slug: "dynamic-running-warmup",
+  title: "Dynamic running warm-up",
+  purpose: "Raise temperature and rehearse running mechanics before faster work.",
+  level: "beginner",
+  focus: "warmup",
+  durationMin: 15,
+  setting: "solo",
+  equipment: ["Running shoes", "20–30 m of flat ground"],
+  contact: "none",
+  content: {
+    setup: ["Mark a 20–30 m straight on a track, field or quiet path."],
+    instructions: [
+      "Jog easily for 5–8 minutes.",
+      "Leg swings: 10 front-to-back and 10 side-to-side per leg, holding a fence or wall.",
+      "Over 20 m each: A-march, A-skip, heel flicks, side shuffle both ways, carioca both ways.",
+      "Walk back between drills.",
+      "Finish with 2–3 build-ups over 60–80 m, rising smoothly to about 80% effort.",
+    ],
+    coachingPoints: ["Tall posture — run 'out of the hips', not sitting back.", "Quiet, quick contacts on the forefoot during skips.", "Build-ups should feel controlled, never a sprint from a cold start."],
+    regressions: ["Replace skips with marching and brisk walking if new to drills."],
+  },
+};
+
+const RUN_COOLDOWN: DrillSeed = {
+  slug: "jog-and-stretch-cooldown",
+  title: "Easy jog & stretch cool-down",
+  purpose: "Bring heart rate down gradually and restore range of motion in the legs and hips.",
+  level: "beginner",
+  focus: "cooldown",
+  durationMin: 12,
+  setting: "solo",
+  equipment: ["Mat or grass"],
+  contact: "none",
+  content: {
+    setup: ["Finish your last effort, then keep moving — don't stop and sit straight away."],
+    instructions: [
+      "Jog or walk easily for 5–8 minutes until breathing settles.",
+      "Calf stretch against a wall, 30 s per leg with the knee straight, then 30 s with it bent.",
+      "Half-kneeling hip-flexor stretch, 30–45 s per side.",
+      "Standing hamstring stretch, 30 s per leg.",
+      "Drink and refuel within the next hour after hard sessions.",
+    ],
+    coachingPoints: ["Breathe slowly and relax into each stretch — no bouncing.", "Note any pain that feels sharp or one-sided and log it."],
+  },
+};
+
+const STRIDES: DrillSeed = {
+  slug: "relaxed-strides",
+  title: "Relaxed strides",
+  purpose: "Practise fast, relaxed running form without fatigue.",
+  level: "beginner",
+  focus: "technique",
+  durationMin: 10,
+  setting: "solo",
+  equipment: ["Flat 80–100 m stretch"],
+  contact: "none",
+  content: {
+    setup: ["After a warm-up, mark roughly 80–100 m of flat, smooth ground."],
+    instructions: [
+      "Accelerate smoothly over the first 30 m.",
+      "Hold about 85–90% effort for 30–40 m while staying relaxed.",
+      "Ease off gradually over the last 20 m.",
+      "Walk back to the start for full recovery; repeat 4–6 times.",
+    ],
+    coachingPoints: ["Loose jaw and hands — tension slows you down.", "Arms swing forward and back, not across the body.", "Feet land close to under the hips, not far out in front."],
+    progressions: ["Run strides on a gentle downhill or with a light tailwind for faster turnover."],
+  },
+};
+
+const FORM_DRILLS: DrillSeed = {
+  slug: "running-form-drills",
+  title: "A-skip, B-skip & straight-leg bounds",
+  purpose: "Build the posture, front-side mechanics and foot stiffness that efficient running needs.",
+  level: "beginner",
+  focus: "technique",
+  durationMin: 12,
+  setting: "solo",
+  equipment: ["20–30 m of flat ground"],
+  contact: "none",
+  content: {
+    setup: ["Warm up first. Mark 20 m."],
+    instructions: [
+      "A-skip × 2: drive one knee to hip height, toes pulled up, and strike the ground under the hip.",
+      "B-skip × 2: as the A-skip, then extend the lower leg and paw it back down under the hips.",
+      "Straight-leg bounds × 2: legs nearly straight, quick 'scissor' contacts on the forefoot.",
+      "High-knee run × 2: fast, short contacts with the knees reaching hip height.",
+      "Walk back between reps.",
+    ],
+    coachingPoints: ["Stay tall — hips forward, no leaning back.", "Opposite arm and leg work together.", "Quality over speed: stop if the rhythm falls apart."],
+    regressions: ["Do each drill as a march before skipping it."],
+  },
+};
+
+const THROWS_WARMUP: DrillSeed = {
+  slug: "throws-warmup",
+  title: "Throws warm-up",
+  purpose: "Prepare shoulders, trunk, hips and wrists for explosive throwing.",
+  level: "beginner",
+  focus: "warmup",
+  durationMin: 15,
+  setting: "solo",
+  equipment: ["Resistance band (optional)"],
+  contact: "none",
+  content: {
+    setup: ["Warm up away from the throwing circle or runway so others can throw safely."],
+    instructions: [
+      "Jog or skip for 5 minutes.",
+      "Arm circles forwards and backwards, 10 each; band pass-throughs × 10.",
+      "Trunk rotations and open-book thoracic rotations, 8 per side.",
+      "Walking lunges with a twist, 10 m.",
+      "Wrist and finger preparation: circles, light presses against the palm.",
+      "Finish with shadow throws (no implement) at increasing speed.",
+    ],
+    coachingPoints: ["Rotation comes from the hips and upper back, not the lower back.", "Shoulders should feel warm and loose before the first implement is picked up."],
+  },
+};
+
+const THROWS_COOLDOWN: DrillSeed = {
+  slug: "throws-cooldown",
+  title: "Throws cool-down",
+  purpose: "Unload the shoulder and trunk after throwing and restore mobility.",
+  level: "beginner",
+  focus: "cooldown",
+  durationMin: 10,
+  setting: "solo",
+  equipment: ["Mat", "Resistance band (optional)"],
+  contact: "none",
+  content: {
+    setup: ["Return all implements to the rack or store before cooling down."],
+    instructions: [
+      "Easy walk or jog for 3 minutes.",
+      "Doorway chest stretch, 30 s per side.",
+      "Thread-the-needle and child's pose, 30–45 s each.",
+      "Light band pull-aparts × 15 to finish.",
+      "Note the number of throws you made today in your log.",
+    ],
+    coachingPoints: ["Count throws every session — sudden jumps in volume are a common cause of shoulder and elbow pain."],
+  },
+};
+
+const JUMPS_WARMUP: DrillSeed = {
+  slug: "jumps-warmup",
+  title: "Jumps warm-up",
+  purpose: "Prepare ankles, knees and hips for take-off and landing loads.",
+  level: "beginner",
+  focus: "warmup",
+  durationMin: 15,
+  setting: "solo",
+  equipment: ["Flat ground or track"],
+  contact: "none",
+  content: {
+    setup: ["Use a track or firm, even grass — not concrete."],
+    instructions: [
+      "Jog 5 minutes, then leg swings and knee-to-wall ankle mobility.",
+      "A-skips, B-skips and side shuffles over 20 m.",
+      "Ankle pops (small, stiff pogo hops) 2 × 10.",
+      "Landing sticks: jump forward softly and hold the landing for 2 s, × 5.",
+      "Two or three build-up runs at about 80% effort.",
+    ],
+    coachingPoints: ["Land quietly with knees tracking over the toes.", "Stiff ankles on pogos — bounce off the ground, don't sink into it."],
+  },
+};
+
+const JUMPS_COOLDOWN: DrillSeed = {
+  slug: "jumps-cooldown",
+  title: "Jumps cool-down",
+  purpose: "Ease off after high-impact work and restore calf, hip and back mobility.",
+  level: "beginner",
+  focus: "cooldown",
+  durationMin: 10,
+  setting: "solo",
+  equipment: ["Mat or grass"],
+  contact: "none",
+  content: {
+    setup: ["Rake or tidy the landing area (or check the mats) before you leave it."],
+    instructions: [
+      "Walk or jog easily for 3–5 minutes.",
+      "Calf stretch against a wall, 30 s per leg.",
+      "Half-kneeling hip-flexor stretch, 30 s per side.",
+      "Cat-cow × 8 and child's pose for 30 s.",
+      "Record the number of full jumps and any soreness.",
+    ],
+    coachingPoints: ["Keep a count of take-offs: jump volume, not just effort, determines how sore you will be."],
+  },
+};
+
+/* ================================ SPRINTING ================================ */
+
+const S_SPRINTING: SportEnrichment = {
+  slug: "sprinting",
+  metrics: [
+    { key: "time_30m_accel", label: "30 m acceleration", kind: "time", scope: "performance", direction: "lower", unit: "s", min: 3.5, max: 9, measurement: "From a standing or crouch start (note which), hand-timed from first movement to crossing 30 m. Use the same start and surface each time." },
+    { key: "time_flying_20m", label: "Flying 20 m", kind: "time", scope: "performance", direction: "lower", unit: "s", min: 1.8, max: 5, measurement: "Build up over 20–30 m, then time only the next 20 m between two cones. Best of two runs with full recovery." },
+  ],
+  profile: {
+    introduction: "Sprinting covers the short track races from 60 m indoors to 400 m. Speed is a skill: a good start, a long acceleration, relaxed maximum velocity and the ability to hold form as you tire. Training is short, fast and high quality with long recoveries.",
+    history: "Short foot races were part of the ancient Olympic Games, and the 100 m, 200 m and 400 m have been on the modern Olympic programme since the first modern Games in 1896 (the 200 m from 1900). Starting blocks and fully automatic timing became standard during the twentieth century.",
+    environment: "A standard outdoor track is 400 m around the inside lane, with 100 m and 200 m races run in lanes. The 400 m is run in lanes all the way round with staggered starts. Indoor tracks are usually 200 m.",
+    equipment: ["Running shoes; spikes once technique and tissue tolerance allow", "Starting blocks (at a track)", "Cones and a stopwatch or timing app", "Layers to stay warm between reps"],
+    terminology: [
+      { term: "Drive phase", definition: "The first 20–30 m out of the start, with a forward body lean and powerful pushing steps." },
+      { term: "Maximum velocity", definition: "The upright phase of the race where you reach top speed, usually somewhere after 30–60 m." },
+      { term: "Speed endurance", definition: "The ability to hold speed and form as fatigue builds, crucial in the 200 m and 400 m." },
+      { term: "Stagger", definition: "The staggered starting positions in lane races around a bend so everyone runs the same distance." },
+      { term: "Set position", definition: "The raised position in the blocks after the 'set' command, hips slightly above shoulders." },
+      { term: "Flying sprint", definition: "A timed sprint started after a running build-up, used to measure top speed." },
+      { term: "Front-side mechanics", definition: "Most of the leg action happening in front of the body: high knee, foot landing under the hips." },
+    ],
+    techniqueAreas: [
+      { title: "Start", points: ["Stable set position with weight over the hands", "Push both feet hard into the blocks", "Low, punching first steps — don't pop up"] },
+      { title: "Acceleration", points: ["Forward lean from the ankles, straight line from head to heel", "Piston-like knee drive", "Gradual rise to upright over 20–30 m"] },
+      { title: "Maximum velocity", points: ["Tall posture, hips high", "Foot strikes down and back under the hips", "Relaxed face, shoulders and hands"] },
+      { title: "Bend running", points: ["Run on the inside of the lane", "Lean slightly into the bend from the ankles", "Right arm swings a little across, left arm stays closer to the body"] },
+      { title: "Speed endurance", points: ["Even, controlled pacing in the 400 m", "Keep arm action going when tired", "Hold posture rather than straining"] },
+    ],
+    tactics: [
+      { title: "Race distribution", points: ["100 m: react, accelerate patiently, stay relaxed at top speed.", "200 m: attack the bend, float briefly coming off it, then hold form.", "400 m: fast but controlled first 200 m; the second half decides the race — don't go out at full sprint."] },
+    ],
+    conditioning: { summary: "Sprinters need explosive legs, stiff ankles, strong hamstrings and a stable trunk. Two short strength sessions a week complement speed work.", exercises: ["squat-jump", "bulgarian-split-squat", "nordic-curl-negative", "single-leg-rdl", "single-leg-calf-raise", "glute-bridge", "front-plank", "landing-stick"] },
+    mobility: { summary: "Hip flexors, hamstrings and ankles need good range to allow full knee drive and a powerful push-off.", exercises: ["leg-swings", "hip-flexor-stretch", "knee-to-wall", "worlds-greatest-stretch", "hamstring-stretch"] },
+    injuryPrevention: ["Hamstring strains are the classic sprint injury: warm up thoroughly, build sprint volume gradually and include eccentric hamstring work.", "Introduce spikes gradually — they load the calves and Achilles more than trainers.", "Stop a sprint the moment you feel a sharp pull at the back of the thigh."],
+    recovery: ["Rest 2–4 minutes or more between maximal sprints — speed work needs full recovery.", "Leave at least 48 hours between maximal-speed sessions.", "Sleep is your most important recovery tool."],
+    competitionPrep: ["Rehearse your full warm-up and block start routine in training.", "Know your heat, lane and call-room time.", "Practise reacting to a starter's commands and stay still in the set position."],
+    safety: ["Never sprint cold: always complete a full warm-up.", "Look before crossing a track — runners in lanes move fast and may not see you.", "Do not train maximal sprints with existing hamstring or calf pain."],
+    ageGuidance: "Young athletes benefit from games, relays and short sprints with full recovery. Avoid long lactic-heavy repetitions and heavy strength loading before physical maturity; technique and coordination come first.",
+    beginner: ["Learn the drills and strides before timing yourself.", "Rest fully between sprints — if you are gasping, the rep is no longer speed training.", "Start in trainers on a track or grass; add spikes later.", "Measure 30 m and flying 20 m: they improve faster than race times and keep you motivated."],
+    milestones: [
+      { level: "beginner", title: "30 m acceleration under 5.5 s", metricKey: "time_30m_accel", target: 5.5 },
+      { level: "beginner", title: "100 m under 16 s", metricKey: "time_100m", target: 16 },
+      { level: "intermediate", title: "100 m under 13.5 s", metricKey: "time_100m", target: 13.5 },
+      { level: "intermediate", title: "200 m under 28 s", metricKey: "time_200m", target: 28 },
+      { level: "advanced", title: "Flying 20 m under 2.4 s", metricKey: "time_flying_20m", target: 2.4 },
+      { level: "advanced", title: "400 m under 60 s", metricKey: "time_400m", target: 60 },
+    ],
+    weeklyStructure: [
+      { sessionsPerWeek: 2, pattern: ["technique", "conditioning"] },
+      { sessionsPerWeek: 3, pattern: ["technique", "conditioning", "technique"] },
+      { sessionsPerWeek: 4, pattern: ["technique", "conditioning", "recovery", "technique"] },
+    ],
+    templates: [
+      { title: "Acceleration session", durationMin: 60, intensity: "vigorous", structure: ["Dynamic warm-up 15 min", "Form drills 10 min", "Falling starts 4 × 20 m, walk-back recovery", "3-point starts 5 × 30 m, 3 min rest", "Cool-down 10 min"] },
+      { title: "Top-speed session", durationMin: 60, intensity: "vigorous", structure: ["Dynamic warm-up 15 min", "Strides 4 × 80 m", "Flying sprints 4 × 20 m with 30 m build-up, 4 min rest", "Cool-down 10 min"] },
+    ],
+  },
+  rulesets: [
+    {
+      slug: "sprint-rules-overview",
+      name: "Sprint events — general overview",
+      governingBody: "World Athletics (national federations apply its rules)",
+      scope: "Track races from 60 m to 400 m at athletics competitions.",
+      editionNote: RULE_NOTE,
+      verification: "general",
+      sources: ["world-athletics"],
+      points: [
+        { topic: "Start commands", text: "Sprint races start from a crouch using starting blocks. The commands are 'On your marks', 'Set', then the gun. Athletes must be still in the set position." },
+        { topic: "False starts", text: "Starting before the gun is a false start. At senior level an athlete responsible for a false start is normally disqualified; some youth and masters competitions use more lenient rules — check the event regulations." },
+        { topic: "Lanes", text: "Races up to and including 400 m are run in lanes. Leaving your lane, or stepping on the inside line of a bend, can lead to disqualification." },
+        { topic: "Finish", text: "The finish is judged when the athlete's torso (not the head, arms or legs) reaches the vertical plane of the finish line's nearer edge." },
+        { topic: "Wind", text: "For 100 m and 200 m, a following wind above the legal limit means a time cannot be used for records, though the result of the race still stands." },
+      ],
+    },
+  ],
+  lessons: [
+    {
+      slug: "sprint-posture-arm-action",
+      title: "Sprint posture & arm action",
+      level: "beginner",
+      summary: "Run tall and use the arms to drive rhythm. This is the foundation for every other sprint skill.",
+      drills: ["dynamic-running-warmup", "running-form-drills", "wall-arm-drill"],
+      sources: ED,
+      content: {
+        objectives: ["Hold a tall, stacked posture while running fast", "Swing the arms forward and back from the shoulder", "Stay relaxed in the face, neck and hands"],
+        keyPoints: ["Head neutral, eyes forward, chin level.", "Hips 'high' and slightly forward — imagine a string pulling you up from the crown.", "Elbows near 90°, hands swing from hip pocket to roughly chin height.", "Hands loose — thumb resting lightly on the index finger.", "Arms work straight forward and back, not across the chest."],
+        mistakes: ["Leaning back at speed — correction: think 'hips through' and keep the chest over the hips.", "Clenched fists and raised shoulders — correction: drop the shoulders and practise 'loose jaw' strides.", "Arms crossing the body, causing twisting — correction: seated arm drill with hands passing the hip pocket."],
+      },
+    },
+    {
+      slug: "acceleration-mechanics",
+      title: "Acceleration mechanics",
+      level: "beginner",
+      summary: "Accelerate with a forward lean and powerful pushes, rising gradually rather than popping upright.",
+      prerequisites: ["sprint-posture-arm-action"],
+      drills: ["falling-starts", "wall-drive-drill"],
+      sources: ED,
+      content: {
+        objectives: ["Lean from the ankles, not the waist", "Push back into the ground with each step", "Rise gradually over 20–30 m"],
+        keyPoints: ["Straight line from head through hips to heel during the first steps.", "Shin angles lean forward; feet land behind the knee, under or behind the hips.", "Big pushes, not big reaches: step length grows naturally with speed.", "Arms punch back hard to balance the strong leg drive."],
+        steps: ["Practise the wall drive drill to feel the lean.", "Progress to falling starts: lean until you must step, then accelerate 15–20 m.", "Add 2-point (standing) starts over 20–30 m."],
+        mistakes: ["Popping up in the first two steps — correction: keep eyes down for the first few strides.", "Overstriding with the foot landing in front — correction: 'push the track behind you'."],
+        progressTest: { description: "Time a 30 m from a standing start, best of three with full recovery.", metricKey: "time_30m_accel", target: 5.5 },
+      },
+    },
+    {
+      slug: "maximum-velocity",
+      title: "Maximum velocity running",
+      level: "intermediate",
+      summary: "Run at top speed with upright posture, high knees and fast, stiff contacts under the hips.",
+      prerequisites: ["acceleration-mechanics"],
+      drills: ["flying-sprints", "running-form-drills", "relaxed-strides"],
+      sources: ED,
+      content: {
+        objectives: ["Reach and hold top speed for 10–20 m", "Keep front-side mechanics", "Stay relaxed at full effort"],
+        keyPoints: ["Thigh of the swing leg rises to about horizontal.", "Foot cocked (toes up) and strikes down and back just ahead of the hips.", "Short ground contacts — 'hot ground'.", "Relax: top speed comes from coordination, not straining."],
+        mistakes: ["Kicking the heel out behind (back-side mechanics) — correction: B-skips and high-knee drills.", "Straining and tightening up — correction: run at 90–95% and focus on relaxation."],
+        progressTest: { description: "Flying 20 m after a 25–30 m build-up.", metricKey: "time_flying_20m", target: 2.8 },
+      },
+    },
+    {
+      slug: "block-starts",
+      title: "Block starts",
+      level: "intermediate",
+      summary: "Set blocks, hold a stable set position and drive out powerfully on the gun.",
+      prerequisites: ["acceleration-mechanics"],
+      drills: ["block-start-practice", "reaction-starts"],
+      requiresSupervision: false,
+      sources: WA_ED,
+      content: {
+        objectives: ["Set up blocks to your body", "Hold a legal, stable set position", "Drive out low for the first 5–8 steps"],
+        keyPoints: ["A common starting point: front pedal about two foot-lengths behind the line, rear pedal about one foot-length further back — then adjust.", "On your marks: hands just behind the line, shoulder-width, weight forward, rear knee down.", "Set: hips rise slightly above shoulders, front knee near 90°, rear knee wider.", "On the gun: push both feet, rear leg swings through low and fast, arms punch strongly."],
+        steps: ["Measure and set the pedals.", "Practise 'marks' and 'set' and hold still for 2 s.", "Start on a clap or partner's command, 10 m out.", "Progress to 20–30 m starts with full recovery."],
+        mistakes: ["Moving in the set position — correction: settle and hold; only the gun moves you.", "Standing up in one step — correction: 'push, push, push' cue for the first three steps."],
+        safety: ["Check the blocks are anchored securely before using them.", "Starts are maximal efforts: limit to 5–8 per session with 2–3 min rest."],
+      },
+    },
+    {
+      slug: "bend-running-200m",
+      title: "Bend running & the 200 m",
+      level: "intermediate",
+      summary: "Run the bend efficiently and distribute effort across a 200 m race.",
+      prerequisites: ["maximum-velocity"],
+      drills: ["bend-runs", "flying-sprints"],
+      sources: ED,
+      content: {
+        objectives: ["Run close to the inside line without stepping on it", "Lean into the bend from the ankles", "Transfer speed off the bend into the straight"],
+        keyPoints: ["Lean the whole body slightly inward — don't just drop the inside shoulder.", "Right arm swings slightly across; left arm stays tighter.", "Coming off the bend, stay relaxed: a short 'float' keeps speed without extra effort.", "Hold form in the final 50 m rather than straining."],
+        mistakes: ["Drifting to the outside of the lane — correction: aim for the inside half of the lane.", "Tying up in the home straight — correction: think 'arms and posture' when tired."],
+        progressTest: { description: "Time a 200 m from a standing or block start.", metricKey: "time_200m", target: 28 },
+      },
+    },
+    {
+      slug: "speed-endurance-400m",
+      title: "Speed endurance & racing the 400 m",
+      level: "advanced",
+      summary: "Train to hold speed as fatigue builds and pace the 400 m so the second half doesn't collapse.",
+      prerequisites: ["bend-running-200m", "block-starts"],
+      drills: ["speed-endurance-reps", "flying-sprints"],
+      sources: ED,
+      content: {
+        objectives: ["Plan a realistic 400 m split", "Build speed endurance safely", "Maintain mechanics when fatigued"],
+        keyPoints: ["Most well-paced 400 m races have a second 200 m a few seconds slower than the first; a huge difference means you went out too hard.", "Fast but controlled first 100 m, relaxed back straight, 'reload' around the final bend.", "Speed-endurance reps (150–300 m) need long recoveries; they are very demanding.", "Keep arms driving and posture tall when your legs tire."],
+        mistakes: ["Sprinting the first 100 m flat out — correction: rehearse target splits in training.", "Doing speed-endurance work too often — correction: limit to one such session a week and keep the rest of the week lighter."],
+        safety: ["Speed-endurance sessions can cause nausea and light-headedness: have water, recover walking, and stop if dizzy."],
+        progressTest: { description: "Race or time-trial a 400 m.", metricKey: "time_400m", target: 60 },
+      },
+    },
+  ],
+  drills: [
+    RUN_WARMUP,
+    RUN_COOLDOWN,
+    FORM_DRILLS,
+    STRIDES,
+    {
+      slug: "wall-arm-drill",
+      title: "Seated & standing arm drill",
+      purpose: "Groove a powerful, straight-line arm swing.",
+      level: "beginner",
+      focus: "technique",
+      durationMin: 6,
+      setting: "solo",
+      equipment: ["None"],
+      contact: "none",
+      content: {
+        setup: ["Sit tall on the ground with legs straight, or stand in a split stance."],
+        instructions: ["Swing the arms as if sprinting for 10 s, rest 20 s, × 6.", "Hands travel from hip pocket to about chin height.", "Increase speed while keeping the shoulders down."],
+        coachingPoints: ["Elbows stay near 90° — the backswing can open slightly.", "No crossing in front of the body.", "If seated and your hips bounce, the arms are driving well."],
+      },
+    },
+    {
+      slug: "wall-drive-drill",
+      title: "Wall drive (acceleration posture)",
+      purpose: "Feel the forward lean and knee drive of the drive phase.",
+      level: "beginner",
+      focus: "technique",
+      durationMin: 8,
+      setting: "solo",
+      equipment: ["Wall or fence"],
+      contact: "none",
+      content: {
+        setup: ["Hands on a wall at shoulder height, step back until the body forms a straight line at about 45°."],
+        instructions: ["Hold one knee up, toes pulled up.", "Single switches: on 'go', swap legs quickly and hold. 5 per leg.", "Double and triple switches: 3 × 3 sets."],
+        coachingPoints: ["Straight line from head to back heel — no sagging hips.", "Drive the foot down and back under the hips.", "Stay on the ball of the support foot."],
+      },
+    },
+    {
+      slug: "falling-starts",
+      title: "Falling starts",
+      purpose: "Learn to accelerate with a natural lean and pushing steps.",
+      level: "beginner",
+      focus: "technique",
+      durationMin: 12,
+      setting: "solo",
+      equipment: ["Cones at 0 and 20 m"],
+      contact: "none",
+      metricKey: "time_30m_accel",
+      content: {
+        setup: ["Stand tall at the start cone, feet together."],
+        instructions: ["Lean forward as a straight plank from the ankles.", "When you must step, explode into acceleration for 15–20 m.", "Walk back. 5–6 reps."],
+        coachingPoints: ["Don't bend at the waist to start the fall.", "First steps short and powerful under the body.", "Eyes down for the first few steps, then rise gradually."],
+        progressions: ["Extend to 30 m and time it."],
+        record: "Optional: time the 30 m version and log the best.",
+      },
+    },
+    {
+      slug: "flying-sprints",
+      title: "Flying sprints",
+      purpose: "Develop and measure maximum velocity.",
+      level: "intermediate",
+      focus: "technique",
+      durationMin: 20,
+      setting: "solo",
+      equipment: ["4 cones", "Stopwatch or timing app (partner helpful)"],
+      contact: "none",
+      metricKey: "time_flying_20m",
+      content: {
+        setup: ["Cones at 0, 25–30 m (start of fly zone) and 20 m after that."],
+        instructions: ["Build up smoothly over the first 25–30 m.", "Run the 20 m fly zone at maximum relaxed speed.", "Ease off gradually after the zone.", "Walk back and rest 3–4 minutes. 3–5 reps."],
+        coachingPoints: ["Arrive at the zone already fast but not straining.", "Tall, relaxed, quick contacts.", "Stop the session if times drop clearly — speed work needs freshness."],
+        record: "Best flying 20 m time.",
+      },
+    },
+    {
+      slug: "block-start-practice",
+      title: "Block start practice",
+      purpose: "Rehearse setting blocks and driving out over 10–30 m.",
+      level: "intermediate",
+      focus: "technique",
+      durationMin: 25,
+      setting: "solo",
+      equipment: ["Starting blocks", "Track"],
+      contact: "none",
+      content: {
+        setup: ["Anchor the blocks securely in your lane behind the start line."],
+        instructions: ["Rehearse 'marks' and 'set' 3 times without running.", "4 starts to 10 m, focusing on push and low first steps.", "3–4 starts to 30 m.", "Rest 2–3 minutes between starts."],
+        coachingPoints: ["Stillness in set.", "Both feet push; rear leg swings through low.", "Strong, opposite arm punch from the first movement."],
+        regressions: ["3-point starts (one hand down) without blocks."],
+      },
+    },
+    {
+      slug: "reaction-starts",
+      title: "Partner reaction starts",
+      purpose: "Train reaction to an external signal from different start positions.",
+      level: "beginner",
+      focus: "game",
+      durationMin: 12,
+      setting: "partner",
+      minPlayers: 2,
+      equipment: ["Cones at 10 m"],
+      contact: "none",
+      content: {
+        setup: ["Runner in a start position (standing, kneeling, lying, 3-point); partner stands to the side, not in the running line."],
+        instructions: ["Partner claps or calls 'go' after a varied delay.", "Runner reacts and sprints 10 m.", "Swap roles after 4–5 reps."],
+        coachingPoints: ["React to the sound, not anticipation.", "First movement is a push, not a stand-up."],
+        progressions: ["Race side by side from the same start position."],
+      },
+    },
+    {
+      slug: "bend-runs",
+      title: "Bend runs",
+      purpose: "Practise running the bend efficiently and accelerating off it.",
+      level: "intermediate",
+      focus: "technique",
+      durationMin: 20,
+      setting: "solo",
+      equipment: ["Track bend"],
+      contact: "none",
+      content: {
+        setup: ["Use an outer lane if others are training; start at the beginning of the bend."],
+        instructions: ["Run 3–4 × 100 m around the bend at 85–90%.", "Focus on the inside half of the lane.", "Walk back for full recovery."],
+        coachingPoints: ["Lean from the ankles.", "Right arm slightly across; left arm tighter.", "Smooth transition into the straight."],
+      },
+    },
+    {
+      slug: "speed-endurance-reps",
+      title: "Speed-endurance repetitions",
+      purpose: "Build the ability to hold speed and form over 150–300 m.",
+      level: "advanced",
+      focus: "conditioning",
+      durationMin: 35,
+      setting: "solo",
+      equipment: ["Track", "Stopwatch"],
+      contact: "none",
+      content: {
+        setup: ["Full warm-up including strides."],
+        instructions: ["Run 3–4 × 150–250 m at about 90% effort.", "Walk or jog very slowly for 6–10 minutes between reps.", "Keep a consistent target time; stop if times fall clearly."],
+        coachingPoints: ["Form first — when posture collapses, the session is over.", "Long recoveries keep the quality high."],
+        regressions: ["Shorten to 120–150 m with the same recoveries."],
+        record: "Rep times and recovery lengths.",
+      },
+    },
+    {
+      slug: "relay-sprint-game",
+      title: "Handicap chase sprints",
+      purpose: "Competitive sprinting with a partner or group to raise intensity.",
+      level: "beginner",
+      focus: "game",
+      durationMin: 15,
+      setting: "team",
+      minPlayers: 3,
+      equipment: ["Cones"],
+      contact: "none",
+      content: {
+        setup: ["Line up athletes with 1–3 m head starts according to ability; finish cone at 30 m."],
+        instructions: ["On a signal everyone sprints to the finish.", "Adjust head starts so races are close.", "4–6 races with full recovery."],
+        coachingPoints: ["Lanes or clear spacing so no one cuts across.", "Keep form even when chasing."],
+      },
+    },
+  ],
+};
+
+export const TRACK: EnrichmentGroup = { sources: [], sports: [S_SPRINTING] };
