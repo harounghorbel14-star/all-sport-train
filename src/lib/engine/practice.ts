@@ -160,7 +160,14 @@ export function generatePractice(input: PracticeInput): PracticeContent {
   if (cool) blocks.push(toBlock(cool, coolMin));
 
   const notes: string[] = [];
-  if (!main.length) notes.push("No main drills match your current level and setting yet. Try a different setting or ask a coach.");
+  if (!main.some((b) => b.kind === "drill")) {
+    const supervisedOnly = excluded.some((e) => e.reason.includes("qualified coach"));
+    notes.push(
+      supervisedOnly
+        ? "Most drills for this sport need a qualified coach (and, in water, a lifeguard). Mark that you train with one to unlock them — until then this session is conditioning only."
+        : "No main drills match your current level and setting yet. Try a different setting or ask a coach.",
+    );
+  }
   if (input.setting === "solo") notes.push("Solo session — partner and team drills were left out.");
   if (preferred.size && main.some((b) => b.drillSlug && preferred.has(b.drillSlug))) notes.push("Includes drills from your next lesson.");
   const safety = ["Stop any drill that causes pain.", "Warm up fully before high-intensity work."];
