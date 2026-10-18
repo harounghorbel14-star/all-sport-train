@@ -46,7 +46,7 @@ npm start
 | `npm test` | Vitest unit and integration tests (creates `prisma/test.db` automatically) |
 | `npm run test:e2e` | Playwright tests (builds nothing; run `npm run build` first). Uses `prisma/e2e.db`. |
 | `npm run db:migrate` | Create a new migration during development |
-| `npm run db:seed` | Seed or refresh the catalog (idempotent; keeps admin-added exercises and admin-edited sports). `SEED_OVERWRITE=1` re-applies the seeded sports content over existing rows. |
+| `npm run db:seed` | Seed or refresh the catalog (idempotent and additive: existing databases receive new sports content such as lessons and drills; admin-added exercises and admin-edited sports are never touched). `SEED_OVERWRITE=1` re-applies the seeded sports content over existing rows. Runs automatically on every deploy via `npm run start:prod`. |
 
 For Playwright in a custom environment, set `PLAYWRIGHT_CHROMIUM_PATH` to a Chromium binary if needed.
 
@@ -96,7 +96,7 @@ Secrets are only read on the server (`src/lib/server/env.ts`, validated with Zod
 | **Form Check AI** | Photo or video. Video is sampled into frames in the browser, so the raw video is never uploaded. Explicit consent; media is not kept unless chosen. Results are split into observed / uncertain / can't be assessed. Delete anytime. |
 | **Challenges** | Sustainable streaks (rest days count, one forgiven miss per week), weekly streaks, 16-week calendar, XP and levels, 13 data-driven achievements, weekly missions, monthly community challenges |
 | **Community** | Feed (friends / public / group), reactions, comments, friend requests, groups, report (auto-hide at 3 reports) and block. Text-only posts, so body photos can never be published. |
-| **Sports** | Searchable catalog of 143 sports and disciplines in 8 categories, with alias and accent-insensitive search. Each sport has a status label: *learning system*, *in development* or *requires external instruction*. Sport hub tabs: Overview, Learn, Drills, Practice, Rules, Progress, Conditioning & safety. Weekly multisport schedule. See [Sports knowledge system](#sports-knowledge-system). |
+| **Sports** | Searchable catalog of 143 sports and disciplines in 8 categories, 113 of them with a full learning system, with alias and accent-insensitive search. Each sport has a status label: *learning system*, *in development* or *requires external instruction*. Sport hub tabs: Overview, Learn, Drills, Practice, Rules, Progress, Conditioning & safety. Weekly multisport schedule. See [Sports knowledge system](#sports-knowledge-system). |
 | **Profile & settings** | Profile, training setup, language (EN / FR / AR with RTL), units, theme (dark / light / system), time zone, reduced motion, nutrition goals, notification preferences with quiet hours, privacy, accountability, export, account deletion |
 | **AI Coach** | Intent detection for the example requests; real actions (saved workouts, technique links, 4-week analysis charts, roadmap and meal guidance) computed from your data; safety screening for emergencies, injury, disordered eating and self-harm; the model gets compact factual context and is told not to invent plans |
 
@@ -105,8 +105,12 @@ Secrets are only read on the server (`src/lib/server/env.ts`, validated with Zod
 Sports live in the database, not in code. Admins can add sports, disciplines (`parentSlug`) and regional variants from **Admin → Sports content** (`/admin/sports`) without a deploy.
 
 **Catalog coverage, stated plainly.** The catalog has 143 entries across combat, team ball, racket, athletics/endurance, strength/gymnastics/fitness, water, outdoor/adventure, and dance/adaptive/other. It is not a list of every sport in the world.
-- **Learning system** (8 sports): full lessons, drills, rules summaries, practice builder and sport-specific metrics. The 8 are calisthenics, boxing, football, basketball, baseball, swimming, running and tennis.
-- **In development** (most of the rest): an overview, beginner tips, activity tracking and metrics, with no lessons yet.
+- **Learning system** (113 sports): lessons from beginner to advanced, drills (warm-up, technique, tactics, conditioning, cool-down), a rules overview, practice builder, sport-specific metrics, milestones and safety. In total: 719 lessons and 1,284 drills.
+  - The 8 original sports (calisthenics, boxing, football, basketball, baseball, swimming, running, tennis) are the deepest.
+  - The other 105 live in `src/lib/content/sports/extended/<group>.ts` (track, endurance, combat, teamA, teamB, racket, outdoor, fitness). They are checked by `npx tsx scripts/validate-sports.ts`.
+  - The validator enforces at least 6 lessons across all levels, at least 10 drills including solo work, at least 4 performance metrics and milestones, valid references, and no "verified" rules claims.
+  - It also enforces safety: supervised partner work in combat sports, no full-contact or sparring drills, and homepage-only URLs for new sources.
+- **In development** (9 gym-style modalities: strength, gym, powerlifting, weightlifting, strongman, CrossFit-style, functional fitness, street workout, adaptive fitness): these are trained through the workout engine, with an overview and tracking.
 - **Requires external instruction** (e.g. diving, kitesurfing, climbing, mountaineering, gymnastics, equestrian, archery): tracking and general conditioning only, plus a pointer to certified instructors.
 
 **Content model.** Each sport has a flexible profile, validated with zod and shared by every sport. A sport only fills the sections that make sense for it:
@@ -290,7 +294,7 @@ To use PostgreSQL, change `provider` in `schema.prisma` to `postgresql`, set `DA
 - **Exercise media**: there are no videos. The catalog uses illustrated fallbacks plus written tutorials until verified media is added.
 - **Form check**: video is analysed as sampled still frames. There is no pose-estimation model, and no tempo or range measurement.
 - **Community**: no real-time updates (refresh-based), no admin moderation workflow beyond auto-hide plus a report list, and no images in posts by design.
-- **Sports content depth**: only 8 sports have a full learning system. The rest have overviews and tracking until lessons are written and reviewed. The seeded rules summaries were written from general knowledge of the cited rulebooks and need periodic re-review against current editions — the review date is shown to users for that reason.
+- **Sports content depth and review**: 113 sports have learning content. The lessons and drills are editorial content written without access to the official coaching manuals or rulebooks (this environment's network blocked them), so they need review by qualified coaches before you rely on them for competition. Para sports content describes classification only in general terms. The seeded rules summaries were written from general knowledge of the cited rulebooks and need periodic re-review against current editions — the review date is shown to users for that reason.
 - **Research verification**: no source could be opened from this environment (network policy), so there are no verified claims yet; the coach therefore answers specific questions only from published lesson and rules content (clearly labelled) or says it doesn't know.
 - **Semantic search**: not available (no embedding provider); retrieval is keyword-based.
 - **Google OAuth / email delivery**: verified only with mocked responses; needs a one-time live test with real credentials. Email verification for password sign-ups (a confirmation link) is not implemented; `emailVerifiedAt` is set by Google sign-in or a completed password reset.

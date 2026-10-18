@@ -184,3 +184,27 @@ describe("coach intent & sport detection", () => {
     expect(detectSportIntent("what positions are there").intent).toBe("positions");
   });
 });
+
+describe("every full sport", () => {
+  it("builds a safe solo beginner practice", () => {
+    for (const s of SPORT_SEEDS.filter((x) => x.availability === "full" && !x.workoutBased)) {
+      const p = generatePractice({
+        sportName: s.name,
+        drills: (s.drills ?? []).map((d) => ({ slug: d.slug, title: d.title, level: d.level, focus: d.focus, durationMin: d.durationMin, setting: d.setting, minPlayers: d.minPlayers ?? 1, contact: d.contact ?? "none", requiresSupervision: d.requiresSupervision ?? false, metricKey: d.metricKey ?? null, equipment: d.equipment ?? [] })),
+        conditioningExercises: s.profile?.conditioning?.exercises ?? [],
+        level: "beginner",
+        minutes: 45,
+        focus: "balanced",
+        setting: "solo",
+        players: 1,
+        supervised: false,
+        under18: false,
+      });
+      const used = p.blocks.map((b) => (s.drills ?? []).find((d) => d.slug === b.drillSlug)).filter(Boolean);
+      // Either a real session, or an explicit explanation of why drills are locked (e.g. water polo needs a lifeguarded, coached pool).
+      if (p.blocks.length < 3) expect(p.notes.join(" "), s.slug).toMatch(/qualified coach/);
+      expect(used.every((d) => (d!.contact ?? "none") === "none" && !d!.requiresSupervision && d!.setting === "solo"), s.slug).toBe(true);
+      expect(p.minutes, s.slug).toBeLessThanOrEqual(50);
+    }
+  });
+});
