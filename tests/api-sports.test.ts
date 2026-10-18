@@ -111,6 +111,21 @@ describe("practice plans", () => {
 });
 
 describe("sport metrics", () => {
+  it("shows the newest results and keeps old personal bests for users with thousands of entries", async () => {
+    const { cookie, userId } = await newUser();
+    const running = await db.sport.findUniqueOrThrow({ where: { slug: "running" } });
+    const day = (i: number) => new Date(Date.UTC(2020, 0, 1) + i * 3_600_000).toISOString().slice(0, 10);
+    // An old 5 km best, then 2,004 slower runs, the newest one last.
+    await db.sportMetricEntry.createMany({
+      data: Array.from({ length: 2005 }, (_, i) => ({ userId, sportId: running.id, metricKey: "time_5k", value: i === 0 ? 1500 : 1900, dateKey: day(i * 2) })),
+    });
+    const hub = await call(sport.GET, { cookie, params: { slug: "running" } });
+    const entries = hub.json.user.entries as { dateKey: string }[];
+    expect(entries).toHaveLength(2000);
+    expect(entries.at(-1)!.dateKey).toBe(day(2004 * 2));
+    expect(hub.json.user.personalBests.time_5k.value).toBe(1500);
+  });
+
   it("validates ratios, applies the minimum-attempts rule for personal bests and handles time metrics", async () => {
     const { cookie } = await newUser();
     const base = { params: { slug: "basketball" }, cookie };

@@ -5,6 +5,7 @@ import { AppError, badRequest, conflict, forbidden, notFound } from "../server/e
 import { LIMITS, rateLimit } from "../server/rate-limit";
 import { clientIp } from "../server/request";
 import { completeOnboarding, uniqueHandle } from "../services/profile";
+import { evaluateAchievements } from "../services/gamification";
 import { recordAuthEvent } from "./audit";
 import { sendMail } from "./mailer";
 import { hashPassword, verifyPassword } from "./password";
@@ -196,9 +197,18 @@ export async function importGuestData(req: Request, accountId: string, guestId: 
     for (const l of await tx.lessonProgress.findMany({ where: { userId: guestId } })) {
       await tx.lessonProgress.upsert({ where: { userId_lessonId: { userId: accountId, lessonId: l.lessonId } }, create: { userId: accountId, lessonId: l.lessonId, status: l.status, completedAt: l.completedAt }, update: {} });
     }
-    // XP, achievements, notifications and reviews are recomputed from the moved data rather than copied.
+    // XP earned for the moved records comes along (same source + record = earned once). Achievement
+    // XP is not copied: achievements are re-evaluated against the merged data below.
+    const taken = new Set((await tx.xpEvent.findMany({ where: { userId: accountId }, select: { source: true, refId: true } })).map((x) => `${x.source}:${x.refId}`));
+    const xp = (await tx.xpEvent.findMany({ where: { userId: guestId, source: { not: "achievement" } } })).filter((x) => !taken.has(`${x.source}:${x.refId}`));
+    if (xp.length) {
+      await tx.xpEvent.updateMany({ where: { id: { in: xp.map((x) => x.id) } }, data: { userId: accountId } });
+      await tx.profile.update({ where: { userId: accountId }, data: { xp: { increment: xp.reduce((sum, x) => sum + x.amount, 0) } } });
+    }
+    moved.xp = xp.reduce((sum, x) => sum + x.amount, 0);
     await tx.user.delete({ where: { id: guestId } });
   });
+  await evaluateAchievements(accountId);
   await recordAuthEvent("guest_imported", { userId: accountId, req, meta: { workouts: moved.workouts ?? 0, activities: moved.activities ?? 0 } });
   return { moved, skipped };
 }

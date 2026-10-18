@@ -162,16 +162,22 @@ export async function getSportHub(slug: string, userId?: string, opts: { include
 }
 export type SportHub = Awaited<ReturnType<typeof getSportHub>>;
 
+const ENTRY_LIMIT = 2000;
+
 async function userSportState(userId: string, sportId: string, lessons: LessonView[], metrics: MetricView[], profile: z.infer<typeof sportProfileSchema>) {
-  const [enrollment, progress, entries, practices] = await Promise.all([
+  const [enrollment, progress, latest, practices, all] = await Promise.all([
     db.userSport.findUnique({ where: { userId_sportId: { userId, sportId } } }),
     db.lessonProgress.findMany({ where: { userId, lessonId: { in: lessons.map((l) => l.id) } } }),
-    db.sportMetricEntry.findMany({ where: { userId, sportId }, orderBy: [{ dateKey: "asc" }, { createdAt: "asc" }], take: 2000 }),
+    // Show the most recent entries (newest kept when there are many)…
+    db.sportMetricEntry.findMany({ where: { userId, sportId }, orderBy: [{ dateKey: "desc" }, { createdAt: "desc" }], take: ENTRY_LIMIT }),
     db.practicePlan.findMany({ where: { userId, sportId, status: { not: "archived" } }, orderBy: { createdAt: "desc" }, take: 10 }),
+    // …but personal bests consider every entry ever logged.
+    db.sportMetricEntry.findMany({ where: { userId, sportId }, select: { id: true, metricKey: true, value: true, made: true, attempts: true, dateKey: true }, orderBy: [{ dateKey: "asc" }, { createdAt: "asc" }] }),
   ]);
+  const entries = latest.reverse();
   const completed = new Set(progress.filter((p) => p.status === "completed").map((p) => lessons.find((l) => l.id === p.lessonId)?.slug).filter(Boolean) as string[]);
   const level = (enrollment?.level ?? "beginner") as Level;
-  const pbs = personalBests(metrics, entries);
+  const pbs = personalBests(metrics, all);
   const milestones = (profile.milestones ?? []).map((m) => {
     const metric = metrics.find((x) => x.key === m.metricKey);
     const best = m.metricKey ? pbs[m.metricKey]?.value : undefined;

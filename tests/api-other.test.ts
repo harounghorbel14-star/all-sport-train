@@ -1,3 +1,5 @@
+import * as checkin from "@/app/api/recovery/checkin/route";
+import { addDays, todayKey } from "@/lib/domain/dates";
 import { beforeAll, describe, expect, it } from "vitest";
 import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
@@ -243,13 +245,31 @@ describe("community & privacy", () => {
   });
 });
 
+describe("recovery logging dates", () => {
+  it("only accepts check-ins and mobility for today or yesterday, and logs a double-tapped routine once", async () => {
+    const { cookie, userId } = await newUser();
+    const today = todayKey("UTC");
+    const ok = await call(checkin.POST, { cookie, body: { dateKey: addDays(today, -1), energy: 3, soreness: 2 } });
+    expect(ok.status).toBe(200);
+    for (const dateKey of [addDays(today, -2), addDays(today, -30), addDays(today, 1)]) {
+      expect((await call(checkin.POST, { cookie, body: { dateKey, energy: 3, soreness: 2, isRestDay: true } })).status).toBe(400);
+      expect((await call(mobility.POST, { cookie, body: { routine: "hip-opener", dateKey } })).status).toBe(400);
+    }
+    expect(await db.xpEvent.count({ where: { userId, source: "checkin" } })).toBe(1);
+    await call(mobility.POST, { cookie, body: { routine: "hip-opener", dateKey: today } });
+    await call(mobility.POST, { cookie, body: { routine: "hip-opener", dateKey: today } });
+    expect(await db.mobilitySession.count({ where: { userId } })).toBe(1);
+    expect(await db.xpEvent.count({ where: { userId, source: "mobility" } })).toBe(1);
+  });
+});
+
 describe("challenges & notifications", () => {
   it("computes challenge progress from logged data", async () => {
     const { cookie } = await newUser();
     const list = await call(challenges.GET, { cookie });
     const mob = list.json.challenges.find((c: { metric: string; active: boolean }) => c.metric === "mobility_sessions" && c.active);
     await call(challenge.POST, { cookie, params: { id: mob.id }, body: { join: true } });
-    await call(mobility.POST, { cookie, body: { routine: "hip-opener", dateKey: mob.startsOn } });
+    await call(mobility.POST, { cookie, body: { routine: "hip-opener", dateKey: todayKey("UTC") } });
     const after = await call(challenges.GET, { cookie });
     expect(after.json.challenges.find((c: { id: string }) => c.id === mob.id).progress).toBe(1);
   });

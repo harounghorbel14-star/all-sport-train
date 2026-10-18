@@ -63,7 +63,10 @@ function RoutinePlayer({ routine, lookup, today, onDone }: { routine: MobilityRo
     }
   }, [left, i, routine.items]);
 
+  const [saving, setSaving] = useState(false);
   async function complete() {
+    if (saving) return;
+    setSaving(true);
     try {
       await api("/api/recovery/mobility", { body: { routine: routine.slug, dateKey: today } });
       toast("Mobility session logged");
@@ -71,6 +74,8 @@ function RoutinePlayer({ routine, lookup, today, onDone }: { routine: MobilityRo
       onDone();
     } catch (e) {
       toast(e instanceof Error ? e.message : "Could not log", "error");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -78,7 +83,7 @@ function RoutinePlayer({ routine, lookup, today, onDone }: { routine: MobilityRo
     return (
       <div className="space-y-4">
         <CelebrationCard icon={<Check className="size-5" />} title="Routine complete" body={`${routine.minutes} minutes of quality movement.`} />
-        <Button className="w-full" onClick={complete}>Log session</Button>
+        <Button className="w-full" onClick={complete} loading={saving}>Log session</Button>
       </div>
     );
 
@@ -104,7 +109,7 @@ function RoutinePlayer({ routine, lookup, today, onDone }: { routine: MobilityRo
         <Button size="lg" variant="secondary" onClick={() => setLeft(0)} icon={<SkipForward className="size-4" />}>Next</Button>
       </div>
       <p className="text-center text-xs text-subtle">Step {i + 1} of {routine.items.length}</p>
-      <div className="flex justify-center"><button className="text-xs text-muted underline" onClick={complete}>I did this routine — log it</button></div>
+      <div className="flex justify-center"><button className="text-xs text-muted underline" onClick={complete} disabled={saving}>I did this routine — log it</button></div>
       {routine.modifications.length > 0 && <Notice tone="info"><span className="text-xs">Modifications: {routine.modifications.join(" ")}</span></Notice>}
     </div>
   );

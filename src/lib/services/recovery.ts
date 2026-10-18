@@ -9,7 +9,19 @@ import type { checkInSchema } from "../validation";
 import { getProfile } from "./profile";
 import { awardXp, evaluateAchievements } from "./gamification";
 
+/**
+ * Check-ins and mobility can be logged for today or yesterday (late entries, time-zone edges),
+ * never the future or further back: older dates would let XP and rest-day streaks be backfilled.
+ */
+async function assertRecentDate(userId: string, dateKey: string) {
+  const p = await getProfile(userId);
+  const today = todayKey(p.timezone);
+  if (dateKey > today) throw badRequest("That date is in the future");
+  if (dateKey < addDays(today, -1)) throw badRequest("Check-ins can only be logged for today or yesterday");
+}
+
 export async function saveCheckIn(userId: string, input: z.infer<typeof checkInSchema>) {
+  await assertRecentDate(userId, input.dateKey);
   const readiness = readinessScore(input);
   const data = {
     sleepHours: input.sleepHours ?? null,
@@ -47,6 +59,10 @@ export async function recoveryOverview(userId: string) {
 export async function logMobility(userId: string, routineSlug: string, dateKey: string, minutes?: number) {
   const routine = MOBILITY_BY_SLUG.get(routineSlug);
   if (!routine) throw badRequest("Unknown routine");
+  await assertRecentDate(userId, dateKey);
+  // A double tap logs the routine once.
+  const recent = await db.mobilitySession.findFirst({ where: { userId, routineSlug, dateKey, createdAt: { gte: new Date(Date.now() - 2 * 60_000) } } });
+  if (recent) return { session: recent, achievements: [] };
   const session = await db.mobilitySession.create({ data: { userId, routineSlug, dateKey, minutes: minutes ?? routine.minutes } });
   await awardXp(userId, "mobility", session.id, XP.mobility);
   const achievements = await evaluateAchievements(userId);

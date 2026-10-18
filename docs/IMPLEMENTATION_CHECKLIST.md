@@ -16,11 +16,11 @@ Each item names how it was verified. Audit of 2026-10-18 (findings verified by r
 - ✅ Offline set queue: queue overwritten during flush, dropped on server error, not flushed after reload → ref-based queue, 5xx kept for retry, auto-flush after reload, finish blocked while sets are unsynced — e2e journey "sets logged without a connection sync after a reload…"
 - ✅ Recovery check-in regenerates (archives) a workout the user edited → edited/coach/started plans are kept and the user is told — test: api-workouts "adapting after a check-in keeps…"
 - ✅ Two active sessions possible on double start / two tabs (and duplicate today plans) → earliest wins, duplicates removed — test: api-workouts "never creates two plans…" (fails on the old code: 3 plans)
-- ⬜ Check-ins and mobility logs can be backdated for XP / streak repair; mobility double-submit
+- ✅ Check-ins and mobility logs can be backdated for XP / streak repair; mobility double-submit → today or yesterday only, repeat taps logged once, busy state on the button — test: api-other "recovery logging dates"
 - ✅ Completed sessions still render the live logging UI; completion retry loses the summary → reopening shows the summary; retries/races return the same summary, one activity, XP once — tests: api-workouts "completes once when two completions race", e2e journey
 - ✅ Query-string tabs (sport hubs, Progress) sometimes didn't respond: Next's router fetched the page but never committed it (pre-existing — reproduced on the last merged commit; still present on the latest Next 15 patch; bisected to the chart components but not to any one behaviour) → `TabLink` falls back to a normal page load after 1.5 s — 50-click stress: 0 stuck (was 3–6 of 8); e2e sports "query-string tabs always respond…"
-- ⬜ Sport hub drops newest metric entries after 2,000
-- ⬜ Guest import drops XP / achievements
+- ✅ Sport hub drops newest metric entries after 2,000 → newest 2,000 shown, personal bests from every entry — test: api-sports "…thousands of entries"
+- ✅ Guest import drops XP / achievements → XP for moved records comes along (no double counting), achievements re-evaluated — test: api-auth-upgrade "conflict-safe import"
 - ✅ Installable app (Android/iPhone) + offline saved lessons/plans — e2e + service-worker unit tests
 
 ## P2 — AI coaching, learning, analytics, hardening, performance

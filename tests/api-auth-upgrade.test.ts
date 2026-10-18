@@ -1,4 +1,5 @@
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import { todayKey } from "@/lib/domain/dates";
 import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT, type JWK } from "jose";
 import { db } from "@/lib/server/db";
 import { resetEnvCache } from "@/lib/server/env";
@@ -287,12 +288,13 @@ describe("guest mode", () => {
   });
 
   it("signing in to an existing account offers an explicit, conflict-safe import", async () => {
+    const T = todayKey("UTC");
     const account = await newUser();
-    await call(checkin.POST, { cookie: account.cookie, body: { dateKey: D, energy: 4, soreness: 2 } });
+    await call(checkin.POST, { cookie: account.cookie, body: { dateKey: T, energy: 4, soreness: 2 } });
     const g = await newGuest();
     const guestId = (await call(me.GET, { cookie: g })).json.user.id;
-    await call(activity.POST, { cookie: g, body: { sport: "running", dateKey: D, durationMin: 25, intensity: "moderate" } });
-    await call(checkin.POST, { cookie: g, body: { dateKey: D, energy: 2, soreness: 4 } }); // same day as the account's
+    await call(activity.POST, { cookie: g, body: { sport: "running", dateKey: T, durationMin: 25, intensity: "moderate" } });
+    await call(checkin.POST, { cookie: g, body: { dateKey: T, energy: 2, soreness: 4 } }); // same day as the account's
 
     const l = await call(login.POST, { cookie: g, body: { email: account.email, password: "password123" } });
     const claim = cookieOf(l.res, GUEST_CLAIM_COOKIE)!;
@@ -312,8 +314,16 @@ describe("guest mode", () => {
     expect(done.json.moved.activities).toBe(1);
     expect(done.json.skipped.checkIns).toBe(1);
     expect(await db.activityEntry.count({ where: { userId: account.userId } })).toBe(1);
-    const ci = await db.checkIn.findFirst({ where: { userId: account.userId, dateKey: D } });
+    const ci = await db.checkIn.findFirst({ where: { userId: account.userId, dateKey: T } });
     expect(ci!.energy).toBe(4); // the account's own check-in was not overwritten
+    // XP earned by the guest for the moved activity comes along; the clashing check-in's XP does not.
+    const actXp = await db.xpEvent.findMany({ where: { userId: account.userId, source: "activity" } });
+    expect(actXp).toHaveLength(1);
+    expect(done.json.moved.xp).toBe(actXp[0].amount);
+    expect(await db.xpEvent.count({ where: { userId: account.userId, source: "checkin" } })).toBe(1);
+    const prof = await db.profile.findUniqueOrThrow({ where: { userId: account.userId } });
+    const events = await db.xpEvent.aggregate({ where: { userId: account.userId }, _sum: { amount: true } });
+    expect(prof.xp).toBe(events._sum.amount);
     expect(await db.user.findUnique({ where: { id: guestId } })).toBeNull();
   });
 
