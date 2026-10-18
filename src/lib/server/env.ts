@@ -40,18 +40,28 @@ export function env() {
  */
 export function configProblems(): string[] {
   const parsed = schema.safeParse(process.env);
-  if (parsed.success) return [];
-  return parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`);
+  const problems = parsed.success ? [] : parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`);
+  if (process.env.NODE_ENV === "production") {
+    const base = (process.env.APP_BASE_URL ?? "").trim();
+    if (!base) problems.push("APP_BASE_URL: required in production (your public https URL, used for password-reset and sign-in links)");
+    else if (!/^https?:\/\/[^/]+/.test(base)) problems.push("APP_BASE_URL: must be a full URL such as https://your-app.example.com");
+  }
+  return problems;
 }
 
 export function resetEnvCache() {
   cached = null;
 }
 
-/** Base URL for absolute links; falls back to the request origin in development. */
+/**
+ * Base URL for absolute links (password-reset emails, OAuth redirect URI).
+ * Production requires APP_BASE_URL: deriving it from the request would let a forged
+ * Host header point reset links at another site. Development falls back to the request origin.
+ */
 export function appBaseUrl(req?: Request) {
   const configured = env().APP_BASE_URL.trim().replace(/\/$/, "");
   if (configured) return configured;
+  if (process.env.NODE_ENV === "production") throw new Error("APP_BASE_URL must be set in production");
   if (req) return new URL(req.url).origin;
   return "http://localhost:3000";
 }

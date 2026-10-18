@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { db } from "../server/db";
-import { adminEmails, appBaseUrl } from "../server/env";
+import { appBaseUrl } from "../server/env";
 import { AppError, badRequest, conflict, forbidden, notFound } from "../server/errors";
 import { LIMITS, rateLimit } from "../server/rate-limit";
 import { clientIp } from "../server/request";
@@ -8,6 +8,7 @@ import { completeOnboarding, uniqueHandle } from "../services/profile";
 import { recordAuthEvent } from "./audit";
 import { sendMail } from "./mailer";
 import { hashPassword, verifyPassword } from "./password";
+import { promoteIfVerifiedAdmin } from "./roles";
 import type { AuthUser } from "./session";
 import type { GoogleIdentity, OAuthIntent } from "./google";
 import { hmac, randomToken, signPayload, verifyPayload } from "./tokens";
@@ -28,7 +29,7 @@ async function createUser(data: { email: string; passwordHash: string | null; di
         emailVerifiedAt: data.emailVerifiedAt ?? null,
         isGuest: data.isGuest ?? false,
         termsAcceptedAt: data.termsAcceptedAt ?? null,
-        role: !data.isGuest && adminEmails().includes(data.email) ? "admin" : "user",
+        role: "user", // admin is granted only after email verification (see roles.ts)
         profile: { create: { displayName: data.displayName, handle, timezone: data.timezone ?? "UTC" } },
       },
     });
@@ -48,7 +49,7 @@ export async function registerWithPassword(req: Request, input: { email: string;
     try {
       const user = await db.user.update({
         where: { id: current.id },
-        data: { email: input.email, passwordHash, isGuest: false, termsAcceptedAt: new Date(), role: adminEmails().includes(input.email) ? "admin" : "user", profile: { update: { displayName: input.displayName } } },
+        data: { email: input.email, passwordHash, isGuest: false, termsAcceptedAt: new Date(), profile: { update: { displayName: input.displayName } } },
       });
       await recordAuthEvent("guest_converted", { userId: user.id, req, meta: { method: "password" } });
       return { user, upgradedGuest: true };
@@ -233,6 +234,7 @@ export async function resetPassword(req: Request, token: string, password: strin
   if (!count) throw new AppError(400, "invalid_token", "This reset link has already been used.");
   await db.user.update({ where: { id: row.userId }, data: { passwordHash, emailVerifiedAt: new Date() } }); // the link proved control of the inbox
   await db.session.deleteMany({ where: { userId: row.userId } }); // sign out everywhere
+  await promoteIfVerifiedAdmin(row.userId);
   await recordAuthEvent("password_reset_completed", { userId: row.userId, req });
 }
 
@@ -263,6 +265,8 @@ export async function resolveGoogleIdentity(req: Request, id: GoogleIdentity, in
     return { kind: "linked", userId: current.id };
   }
   if (linked) {
+    if (linked.emailVerified) await db.user.updateMany({ where: { id: linked.userId, emailVerifiedAt: null, email: id.email ?? "" }, data: { emailVerifiedAt: new Date() } });
+    await promoteIfVerifiedAdmin(linked.userId);
     await recordAuthEvent("google_login", { userId: linked.userId, req });
     return { kind: "session", userId: linked.userId, isNew: false };
   }
@@ -284,5 +288,6 @@ export async function resolveGoogleIdentity(req: Request, id: GoogleIdentity, in
     await recordAuthEvent("google_register", { userId, req });
   }
   await db.authAccount.create({ data: { userId, provider: "google", providerAccountId: id.sub, email: id.email, emailVerified: true } });
+  await promoteIfVerifiedAdmin(userId);
   return { kind: "session", userId, isNew: true };
 }

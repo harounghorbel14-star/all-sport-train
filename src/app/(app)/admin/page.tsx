@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/server";
+import { isAdmin } from "@/lib/auth/roles";
 import { allExercises } from "@/lib/services/exercises";
 import { db } from "@/lib/server/db";
 import { ButtonLink, Card, CardTitle, PageHeader, Stat } from "@/components/ui/primitives";
@@ -9,7 +10,7 @@ export const metadata = { title: "Admin" };
 
 export default async function AdminPage() {
   const { user } = await requireUser();
-  if (user.role !== "admin") redirect("/today");
+  if (!isAdmin(user)) redirect("/today");
   const [exercises, users, reports] = await Promise.all([allExercises(), db.user.count(), db.report.findMany({ where: { status: "open" }, orderBy: { createdAt: "desc" }, take: 20 })]);
   return (
     <div className="space-y-6">
