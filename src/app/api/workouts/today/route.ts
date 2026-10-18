@@ -9,5 +9,7 @@ const overrides = z.object({
   focus: z.string().max(30).optional(),
   avoidMuscles: z.array(z.string().max(20)).max(10).optional(),
   ignoreReadiness: z.boolean().optional(),
+  /** Adapting after a check-in: plans the user edited (or got from the coach) are kept. */
+  keepEdited: z.boolean().optional(),
 });
 export const POST = authedRoute({ body: overrides }, async ({ user, body }) => regenerateToday(user.id, body));

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/server";
+import { isAdmin } from "@/lib/auth/roles";
 import { aiConfigured } from "@/lib/server/env";
 import { db } from "@/lib/server/db";
 import { coverage } from "@/lib/services/research";
@@ -12,7 +13,7 @@ export const metadata = { title: "Research coverage" };
 
 export default async function ResearchPage({ searchParams }: { searchParams: Promise<{ filter?: string }> }) {
   const { user } = await requireUser();
-  if (user.role !== "admin") redirect("/today");
+  if (!isAdmin(user)) redirect("/today");
   const sp = await searchParams;
   const [rows, sourcesTotal, sourcesOpened, sourcesBlocked] = await Promise.all([
     coverage(),

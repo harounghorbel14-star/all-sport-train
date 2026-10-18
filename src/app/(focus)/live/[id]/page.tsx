@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/server";
-import { getSession } from "@/lib/services/workouts";
+import { completedSummary, getSession } from "@/lib/services/workouts";
 import { exerciseLookup } from "@/lib/services/views";
 import { AppError } from "@/lib/server/errors";
 import { LiveWorkout } from "./live";
@@ -18,7 +18,7 @@ export default async function LivePage({ params }: { params: Promise<{ id: strin
     throw e;
   }
   if (data.session.status === "abandoned") redirect("/today");
-  const lookup = await exerciseLookup();
+  const [lookup, summary] = await Promise.all([exerciseLookup(), data.session.status === "completed" ? completedSummary(user.id, id) : null]);
   return (
     <LiveWorkout
       session={{
@@ -34,6 +34,7 @@ export default async function LivePage({ params }: { params: Promise<{ id: strin
       workout={data.workout}
       lookup={lookup}
       units={profile.units as "metric" | "imperial"}
+      initialSummary={summary}
     />
   );
 }

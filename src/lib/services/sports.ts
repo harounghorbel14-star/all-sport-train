@@ -366,12 +366,22 @@ export async function completePractice(userId: string, id: string, input: z.infe
     if (!m) throw badRequest(`Unknown metric: ${r.metricKey}`);
     resolveMetricValue(m, r);
   }
-  const activity = await db.activityEntry.create({
-    data: { userId, sport: sport.slug, title: plan.title, dateKey, durationMin: input.durationMin, intensity: input.intensity, rpe: input.rpe ?? null, kcalLow: kcal.low, kcalHigh: kcal.high, source: "practice", notes: input.notes ?? null, metrics: "{}" },
-  });
+  // Claim the plan atomically so a double tap or a retry can't log the practice twice.
+  const claimed = await db.practicePlan.updateMany({ where: { id: plan.id, status: { not: "completed" } }, data: { status: "completed", completedAt: new Date() } });
+  if (!claimed.count) throw conflict("Practice already completed");
+  let activity;
+  try {
+    activity = await db.activityEntry.create({
+      data: { userId, sport: sport.slug, title: plan.title, dateKey, durationMin: input.durationMin, intensity: input.intensity, rpe: input.rpe ?? null, kcalLow: kcal.low, kcalHigh: kcal.high, source: "practice", notes: input.notes ?? null, metrics: "{}" },
+    });
+    await db.practicePlan.update({ where: { id: plan.id }, data: { activityId: activity.id, rpe: input.rpe ?? null, notes: input.notes ?? null } });
+  } catch (e) {
+    // Release the claim so the user can try again.
+    await db.practicePlan.update({ where: { id: plan.id }, data: { status: plan.status, completedAt: null } }).catch(() => undefined);
+    throw e;
+  }
   const results = [];
   for (const r of input.results) results.push(await logMetric(userId, sport.slug, { ...r, dateKey, practicePlanId: plan.id }));
-  await db.practicePlan.update({ where: { id: plan.id }, data: { status: "completed", activityId: activity.id, rpe: input.rpe ?? null, notes: input.notes ?? null, completedAt: new Date() } });
   await awardXp(userId, "practice", plan.id, XP.activity + 10);
   const achievements = await evaluateAchievements(userId);
   return { activityId: activity.id, kcal, results: results.map((r) => ({ metricKey: r.entry.metricKey, value: r.entry.value, personalBest: r.personalBest })), achievements };

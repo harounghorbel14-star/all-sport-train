@@ -56,13 +56,13 @@ For Playwright in a custom environment, set `PLAYWRIGHT_CHROMIUM_PATH` to a Chro
 | --- | --- | --- |
 | `DATABASE_URL` | yes | `file:./dev.db` (SQLite) or a PostgreSQL URL (after switching the provider) |
 | `SESSION_SECRET` | yes | 32+ characters; peppers the session-token hashes |
-| `ADMIN_EMAILS` | no | Comma-separated emails that get the admin role on registration (exercise management, reports) |
+| `ADMIN_EMAILS` | no | Comma-separated emails allowed to become admins. The role is granted only after the address is **verified**, by signing in with Google or completing a password-reset link once. Registering with the address is not enough. |
 | `ANTHROPIC_API_KEY` | no | Turns on the conversational coach, photo meal estimates and visual form analysis |
 | `AI_MODEL` | no | Defaults to `claude-opus-5-5` |
 | `FDC_API_KEY` | no | USDA FoodData Central key for extended food search; the local database is always available |
 | `UPLOAD_DIR` | no | Private media storage, default `./storage/uploads` (never under `public/`) |
 | `ENFORCE_TIERS` | no | `true` to gate Pro/Elite features. Default `false`, because there is no payment provider. |
-| `APP_BASE_URL` | for Google / email | Public base URL, e.g. `https://app.example.com`. Used for the OAuth callback and reset links. |
+| `APP_BASE_URL` | **yes in production** | Public base URL, e.g. `https://app.example.com`. Used for the OAuth callback and reset links. It is required so that links are never built from a forged Host header. |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | no | Enables "Continue with Google" (see [Google sign-in setup](#google-sign-in-setup)). |
 | `GOOGLE_CALLBACK_URL` | no | Override for the redirect URI; defaults to `${APP_BASE_URL}/api/auth/google/callback`. |
 | `RESEND_API_KEY`, `MAIL_FROM` | for password reset | Transactional email through Resend. Without them, development logs reset links to the server console; production sends nothing. |
@@ -232,7 +232,7 @@ Set these in the service's **Variables** (the repository's `.env` is never commi
 | `DATABASE_URL` | **Required.** For SQLite, use a file on a persistent volume, e.g. `file:/data/apex.db` with a Railway volume mounted at `/data` — without a volume every redeploy starts with an empty database. Or use PostgreSQL (switch the provider in `schema.prisma` and create a fresh migration). |
 | `UPLOAD_DIR` | `/data/uploads` (same volume) so private photos survive redeploys. |
 | `APP_BASE_URL` | Your public URL, e.g. `https://your-app.up.railway.app` (needed for Google sign-in and reset links). |
-| `ADMIN_EMAILS` | Your email, to get admin access when you register. |
+| `ADMIN_EMAILS` | Your email. After registering, use "Forgot password" once to verify it (needs email configured). Without email, run `npm run admin:grant -- you@example.com` from the service's shell. |
 | Optional | `ANTHROPIC_API_KEY`, `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`, `RESEND_API_KEY` / `MAIL_FROM`, `FDC_API_KEY`. |
 
 If `SESSION_SECRET` or `DATABASE_URL` is missing, the sign-in pages show **"Server setup incomplete"** with the variable names (never values), the server logs the problem at startup, and `/api/health` explains it.

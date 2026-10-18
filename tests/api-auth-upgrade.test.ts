@@ -345,3 +345,47 @@ describe("deployment health", () => {
     }
   });
 });
+
+describe("admin access (P0)", () => {
+  it("never grants admin at registration; only after the email is verified via a reset link", async () => {
+    // tests/setup.ts sets ADMIN_EMAILS=admin@example.com
+    const reg = await call(register.POST, { body: { email: "admin@example.com", password: "password123", displayName: "Imposter", acceptTerms: true } });
+    expect(reg.status).toBe(201);
+    const cookie = sessionCookie(reg.res);
+    const u = await db.user.findUniqueOrThrow({ where: { email: "admin@example.com" } });
+    expect(u.role).toBe("user");
+    const { GET: adminList } = await import("@/app/api/admin/sports/route");
+    expect((await call(adminList, { cookie })).status).toBe(403);
+
+    // A role flag alone (e.g. set by an older version) is not enough without a verified email.
+    await db.user.update({ where: { id: u.id }, data: { role: "admin" } });
+    expect((await call(adminList, { cookie })).status).toBe(403);
+    await db.user.update({ where: { id: u.id }, data: { role: "user" } });
+
+    // Proving inbox control with a reset link promotes the account.
+    await call(forgot.POST, { body: { email: "admin@example.com" } });
+    const token = decodeURIComponent(devMailbox().filter((m) => m.to === "admin@example.com").at(-1)!.text.match(/token=([^\s]+)/)![1]);
+    expect((await call(reset.POST, { body: { token, password: "newpassword456" } })).status).toBe(200);
+    const after = await db.user.findUniqueOrThrow({ where: { id: u.id } });
+    expect(after.role).toBe("admin");
+    const fresh = sessionCookie((await call(login.POST, { body: { email: "admin@example.com", password: "newpassword456" } })).res);
+    expect((await call(adminList, { cookie: fresh })).status).toBe(200);
+  });
+
+  it("requires APP_BASE_URL in production instead of trusting the Host header", async () => {
+    const { appBaseUrl, configProblems } = await import("@/lib/server/env");
+    const env = process.env as Record<string, string | undefined>;
+    const prev = { node: env.NODE_ENV, base: env.APP_BASE_URL };
+    env.NODE_ENV = "production";
+    delete env.APP_BASE_URL;
+    resetEnvCache();
+    try {
+      expect(() => appBaseUrl(new Request("https://evil.example/x"))).toThrow(/APP_BASE_URL/);
+      expect(configProblems().join(" ")).toMatch(/APP_BASE_URL/);
+    } finally {
+      env.NODE_ENV = prev.node;
+      if (prev.base !== undefined) env.APP_BASE_URL = prev.base;
+      resetEnvCache();
+    }
+  });
+});

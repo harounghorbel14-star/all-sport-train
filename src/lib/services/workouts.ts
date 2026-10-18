@@ -150,6 +150,15 @@ export async function getOrCreateTodayPlan(userId: string) {
   const plan = await db.workoutPlan.create({
     data: { userId, title: workout.title, focus: workout.focus, scheduledOn: today, source: "engine", content: JSON.stringify(workout) },
   });
+  // Two requests racing (e.g. two tabs) may both have created a plan: keep the first, drop ours.
+  const first = await db.workoutPlan.findFirst({
+    where: { userId, scheduledOn: today, status: { not: "archived" } },
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+  });
+  if (first && first.id !== plan.id) {
+    await db.workoutPlan.delete({ where: { id: plan.id } });
+    return { plan: first, workout: parseWorkout(first.content) };
+  }
   return { plan, workout };
 }
 
@@ -160,15 +169,20 @@ export async function createPlan(userId: string, workout: GeneratedWorkout, sour
   });
 }
 
-export async function regenerateToday(userId: string, overrides: GenerateOverrides) {
+export async function regenerateToday(userId: string, overrides: GenerateOverrides & { keepEdited?: boolean }) {
   const p = await getProfile(userId);
   const today = todayKey(p.timezone);
+  if (overrides.keepEdited) {
+    const current = await db.workoutPlan.findFirst({ where: { userId, scheduledOn: today, status: { not: "archived" } }, orderBy: { createdAt: "desc" } });
+    // Never silently replace a workout the user changed, or one already under way.
+    if (current && (current.source !== "engine" || current.status !== "planned")) return { plan: current, workout: parseWorkout(current.content), kept: true };
+  }
   await db.workoutPlan.updateMany({ where: { userId, scheduledOn: today, status: "planned" }, data: { status: "archived" } });
   const { workout } = await generateForUser(userId, overrides, today);
   const plan = await db.workoutPlan.create({
     data: { userId, title: workout.title, focus: workout.focus, scheduledOn: today, source: "engine", content: JSON.stringify(workout) },
   });
-  return { plan, workout };
+  return { plan, workout, kept: false };
 }
 
 /** Validates an edited workout: schema + every exercise must exist. */
@@ -249,6 +263,16 @@ export async function startSession(userId: string, planId: string) {
   const session = await db.workoutSession.create({
     data: { userId, planId: plan.id, title: workout.title, content: JSON.stringify(workout) },
   });
+  // A double tap or a second tab may have started one at the same time: the earliest wins.
+  const winner = await db.workoutSession.findFirst({
+    where: { userId, status: { in: ["active", "paused"] } },
+    orderBy: [{ startedAt: "asc" }, { id: "asc" }],
+  });
+  if (winner && winner.id !== session.id) {
+    await db.workoutSession.delete({ where: { id: session.id } });
+    if (winner.planId === planId) return winner;
+    throw conflict("You already have a workout in progress. Finish or end it first.");
+  }
   await db.workoutPlan.update({ where: { id: plan.id }, data: { status: "started" } });
   return session;
 }
@@ -272,18 +296,32 @@ export interface SetInput {
   skipped?: boolean;
 }
 
-async function previousBest(userId: string, exerciseId: string, metric: "reps" | "seconds" | "loadKg", excludeSetId?: string) {
+async function previousBest(userId: string, sessionId: string, exerciseId: string, metric: "reps" | "seconds" | "loadKg", excludeSetId?: string) {
   const [setMax, pr] = await Promise.all([
     db.setLog.aggregate({
-      where: { exerciseId, skipped: false, session: { userId }, ...(excludeSetId ? { id: { not: excludeSetId } } : {}) },
+      where: { exerciseId, skipped: false, session: { userId, status: { not: "abandoned" } }, ...(excludeSetId ? { id: { not: excludeSetId } } : {}) },
       _max: { [metric]: true } as never,
     }) as Promise<{ _max: Record<string, number | null> }>,
-    db.personalRecord.aggregate({ where: { userId, exerciseId, metric }, _max: { value: true } }),
+    // This session's own records are backed by its sets (counted above), which may since have been corrected.
+    db.personalRecord.aggregate({ where: { userId, exerciseId, metric, OR: [{ sessionId: null }, { sessionId: { not: sessionId } }] }, _max: { value: true } }),
   ]);
   const a = setMax._max[metric];
   const b = pr._max.value;
   if (a == null && b == null) return null;
   return Math.max(a ?? 0, b ?? 0);
+}
+
+/**
+ * Drops personal records from this session that its sets no longer support
+ * (a set was corrected downwards, or its block was substituted away).
+ */
+async function reconcileSessionPrs(userId: string, sessionId: string) {
+  const [prs, sets] = await Promise.all([
+    db.personalRecord.findMany({ where: { userId, sessionId } }),
+    db.setLog.findMany({ where: { sessionId, skipped: false } }),
+  ]);
+  const stale = prs.filter((pr) => !sets.some((s) => s.exerciseId === pr.exerciseId && (s[pr.metric as "reps" | "seconds" | "loadKg"] ?? 0) >= pr.value));
+  if (stale.length) await db.personalRecord.deleteMany({ where: { id: { in: stale.map((p) => p.id) } } });
 }
 
 export async function logSet(userId: string, sessionId: string, input: SetInput) {
@@ -313,7 +351,7 @@ export async function logSet(userId: string, sessionId: string, input: SetInput)
     for (const metric of ["reps", "seconds", "loadKg"] as const) {
       const value = data[metric];
       if (value == null || value <= 0) continue;
-      const prev = await previousBest(userId, exercise.id, metric, existing?.id);
+      const prev = await previousBest(userId, sessionId, exercise.id, metric, existing?.id);
       if (prev != null && value > prev) prs.push({ metric, value, previous: prev });
     }
   }
@@ -323,7 +361,10 @@ export async function logSet(userId: string, sessionId: string, input: SetInput)
     create: { sessionId, blockIndex: input.blockIndex, setNumber: input.setNumber, ...data },
     update: data,
   });
+  if (existing) await reconcileSessionPrs(userId, sessionId);
   for (const pr of prs) {
+    // One record per exercise and metric per session: the new best replaces a lower one from earlier in the workout.
+    await db.personalRecord.deleteMany({ where: { userId, sessionId, exerciseId: exercise.id, metric: pr.metric } });
     await db.personalRecord.create({ data: { userId, exerciseId: exercise.id, metric: pr.metric, value: pr.value, sessionId } });
   }
   return { set, prs };
@@ -372,6 +413,7 @@ export async function updateSessionState(userId: string, sessionId: string, a: S
       workout.main[a.blockIndex] = replaced;
       // Sets already logged for the old exercise in this block are discarded.
       await db.setLog.deleteMany({ where: { sessionId: session.id, blockIndex: a.blockIndex } });
+      await reconcileSessionPrs(userId, session.id);
       return db.workoutSession.update({ where: { id: session.id }, data: { content: JSON.stringify(workout) } });
     }
     case "notes":
@@ -379,9 +421,48 @@ export async function updateSessionState(userId: string, sessionId: string, a: S
   }
 }
 
+type LoadedSession = Awaited<ReturnType<typeof getSession>>["session"];
+
+/** Energy estimate from the exercises actually performed (weighted MET). */
+async function sessionKcal(done: LoadedSession["sets"], durationMin: number, weightKg: number | null) {
+  const map = await exerciseMap();
+  const exerciseById = new Map([...map.values()].map((e) => [e.id, e]));
+  const mets = done.map((s) => exerciseById.get(s.exerciseId)?.met ?? 4);
+  const met = mets.reduce((a, b) => a + b, 0) / mets.length;
+  // Rest periods lower the average intensity of a strength session.
+  return exerciseKcal(Math.max(2.5, met * 0.85), durationMin, weightKg);
+}
+
+async function sessionSummary(userId: string, session: LoadedSession, weightKg: number | null, achievements: Awaited<ReturnType<typeof evaluateAchievements>>) {
+  const done = session.sets.filter((s) => !s.skipped);
+  const durationSeconds = session.durationSeconds ?? 0;
+  const kcal = await sessionKcal(done, durationSeconds / 60, weightKg);
+  const prs = await db.personalRecord.findMany({ where: { userId, sessionId: session.id }, include: { exercise: { select: { name: true } } } });
+  return {
+    durationSeconds,
+    setsCompleted: done.length,
+    setsSkipped: session.sets.length - done.length,
+    totalReps: done.reduce((s, x) => s + (x.reps ?? 0), 0),
+    totalSeconds: done.reduce((s, x) => s + (x.seconds ?? 0), 0),
+    volumeKg: done.reduce((s, x) => s + (x.reps ?? 0) * (x.loadKg ?? 0), 0),
+    kcal: { ...kcal, low: session.kcalLow ?? kcal.low, high: session.kcalHigh ?? kcal.high },
+    prs: prs.map((r) => ({ exercise: r.exercise.name, metric: r.metric, value: r.value })),
+    achievements,
+  };
+}
+
+/** Summary of an already completed workout (for a retried completion or reopening the page). */
+export async function completedSummary(userId: string, sessionId: string) {
+  const { session } = await getSession(userId, sessionId);
+  if (session.status !== "completed") throw conflict("This workout isn't finished yet");
+  const p = await getProfile(userId);
+  return sessionSummary(userId, session, p.weightKg, []);
+}
+
 export async function completeSession(userId: string, sessionId: string, input: { rpe?: number; notes?: string }) {
   const { session, workout } = await getSession(userId, sessionId);
-  if (session.status === "completed") throw conflict("Workout already completed");
+  // A retry (lost response, double tap) gets the same summary instead of an error.
+  if (session.status === "completed") return completedSummary(userId, sessionId);
   if (session.status === "abandoned") throw conflict("This workout was ended");
   const done = session.sets.filter((s) => !s.skipped);
   if (!done.length) throw badRequest("Log at least one set before completing the workout");
@@ -391,77 +472,57 @@ export async function completeSession(userId: string, sessionId: string, input: 
   const pausedExtra = session.status === "paused" && session.pausedAt ? Math.round((now.getTime() - session.pausedAt.getTime()) / 1000) : 0;
   const durationSeconds = Math.max(60, Math.round((now.getTime() - session.startedAt.getTime()) / 1000) - session.pausedSeconds - pausedExtra);
   const durationMin = durationSeconds / 60;
-
-  // Weighted MET from the exercises actually performed.
-  const map = await exerciseMap();
-  const exerciseById = new Map([...map.values()].map((e) => [e.id, e]));
-  const mets = done.map((s) => exerciseById.get(s.exerciseId)?.met ?? 4);
-  const met = mets.reduce((a, b) => a + b, 0) / mets.length;
-  // Rest periods lower the average intensity of a strength session.
-  const effectiveMet = Math.max(2.5, met * 0.85);
-  const kcal = exerciseKcal(effectiveMet, durationMin, p.weightKg);
-  const dateKey = todayKey(p.timezone, now);
+  const kcal = await sessionKcal(done, durationMin, p.weightKg);
+  const dateKey = todayKey(p.timezone);
   const rpe = input.rpe ?? null;
 
-  await db.$transaction([
-    db.workoutSession.update({
-      where: { id: session.id },
-      data: {
-        status: "completed",
-        endedAt: now,
-        pausedAt: null,
-        durationSeconds,
-        rpe,
-        notes: input.notes?.slice(0, 1000) ?? session.notes,
-        kcalLow: kcal.low,
-        kcalHigh: kcal.high,
-        dateKey,
-      },
-    }),
-    // One activity entry per workout (unique on workoutSessionId) prevents double counting.
-    db.activityEntry.create({
-      data: {
-        userId,
-        sport: p.sports.includes("gym") && !p.sports.includes("calisthenics") ? "gym" : "calisthenics",
-        title: workout.title,
-        dateKey,
-        startedAt: session.startedAt,
-        durationMin: Math.round(durationMin * 10) / 10,
-        intensity: !rpe ? "moderate" : rpe <= 4 ? "light" : rpe <= 7 ? "moderate" : "vigorous",
-        rpe,
-        kcalLow: kcal.low,
-        kcalHigh: kcal.high,
-        source: "workout",
-        workoutSessionId: session.id,
-      },
-    }),
-    ...(session.planId ? [db.workoutPlan.update({ where: { id: session.planId }, data: { status: "completed" } })] : []),
-  ]);
+  // Claim the session atomically: of two concurrent completions only one records anything.
+  const claimed = await db.workoutSession.updateMany({
+    where: { id: session.id, status: { in: ["active", "paused"] } },
+    data: { status: "completed", endedAt: now, pausedAt: null, durationSeconds, rpe, notes: input.notes?.slice(0, 1000) ?? session.notes, kcalLow: kcal.low, kcalHigh: kcal.high, dateKey },
+  });
+  if (!claimed.count) return completedSummary(userId, sessionId);
+  try {
+    await db.$transaction([
+      // One activity entry per workout (unique on workoutSessionId) prevents double counting.
+      db.activityEntry.create({
+        data: {
+          userId,
+          sport: p.sports.includes("gym") && !p.sports.includes("calisthenics") ? "gym" : "calisthenics",
+          title: workout.title,
+          dateKey,
+          startedAt: session.startedAt,
+          durationMin: Math.round(durationMin * 10) / 10,
+          intensity: !rpe ? "moderate" : rpe <= 4 ? "light" : rpe <= 7 ? "moderate" : "vigorous",
+          rpe,
+          kcalLow: kcal.low,
+          kcalHigh: kcal.high,
+          source: "workout",
+          workoutSessionId: session.id,
+        },
+      }),
+      ...(session.planId ? [db.workoutPlan.update({ where: { id: session.planId }, data: { status: "completed" } })] : []),
+    ]);
+  } catch (e) {
+    // Put the session back so the user can finish it again.
+    await db.workoutSession.update({ where: { id: session.id }, data: { status: session.status, endedAt: null, pausedAt: session.pausedAt, durationSeconds: null, dateKey: null } }).catch(() => undefined);
+    throw e;
+  }
 
   await awardXp(userId, "workout", session.id, XP.workout + Math.min(60, Math.round(durationMin)) * XP.workoutPerMinute);
   const achievements = await evaluateAchievements(userId);
-  const prs = await db.personalRecord.findMany({ where: { userId, sessionId: session.id }, include: { exercise: { select: { name: true } } } });
-
-  const totalReps = done.reduce((s, x) => s + (x.reps ?? 0), 0);
-  const totalSeconds = done.reduce((s, x) => s + (x.seconds ?? 0), 0);
-  const volumeKg = done.reduce((s, x) => s + (x.reps ?? 0) * (x.loadKg ?? 0), 0);
-  return {
-    durationSeconds,
-    setsCompleted: done.length,
-    setsSkipped: session.sets.length - done.length,
-    totalReps,
-    totalSeconds,
-    volumeKg,
-    kcal,
-    prs: prs.map((r) => ({ exercise: r.exercise.name, metric: r.metric, value: r.value })),
-    achievements,
-  };
+  const { session: completed } = await getSession(userId, sessionId);
+  return sessionSummary(userId, completed, p.weightKg, achievements);
 }
 
 export async function abandonSession(userId: string, sessionId: string) {
   const { session } = await getSession(userId, sessionId);
   if (session.status === "completed") throw conflict("Completed workouts can't be ended");
-  await db.workoutSession.update({ where: { id: session.id }, data: { status: "abandoned", endedAt: new Date() } });
+  // Discarded workouts leave no trace in bests: their sets are ignored and their records removed.
+  await db.$transaction([
+    db.workoutSession.update({ where: { id: session.id }, data: { status: "abandoned", endedAt: new Date() } }),
+    db.personalRecord.deleteMany({ where: { userId, sessionId: session.id } }),
+  ]);
   if (session.planId) await db.workoutPlan.update({ where: { id: session.planId }, data: { status: "planned" } });
   return { ok: true };
 }

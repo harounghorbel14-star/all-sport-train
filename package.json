@@ -18,7 +18,8 @@
     "db:reset": "prisma migrate reset --force",
     "postinstall": "prisma generate",
     "research": "tsx scripts/research.ts",
-    "start:prod": "prisma migrate deploy && tsx prisma/seed.ts && next start"
+    "start:prod": "prisma migrate deploy && tsx prisma/seed.ts && next start",
+    "admin:grant": "tsx scripts/grant-admin.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

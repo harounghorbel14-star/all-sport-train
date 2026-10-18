@@ -6,7 +6,12 @@ import { tooMany } from "./errors";
  */
 const buckets = new Map<string, number[]>();
 
-export function rateLimit(key: string, limit: number, windowMs: number, now = Date.now()) {
+// Test environments that create many accounts from one IP can raise limits (e.g. RATE_LIMIT_MULTIPLIER=20).
+// Never set this in production.
+const MULTIPLIER = Math.max(1, Number(process.env.RATE_LIMIT_MULTIPLIER) || 1);
+
+export function rateLimit(key: string, baseLimit: number, windowMs: number, now = Date.now()) {
+  const limit = baseLimit * MULTIPLIER;
   const hits = (buckets.get(key) ?? []).filter((t) => now - t < windowMs);
   if (hits.length >= limit) {
     const retryAfter = Math.ceil((windowMs - (now - hits[0])) / 1000);

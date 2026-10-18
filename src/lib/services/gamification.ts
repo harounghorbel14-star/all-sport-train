@@ -61,9 +61,9 @@ export async function collectStats(userId: string): Promise<AchievementStats> {
   const today = todayKey(p.timezone);
   const [workouts, pushups, pullups, plank, skillsDone, reviews, mobility, prs, activities, sports] = await Promise.all([
     db.workoutSession.count({ where: { userId, status: "completed" } }),
-    db.setLog.aggregate({ where: { skipped: false, session: { userId }, exercise: { slug: { in: PUSHUP_SLUGS } } }, _sum: { reps: true } }),
-    db.setLog.aggregate({ where: { skipped: false, session: { userId }, exercise: { slug: { in: PULLUP_SLUGS } } }, _max: { reps: true } }),
-    db.setLog.aggregate({ where: { skipped: false, session: { userId }, exercise: { slug: "front-plank" } }, _max: { seconds: true } }),
+    db.setLog.aggregate({ where: { skipped: false, session: { userId, status: { not: "abandoned" } }, exercise: { slug: { in: PUSHUP_SLUGS } } }, _sum: { reps: true } }),
+    db.setLog.aggregate({ where: { skipped: false, session: { userId, status: { not: "abandoned" } }, exercise: { slug: { in: PULLUP_SLUGS } } }, _max: { reps: true } }),
+    db.setLog.aggregate({ where: { skipped: false, session: { userId, status: { not: "abandoned" } }, exercise: { slug: "front-plank" } }, _max: { seconds: true } }),
     db.skillProgress.count({ where: { userId, unlockedAt: { not: null }, skillSlug: { in: SKILLS.map((s) => s.slug) } } }),
     db.weeklyReview.count({ where: { userId } }),
     db.mobilitySession.count({ where: { userId } }),

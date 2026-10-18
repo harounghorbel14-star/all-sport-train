@@ -17,7 +17,7 @@ beforeAll(async () => {
 
 async function admin() {
   const u = await newUser();
-  await db.user.update({ where: { id: u.userId }, data: { role: "admin" } });
+  await db.user.update({ where: { id: u.userId }, data: { role: "admin", emailVerifiedAt: new Date() } });
   return u;
 }
 

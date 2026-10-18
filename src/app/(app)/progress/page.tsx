@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TabLink } from "@/components/ui/tab-link";
 import { Download, Dumbbell, LineChart as LineIcon, Ruler } from "lucide-react";
 import { requireUser } from "@/lib/auth/server";
 import { analytics, RANGES, type RangeKey } from "@/lib/services/progress";
@@ -31,9 +32,9 @@ export default async function ProgressPage({ searchParams }: { searchParams: Pro
         action={
           <div className="flex gap-1 rounded-xl bg-surface-2 p-1" role="tablist" aria-label="Time range">
             {Object.keys(RANGES).map((r) => (
-              <Link key={r} href={`/progress?range=${r}${sp.exercise ? `&exercise=${sp.exercise}` : ""}`} role="tab" aria-selected={r === range} className={cx("rounded-lg px-3 py-1.5 text-sm font-medium", r === range ? "bg-accent text-accent-fg" : "text-muted")}>
+              <TabLink key={r} href={`/progress?range=${r}${sp.exercise ? `&exercise=${sp.exercise}` : ""}`} role="tab" aria-selected={r === range} className={cx("rounded-lg px-3 py-1.5 text-sm font-medium", r === range ? "bg-accent text-accent-fg" : "text-muted")}>
                 {r}
-              </Link>
+              </TabLink>
             ))}
           </div>
         }

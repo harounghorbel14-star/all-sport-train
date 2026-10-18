@@ -3,11 +3,15 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import { currentUser } from "@/lib/auth/server";
 import { isRtl } from "@/lib/i18n";
+import { ServiceWorkerRegister } from "@/components/pwa/register";
 
 export const metadata: Metadata = {
   title: { default: "APEX FIT — AI Fitness & Calisthenics", template: "%s · APEX FIT" },
   description: "Personalised calisthenics, strength, nutrition and recovery coaching. Useful from day one — no equipment, subscription or wearable required.",
   applicationName: "APEX FIT",
+  appleWebApp: { capable: true, title: "APEX FIT", statusBarStyle: "black-translucent" },
+  icons: { icon: "/icon.svg", apple: "/icons/apple-touch-icon.png" },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
@@ -32,6 +36,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Providers locale={locale} units={(p?.units as "metric" | "imperial") ?? "metric"} reducedMotion={!!p?.reducedMotion}>
           {children}
         </Providers>
+        <ServiceWorkerRegister />
       </body>
     </html>
   );

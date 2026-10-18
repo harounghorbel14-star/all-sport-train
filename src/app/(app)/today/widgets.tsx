@@ -79,8 +79,9 @@ export function CheckInCard({ dateKey, existing }: { dateKey: string; existing?:
     setSaving(true);
     try {
       const r = await api<{ advice: { title: string; body: string } }>("/api/recovery/checkin", { body: { dateKey, sleepHours: sleep, energy, soreness, pain, isRestDay: rest } });
-      setAdvice(r.advice);
-      await api("/api/workouts/today", { body: {} }).catch(() => undefined); // adapt today's session
+      // Adapt today's session — unless the user edited it, which we keep and say so.
+      const adapted = await api<{ kept?: boolean }>("/api/workouts/today", { body: { keepEdited: true } }).catch(() => null);
+      setAdvice(adapted?.kept ? { ...r.advice, body: `${r.advice.body} Your edited workout was kept as it is — use “Regenerate” if you want it adapted to this check-in.` } : r.advice);
       router.refresh();
     } catch (e) {
       toast(e instanceof Error ? e.message : "Could not save", "error");

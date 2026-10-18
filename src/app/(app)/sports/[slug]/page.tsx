@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TabLink } from "@/components/ui/tab-link";
 import { notFound } from "next/navigation";
 import { BookOpen, Bot, Check, Lock, ShieldAlert, Trophy } from "lucide-react";
 import { requireUser } from "@/lib/auth/server";
@@ -78,9 +79,9 @@ export default async function SportHubPage({ params, searchParams }: { params: P
 
       <nav className="-mx-1 flex gap-1 overflow-x-auto rounded-xl bg-surface-2 p-1 scrollbar-none" role="tablist" aria-label={`${sport.name} sections`}>
         {tabs.map((t) => (
-          <Link key={t.key} href={t.key === "overview" ? `/sports/${slug}` : `/sports/${slug}?tab=${t.key}`} role="tab" aria-selected={t.key === tab} scroll={false} className={cx("shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium", t.key === tab ? "bg-accent text-accent-fg" : "text-muted hover:text-fg")}>
+          <TabLink key={t.key} href={t.key === "overview" ? `/sports/${slug}` : `/sports/${slug}?tab=${t.key}`} role="tab" aria-selected={t.key === tab} scroll={false} className={cx("shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium", t.key === tab ? "bg-accent text-accent-fg" : "text-muted hover:text-fg")}>
             {t.label}
-          </Link>
+          </TabLink>
         ))}
       </nav>
 

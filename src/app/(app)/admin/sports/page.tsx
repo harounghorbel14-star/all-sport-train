@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/server";
+import { isAdmin } from "@/lib/auth/roles";
 import { CATEGORIES } from "@/lib/content/sports/types";
 import { adminListContent } from "@/lib/services/sports";
 import { Card, PageHeader, Stat } from "@/components/ui/primitives";
@@ -9,7 +10,7 @@ export const metadata = { title: "Sports content" };
 
 export default async function AdminSportsPage() {
   const { user } = await requireUser();
-  if (user.role !== "admin") redirect("/today");
+  if (!isAdmin(user)) redirect("/today");
   const data = await adminListContent();
   const q = data.queue;
   return (

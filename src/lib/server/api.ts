@@ -3,6 +3,7 @@ import { z } from "zod";
 import { AppError, badRequest, forbidden, unauthorized } from "./errors";
 import { getUserFromToken, readCookie, SESSION_COOKIE, type AuthUser } from "../auth/session";
 import { log } from "./logger";
+import { isAdmin } from "../auth/roles";
 
 type Ctx<B, Q, P> = { req: Request; body: B; query: Q; params: P };
 type AuthedCtx<B, Q, P> = Ctx<B, Q, P> & { user: AuthUser };
@@ -110,7 +111,7 @@ export function authedRoute<B = undefined, Q = undefined>(
       const user = await getUserFromToken(readCookie(req.headers.get("cookie"), SESSION_COOKIE));
       if (!user) throw unauthorized();
       if (user.isGuest && guestBlocked(new URL(req.url).pathname)) throw new AppError(403, "guest_restricted", "Create a free account to use this feature. Your guest progress will be kept.");
-      if (opts.admin && user.role !== "admin") throw forbidden("Administrator access required");
+      if (opts.admin && !isAdmin(user)) throw forbidden(user.role === "admin" ? "Verify your email (use “Forgot password” once) to use admin features" : "Administrator access required");
       const params = (await route?.params) ?? {};
       const { body, query } = await parseInput(req, opts);
       const out = await fn({ req, body, query, params, user });

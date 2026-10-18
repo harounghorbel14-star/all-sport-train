@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { api } from "@/lib/client/api";
+import { clearOfflineData } from "@/lib/client/pwa";
 import { useI18n } from "../providers";
 import { cx } from "../ui/primitives";
 import { Sheet } from "../ui/overlay";
@@ -40,6 +41,7 @@ export function AppShell({ children, user, streak, level }: ShellProps) {
   async function logout() {
     if (user.isGuest && !confirm("Leave guest mode? Without an account, this guest progress can't be recovered after you leave.")) return;
     await api("/api/auth/logout", { method: "POST" }).catch(() => undefined);
+    await clearOfflineData().catch(() => undefined); // saved pages may contain personal plans
     router.push("/login");
     router.refresh();
   }

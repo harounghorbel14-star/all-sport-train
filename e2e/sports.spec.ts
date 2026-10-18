@@ -35,3 +35,15 @@ test("sports: search → join → lesson → practice → log a result", async (
   await page.getByRole("button", { name: "Save result" }).click();
   await expect(page.getByText("Best 70%")).toBeVisible();
 });
+
+test("query-string tabs always respond, even on chart-heavy pages", async ({ page }) => {
+  await registerAndOnboard(page);
+  for (const [start, tabs] of [["/sports/basketball?tab=drills", ["Rules", "Learn", "Drills", "Progress", "Overview"]], ["/progress?range=12w", ["4w", "24w", "12w"]]] as const) {
+    await page.goto(start);
+    for (let i = 0; i < 10; i++) {
+      const tab = page.getByRole("tab", { name: tabs[i % tabs.length], exact: true });
+      await tab.click();
+      await expect(tab).toHaveAttribute("aria-selected", "true", { timeout: 8000 });
+    }
+  }
+});
