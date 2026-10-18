@@ -28,43 +28,44 @@ model User {
   resetTokens  PasswordResetToken[]
   authEvents   AuthEvent[]
 
-  profile          Profile?
-  sessions         Session[]
-  plans            WorkoutPlan[]
-  workoutSessions  WorkoutSession[]
-  personalRecords  PersonalRecord[]
-  favorites        FavoriteExercise[]
-  skillProgress    SkillProgress[]
-  foodEntries      FoodEntry[]
-  customFoods      Food[]
-  savedMeals       SavedMeal[]
-  waterLogs        WaterLog[]
-  activities       ActivityEntry[]
-  checkIns         CheckIn[]
-  mobilityLogs     MobilitySession[]
-  measurements     BodyMeasurement[]
-  media            MediaUpload[]
-  formChecks       FormCheck[]
-  achievements     UserAchievement[]
-  xpEvents         XpEvent[]
-  weeklyReviews    WeeklyReview[]
-  coachMessages    CoachMessage[]
-  notifications    Notification[]
-  challengeEntries ChallengeParticipant[]
-  posts            Post[]
-  comments         Comment[]
-  reactions        Reaction[]
-  sentRequests     Friendship[]           @relation("requester")
-  receivedRequests Friendship[]           @relation("addressee")
-  blocks           Block[]                @relation("blocker")
-  blockedBy        Block[]                @relation("blocked")
-  reports          Report[]               @relation("reporter")
-  groupMemberships GroupMember[]
-  ownedGroups      Group[]
-  userSports       UserSport[]
-  lessonProgress   LessonProgress[]
-  practicePlans    PracticePlan[]
-  sportMetrics     SportMetricEntry[]
+  profile                Profile?
+  sessions               Session[]
+  plans                  WorkoutPlan[]
+  workoutSessions        WorkoutSession[]
+  personalRecords        PersonalRecord[]
+  favorites              FavoriteExercise[]
+  skillProgress          SkillProgress[]
+  foodEntries            FoodEntry[]
+  customFoods            Food[]
+  savedMeals             SavedMeal[]
+  waterLogs              WaterLog[]
+  activities             ActivityEntry[]
+  checkIns               CheckIn[]
+  mobilityLogs           MobilitySession[]
+  measurements           BodyMeasurement[]
+  media                  MediaUpload[]
+  formChecks             FormCheck[]
+  achievements           UserAchievement[]
+  xpEvents               XpEvent[]
+  weeklyReviews          WeeklyReview[]
+  coachMessages          CoachMessage[]
+  notifications          Notification[]
+  challengeEntries       ChallengeParticipant[]
+  posts                  Post[]
+  comments               Comment[]
+  reactions              Reaction[]
+  sentRequests           Friendship[]             @relation("requester")
+  receivedRequests       Friendship[]             @relation("addressee")
+  blocks                 Block[]                  @relation("blocker")
+  blockedBy              Block[]                  @relation("blocked")
+  reports                Report[]                 @relation("reporter")
+  groupMemberships       GroupMember[]
+  ownedGroups            Group[]
+  userSports             UserSport[]
+  lessonProgress         LessonProgress[]
+  practicePlans          PracticePlan[]
+  sportMetrics           SportMetricEntry[]
+  recommendationFeedback RecommendationFeedback[]
 }
 
 /// External identity (e.g. Google). The provider's stable subject id is the key — never the email.
@@ -968,4 +969,18 @@ model SportMetricEntry {
   sport          Sport    @relation(fields: [sportId], references: [id], onDelete: Cascade)
 
   @@index([userId, sportId, metricKey, dateKey])
+}
+
+/// What the user did with a coach recommendation (accept / modify / reject), so it isn't repeated
+/// and future suggestions can respect it.
+model RecommendationFeedback {
+  id        String   @id @default(cuid())
+  userId    String
+  dateKey   String
+  action    String // accepted | modified | rejected
+  detail    String? // JSON: the suggestion shown and any changes / reason
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, dateKey])
 }

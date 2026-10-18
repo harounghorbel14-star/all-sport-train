@@ -18,6 +18,8 @@ import { MeterBar, ProgressRing } from "@/components/ui/charts";
 import { AnimatedNumber, Stagger, StaggerItem } from "@/components/ui/motion";
 import { WorkoutSections } from "@/components/workout/block-list";
 import { CheckInCard, RegenerateButtons, StartWorkoutButton } from "./widgets";
+import { CoachSuggestion } from "./recommendation";
+import { nextRecommendation } from "@/lib/services/recommendation";
 
 export const metadata = { title: "Today" };
 
@@ -26,7 +28,7 @@ export default async function TodayPage({ searchParams }: { searchParams: Promis
   const t = getDictionary(profile.locale);
   const { welcome } = await searchParams;
   const today = todayKey(profile.timezone);
-  const [{ plan, workout }, week, streak, missions, readiness, roadmap, nutrition, skills, active, lookup, prs] = await Promise.all([
+  const [{ plan, workout }, week, streak, missions, readiness, roadmap, nutrition, skills, active, lookup, prs, recommendation] = await Promise.all([
     getOrCreateTodayPlan(user.id),
     weekPreview(user.id),
     streakSummary(user.id),
@@ -38,6 +40,7 @@ export default async function TodayPage({ searchParams }: { searchParams: Promis
     activeSession(user.id),
     exerciseLookup(),
     db.personalRecord.findMany({ where: { userId: user.id }, orderBy: { achievedAt: "desc" }, take: 4, include: { exercise: { select: { name: true, slug: true } } } }),
+    nextRecommendation(user.id),
   ]);
 
   const plannedToday = profile.trainingDays.includes(weekday(today));
@@ -74,6 +77,8 @@ export default async function TodayPage({ searchParams }: { searchParams: Promis
           <p className="text-xs text-muted">Your first session is below. Start whenever you&apos;re ready — finishing is the win, not perfection.</p>
         </Notice>
       )}
+
+      {!active && <CoachSuggestion rec={recommendation} />}
 
       <Stagger className="grid gap-5 lg:grid-cols-3">
         {/* Today's session */}
