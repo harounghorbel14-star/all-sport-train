@@ -5,6 +5,7 @@ Each item names how it was verified. Audit of 2026-10-18 (findings verified by r
 
 ## P0 — security, broken auth, data loss, critical failures
 - ✅ Admin role granted to unverified emails in `ADMIN_EMAILS` → admin now requires role + verified email (Google or reset link); API and pages use `isAdmin()` — tests: api-auth-upgrade "admin access (P0)"
+- ✅ Operator escape hatch for deployments without email: `npm run admin:grant -- you@example.com` (marks the address verified, logs an `admin_granted_by_operator` auth event) — verified manually
 - ✅ Reset/OAuth links built from the request Host → `APP_BASE_URL` required in production (health + setup notice report it) — test: "requires APP_BASE_URL in production"
 
 ## P1 — core workout experience, persistence, progress accuracy

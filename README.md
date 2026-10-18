@@ -232,7 +232,7 @@ Set these in the service's **Variables** (the repository's `.env` is never commi
 | `DATABASE_URL` | **Required.** For SQLite, use a file on a persistent volume, e.g. `file:/data/apex.db` with a Railway volume mounted at `/data` — without a volume every redeploy starts with an empty database. Or use PostgreSQL (switch the provider in `schema.prisma` and create a fresh migration). |
 | `UPLOAD_DIR` | `/data/uploads` (same volume) so private photos survive redeploys. |
 | `APP_BASE_URL` | Your public URL, e.g. `https://your-app.up.railway.app` (needed for Google sign-in and reset links). |
-| `ADMIN_EMAILS` | Your email. After registering, use "Forgot password" once to verify it; you then get admin access. |
+| `ADMIN_EMAILS` | Your email. After registering, use "Forgot password" once to verify it (needs email configured). Without email, run `npm run admin:grant -- you@example.com` from the service's shell. |
 | Optional | `ANTHROPIC_API_KEY`, `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`, `RESEND_API_KEY` / `MAIL_FROM`, `FDC_API_KEY`. |
 
 If `SESSION_SECRET` or `DATABASE_URL` is missing, the sign-in pages show **"Server setup incomplete"** with the variable names (never values), the server logs the problem at startup, and `/api/health` explains it.
