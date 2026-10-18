@@ -7,7 +7,7 @@ import { useState, type ReactNode } from "react";
 import { api } from "@/lib/client/api";
 import { clearOfflineData } from "@/lib/client/pwa";
 import { InstallApp } from "@/components/pwa/install";
-import { EQUIPMENT_LABELS, LIMITATION_LABELS } from "@/lib/content/exercises";
+import { EQUIPMENT_LABELS, LIMITATION_LABELS } from "@/lib/exercise-labels";
 import { LOCALE_NAMES } from "@/lib/i18n";
 import { Badge, Button, ButtonLink, Card, CardTitle, Chip, Field, Input, Notice, Select, Textarea, Toggle } from "@/components/ui/primitives";
 import { Sheet, useToast } from "@/components/ui/overlay";

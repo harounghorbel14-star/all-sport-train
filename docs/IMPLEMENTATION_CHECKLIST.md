@@ -16,29 +16,32 @@ Each item names how it was verified. Audit of 2026-10-18 (findings verified by r
 - ✅ Offline set queue: queue overwritten during flush, dropped on server error, not flushed after reload → ref-based queue, 5xx kept for retry, auto-flush after reload, finish blocked while sets are unsynced — e2e journey "sets logged without a connection sync after a reload…"
 - ✅ Recovery check-in regenerates (archives) a workout the user edited → edited/coach/started plans are kept and the user is told — test: api-workouts "adapting after a check-in keeps…"
 - ✅ Two active sessions possible on double start / two tabs (and duplicate today plans) → earliest wins, duplicates removed — test: api-workouts "never creates two plans…" (fails on the old code: 3 plans)
-- ⬜ Check-ins and mobility logs can be backdated for XP / streak repair; mobility double-submit
+- ✅ Check-ins and mobility logs can be backdated for XP / streak repair; mobility double-submit → today or yesterday only, repeat taps logged once, busy state on the button — test: api-other "recovery logging dates"
 - ✅ Completed sessions still render the live logging UI; completion retry loses the summary → reopening shows the summary; retries/races return the same summary, one activity, XP once — tests: api-workouts "completes once when two completions race", e2e journey
 - ✅ Query-string tabs (sport hubs, Progress) sometimes didn't respond: Next's router fetched the page but never committed it (pre-existing — reproduced on the last merged commit; still present on the latest Next 15 patch; bisected to the chart components but not to any one behaviour) → `TabLink` falls back to a normal page load after 1.5 s — 50-click stress: 0 stuck (was 3–6 of 8); e2e sports "query-string tabs always respond…"
-- ⬜ Sport hub drops newest metric entries after 2,000
-- ⬜ Guest import drops XP / achievements
+- ✅ Sport hub drops newest metric entries after 2,000 → newest 2,000 shown, personal bests from every entry — test: api-sports "…thousands of entries"
+- ✅ Guest import drops XP / achievements → XP for moved records comes along (no double counting), achievements re-evaluated — test: api-auth-upgrade "conflict-safe import"
 - ✅ Installable app (Android/iPhone) + offline saved lessons/plans — e2e + service-worker unit tests
 
 ## P2 — AI coaching, learning, analytics, hardening, performance
-- ⬜ Skill/lesson states: not started / in progress / awaiting assessment / completed; self-reported vs verified
-- ⬜ Adaptive next-workout recommendation with reasons; accept / modify / reject
-- ⬜ IP rate limits trust X-Forwarded-For; limiter never evicts keys
-- ⬜ Uploads parsed fully before size checks
-- ⬜ Saved-meal foodId not ownership-checked
-- ⬜ Knowledge search loads the whole catalog per request; research-gap queue can be flooded
-- ⬜ XP farming via activity log + delete
-- ⬜ Malformed cookie → 500 on every request
-- ⬜ Imperial units for PRs, waist and volume; silent failures on deletes/toggles
-- ⬜ N+1 queries: achievements, practice completion, skills list, lesson page; exercise catalog in client bundles
+- ✅ Skill/lesson states: not started / in progress / awaiting assessment / completed; self-reported vs verified → opening a lesson changes nothing; lessons with a measurable progress test wait for a logged result that meets it (XP and prerequisites only once passed); evidence shown as self-reported / result logged / progress test passed; skill prerequisites say whether a best came from a workout or a self-reported test; results are labelled self-reported (APEX can't verify) — test: api-sports "lesson states"
+- ✅ Adaptive next-workout recommendation with reasons; accept / modify / reject → "Coach suggestion" on Today: readiness, RPE, skipped sets, time since last session; each reason quotes the data; missing data listed as unknowns (never as recovery); cautious plateau check (≥4 sessions over ≥3 weeks) with easier/harder variations; missing skill prerequisites; nothing changes until Accept/Modify; every response recorded (`RecommendationFeedback`, included in data export) — tests: recommendation.test.ts, e2e journey
+- ✅ IP rate limits trust X-Forwarded-For; limiter never evicts keys → right-most proxy-added address (`TRUSTED_PROXY_HOPS`, default 1), expired buckets swept — tests: hardening.test.ts
+- ✅ Uploads parsed fully before size checks → Content-Length checked first, stream counted while reading, 413 past the limit — tests: hardening.test.ts
+- ✅ Saved-meal foodId not ownership-checked → only shared or own foods are linked; unknown/deleted foods no longer crash logging — test: api-other "saved meals"
+- ✅ Knowledge search loads the whole catalog per request; research-gap queue can be flooded → tokenised index cached (invalidated by content edits, 5-min TTL); 10 new gaps per user per day, 500 open gaps max; the coach only says a question was queued when it was — tests: research "knowledge index and gap queue"
+- ✅ XP farming via activity log + delete → XP revoked on delete; at most 5 XP-earning activities per 24 h (all still logged) — test: api-other "XP integrity"
+- ✅ Malformed cookie → 500 on every request → treated as no cookie — test: hardening.test.ts
+- ✅ Imperial units for PRs, waist and volume; silent failures on deletes/toggles → shared `formatRecord`/`formatWeight` everywhere; user actions use `attempt()` which shows the error and stops — tests: hardening.test.ts
+- ✅ Streaks counted a forgiven missed day as a streak day → grace protects the chain without adding to it — test: domain "forgives one missed planned day…"
+- ✅ N+1 queries: achievements, practice completion, skills list, lesson page; exercise catalog in client bundles → achievements stats in one round trip; skills list uses 4 grouped queries; lesson page no longer loads the results history; practice completion reuses the loaded sport; labels moved to `src/lib/exercise-labels.ts` (no client component imports the catalog); coach context and sport hub built once per message
 
 ## P3 — community, integrations, polish
-- ⬜ RTL decorative offsets; French/Arabic coverage of page strings
-- ⬜ Missing loading states for (focus)/(auth); 401 redirect without `next`; invalid calendar dates accepted
-- ⬜ Community: reaction double-tap 500; report brigading threshold
+- ✅ RTL decorative offsets → centred glows use direction-neutral centring; admin table uses `text-start`; untranslated English text inside the Arabic UI keeps its reading order and punctuation (`unicode-bidi: plaintext`) — verified by screenshot at 390 px, no horizontal overflow
+- ✅ French/Arabic coverage of the shared dictionary → every key translated, placeholders preserved — test: i18n.test.ts (and the `Dictionary` type)
+- ⚠️ Many page bodies (and all sports content) are still English-only: only the shared dictionary (navigation, sign-in, onboarding, Today, workout screens) is translated
+- ✅ Missing loading states for (focus)/(auth); 401 redirect without `next`; invalid calendar dates accepted → skeletons added; expired sessions return to the same page after sign-in; 2026-02-30 etc. rejected — test: hardening.test.ts "dates"
+- ✅ Community: reaction double-tap 500; report brigading threshold → concurrent reactions settle cleanly; only accounts ≥3 days old count toward auto-hiding (all reports still reach moderation) — test: api-other "community robustness"
 - ⚠️ Root cause of the stalled tab navigations is unknown; the fallback costs ~1.5 s plus a page load when it happens
 - ⚠️ Registration reveals existing emails (accepted trade-off for clear UX; reset flow does not)
 

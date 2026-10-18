@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api } from "@/lib/client/api";
-import { EQUIPMENT_LABELS, LIMITATION_LABELS, MUSCLE_LABELS, PATTERN_LABELS } from "@/lib/content/exercises";
+import { EQUIPMENT_LABELS, LIMITATION_LABELS, MUSCLE_LABELS, PATTERN_LABELS } from "@/lib/exercise-labels";
 import { Button, Chip, Field, Input, Select, Textarea, Toggle } from "@/components/ui/primitives";
 import { useToast } from "@/components/ui/overlay";
 

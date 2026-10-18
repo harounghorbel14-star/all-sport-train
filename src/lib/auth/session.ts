@@ -43,7 +43,12 @@ export function readCookie(header: string | null, name: string): string | undefi
   if (!header) return undefined;
   for (const part of header.split(";")) {
     const [k, ...v] = part.trim().split("=");
-    if (k === name) return decodeURIComponent(v.join("="));
+    if (k !== name) continue;
+    try {
+      return decodeURIComponent(v.join("="));
+    } catch {
+      return undefined; // malformed encoding (e.g. a stray "%"): treat as no cookie rather than a 500
+    }
   }
   return undefined;
 }

@@ -24,47 +24,48 @@ model User {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  authAccounts     AuthAccount[]
-  resetTokens      PasswordResetToken[]
-  authEvents       AuthEvent[]
+  authAccounts AuthAccount[]
+  resetTokens  PasswordResetToken[]
+  authEvents   AuthEvent[]
 
-  profile          Profile?
-  sessions         Session[]
-  plans            WorkoutPlan[]
-  workoutSessions  WorkoutSession[]
-  personalRecords  PersonalRecord[]
-  favorites        FavoriteExercise[]
-  skillProgress    SkillProgress[]
-  foodEntries      FoodEntry[]
-  customFoods      Food[]
-  savedMeals       SavedMeal[]
-  waterLogs        WaterLog[]
-  activities       ActivityEntry[]
-  checkIns         CheckIn[]
-  mobilityLogs     MobilitySession[]
-  measurements     BodyMeasurement[]
-  media            MediaUpload[]
-  formChecks       FormCheck[]
-  achievements     UserAchievement[]
-  xpEvents         XpEvent[]
-  weeklyReviews    WeeklyReview[]
-  coachMessages    CoachMessage[]
-  notifications    Notification[]
-  challengeEntries ChallengeParticipant[]
-  posts            Post[]
-  comments         Comment[]
-  reactions        Reaction[]
-  sentRequests     Friendship[]  @relation("requester")
-  receivedRequests Friendship[]  @relation("addressee")
-  blocks           Block[]       @relation("blocker")
-  blockedBy        Block[]       @relation("blocked")
-  reports          Report[]      @relation("reporter")
-  groupMemberships GroupMember[]
-  ownedGroups      Group[]
-  userSports       UserSport[]
-  lessonProgress   LessonProgress[]
-  practicePlans    PracticePlan[]
-  sportMetrics     SportMetricEntry[]
+  profile                Profile?
+  sessions               Session[]
+  plans                  WorkoutPlan[]
+  workoutSessions        WorkoutSession[]
+  personalRecords        PersonalRecord[]
+  favorites              FavoriteExercise[]
+  skillProgress          SkillProgress[]
+  foodEntries            FoodEntry[]
+  customFoods            Food[]
+  savedMeals             SavedMeal[]
+  waterLogs              WaterLog[]
+  activities             ActivityEntry[]
+  checkIns               CheckIn[]
+  mobilityLogs           MobilitySession[]
+  measurements           BodyMeasurement[]
+  media                  MediaUpload[]
+  formChecks             FormCheck[]
+  achievements           UserAchievement[]
+  xpEvents               XpEvent[]
+  weeklyReviews          WeeklyReview[]
+  coachMessages          CoachMessage[]
+  notifications          Notification[]
+  challengeEntries       ChallengeParticipant[]
+  posts                  Post[]
+  comments               Comment[]
+  reactions              Reaction[]
+  sentRequests           Friendship[]             @relation("requester")
+  receivedRequests       Friendship[]             @relation("addressee")
+  blocks                 Block[]                  @relation("blocker")
+  blockedBy              Block[]                  @relation("blocked")
+  reports                Report[]                 @relation("reporter")
+  groupMemberships       GroupMember[]
+  ownedGroups            Group[]
+  userSports             UserSport[]
+  lessonProgress         LessonProgress[]
+  practicePlans          PracticePlan[]
+  sportMetrics           SportMetricEntry[]
+  recommendationFeedback RecommendationFeedback[]
 }
 
 /// External identity (e.g. Google). The provider's stable subject id is the key — never the email.
@@ -171,41 +172,41 @@ model Profile {
 }
 
 model Exercise {
-  id                 String   @id @default(cuid())
-  slug               String   @unique
-  name               String
-  description        String
-  category           String // strength | skill | core | mobility | cardio | plyometric
-  movementPattern    String
-  primaryMuscles     String // JSON string[]
-  secondaryMuscles   String   @default("[]")
-  equipment          String   @default("[]") // JSON string[] — all required
-  difficulty         Int // 1..5
-  locations          String   @default("[\"home\",\"gym\",\"outdoor\"]")
-  sports             String   @default("[\"calisthenics\"]")
-  progressionGroup   String?
-  progressionLevel   Int?
-  isTimed            Boolean  @default(false)
-  defaultSets        Int      @default(3)
-  repMin             Int      @default(8)
-  repMax             Int      @default(12)
-  holdSeconds        Int?
-  restSeconds        Int      @default(90)
-  met                Float    @default(4.0)
-  setup              String   @default("[]")
-  steps              String   @default("[]")
-  breathing          String   @default("")
-  cues               String   @default("[]")
-  mistakes           String   @default("[]")
-  safety             String   @default("[]")
-  easier             String   @default("[]") // JSON slug[]
-  harder             String   @default("[]")
-  related            String   @default("[]")
-  contraindications  String   @default("[]") // limitation keys
-  mediaUrl           String?
-  isCustom           Boolean  @default(false)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                String   @id @default(cuid())
+  slug              String   @unique
+  name              String
+  description       String
+  category          String // strength | skill | core | mobility | cardio | plyometric
+  movementPattern   String
+  primaryMuscles    String // JSON string[]
+  secondaryMuscles  String   @default("[]")
+  equipment         String   @default("[]") // JSON string[] — all required
+  difficulty        Int // 1..5
+  locations         String   @default("[\"home\",\"gym\",\"outdoor\"]")
+  sports            String   @default("[\"calisthenics\"]")
+  progressionGroup  String?
+  progressionLevel  Int?
+  isTimed           Boolean  @default(false)
+  defaultSets       Int      @default(3)
+  repMin            Int      @default(8)
+  repMax            Int      @default(12)
+  holdSeconds       Int?
+  restSeconds       Int      @default(90)
+  met               Float    @default(4.0)
+  setup             String   @default("[]")
+  steps             String   @default("[]")
+  breathing         String   @default("")
+  cues              String   @default("[]")
+  mistakes          String   @default("[]")
+  safety            String   @default("[]")
+  easier            String   @default("[]") // JSON slug[]
+  harder            String   @default("[]")
+  related           String   @default("[]")
+  contraindications String   @default("[]") // limitation keys
+  mediaUrl          String?
+  isCustom          Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   favorites FavoriteExercise[]
   setLogs   SetLog[]
@@ -226,33 +227,33 @@ model FavoriteExercise {
 }
 
 model WorkoutPlan {
-  id          String   @id @default(cuid())
+  id          String           @id @default(cuid())
   userId      String
   title       String
   focus       String
   scheduledOn String? // YYYY-MM-DD in user timezone
-  source      String   @default("engine") // engine | coach | custom
-  status      String   @default("planned") // planned | started | completed | archived
+  source      String           @default("engine") // engine | coach | custom
+  status      String           @default("planned") // planned | started | completed | archived
   content     String // JSON GeneratedWorkout
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   sessions    WorkoutSession[]
 
   @@index([userId, scheduledOn])
 }
 
 model WorkoutSession {
-  id              String    @id @default(cuid())
+  id              String         @id @default(cuid())
   userId          String
   planId          String?
   title           String
-  status          String    @default("active") // active | paused | completed | abandoned
-  startedAt       DateTime  @default(now())
+  status          String         @default("active") // active | paused | completed | abandoned
+  startedAt       DateTime       @default(now())
   endedAt         DateTime?
   pausedAt        DateTime?
-  pausedSeconds   Int       @default(0)
-  currentIndex    Int       @default(0)
+  pausedSeconds   Int            @default(0)
+  currentIndex    Int            @default(0)
   content         String // JSON snapshot of the workout being performed
   rpe             Int?
   notes           String?
@@ -260,10 +261,10 @@ model WorkoutSession {
   kcalLow         Int?
   kcalHigh        Int?
   dateKey         String? // completion date in user's timezone
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan            WorkoutPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan            WorkoutPlan?   @relation(fields: [planId], references: [id], onDelete: SetNull)
   sets            SetLog[]
   activity        ActivityEntry?
 
@@ -272,19 +273,19 @@ model WorkoutSession {
 }
 
 model SetLog {
-  id           String   @id @default(cuid())
-  sessionId    String
-  exerciseId   String
-  blockIndex   Int
-  setNumber    Int
-  reps         Int?
-  seconds      Int?
-  loadKg       Float?
-  rpe          Int?
-  skipped      Boolean  @default(false)
-  completedAt  DateTime @default(now())
-  session      WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  exercise     Exercise       @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  id          String         @id @default(cuid())
+  sessionId   String
+  exerciseId  String
+  blockIndex  Int
+  setNumber   Int
+  reps        Int?
+  seconds     Int?
+  loadKg      Float?
+  rpe         Int?
+  skipped     Boolean        @default(false)
+  completedAt DateTime       @default(now())
+  session     WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  exercise    Exercise       @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 
   @@unique([sessionId, blockIndex, setNumber])
   @@index([exerciseId])
@@ -305,61 +306,61 @@ model PersonalRecord {
 }
 
 model SkillProgress {
-  id          String   @id @default(cuid())
-  userId      String
-  skillSlug   String
-  stepIndex   Int      @default(0)
-  bestValue   Float?
-  bestUnit    String?
-  attempts    Int      @default(0)
-  unlockedAt  DateTime?
-  notes       String?
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id         String    @id @default(cuid())
+  userId     String
+  skillSlug  String
+  stepIndex  Int       @default(0)
+  bestValue  Float?
+  bestUnit   String?
+  attempts   Int       @default(0)
+  unlockedAt DateTime?
+  notes      String?
+  updatedAt  DateTime  @updatedAt
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, skillSlug])
 }
 
 model Food {
-  id           String  @id @default(cuid())
-  ownerId      String? // null = shared local database entry
-  name         String
-  brand        String?
-  category     String  @default("other")
-  kcalPer100g  Float
-  proteinG     Float
-  carbsG       Float
-  fatG         Float
-  fiberG       Float?
-  servings     String  @default("[]") // JSON [{label, grams}]
-  source       String  @default("local") // local | custom | usda
-  externalId   String?
-  isEstimate   Boolean @default(true)
-  owner        User?   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  entries      FoodEntry[]
+  id          String      @id @default(cuid())
+  ownerId     String? // null = shared local database entry
+  name        String
+  brand       String?
+  category    String      @default("other")
+  kcalPer100g Float
+  proteinG    Float
+  carbsG      Float
+  fatG        Float
+  fiberG      Float?
+  servings    String      @default("[]") // JSON [{label, grams}]
+  source      String      @default("local") // local | custom | usda
+  externalId  String?
+  isEstimate  Boolean     @default(true)
+  owner       User?       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  entries     FoodEntry[]
 
   @@index([name])
   @@index([ownerId])
 }
 
 model FoodEntry {
-  id         String   @id @default(cuid())
-  userId     String
-  foodId     String?
-  dateKey    String
-  meal       String // breakfast | lunch | dinner | snack
-  name       String
-  grams      Float
+  id           String   @id @default(cuid())
+  userId       String
+  foodId       String?
+  dateKey      String
+  meal         String // breakfast | lunch | dinner | snack
+  name         String
+  grams        Float
   servingLabel String?
-  kcal       Float
-  proteinG   Float
-  carbsG     Float
-  fatG       Float
-  source     String   @default("local") // local | usda | custom | ai_estimate | quick
-  confidence String? // high | medium | low (for estimates)
-  createdAt  DateTime @default(now())
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  food       Food?    @relation(fields: [foodId], references: [id], onDelete: SetNull)
+  kcal         Float
+  proteinG     Float
+  carbsG       Float
+  fatG         Float
+  source       String   @default("local") // local | usda | custom | ai_estimate | quick
+  confidence   String? // high | medium | low (for estimates)
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  food         Food?    @relation(fields: [foodId], references: [id], onDelete: SetNull)
 
   @@index([userId, dateKey])
 }
@@ -390,27 +391,27 @@ model WaterLog {
 }
 
 model ActivityEntry {
-  id              String   @id @default(cuid())
-  userId          String
-  sport           String
-  title           String?
-  dateKey         String
-  startedAt       DateTime @default(now())
-  durationMin     Float
-  intensity       String   @default("moderate") // light | moderate | vigorous
-  rpe             Int?
-  distanceKm      Float?
-  elevationM      Float?
-  metrics         String   @default("{}") // sport-specific JSON
-  kcalLow         Int
-  kcalHigh        Int
-  source          String   @default("manual") // manual | workout | import
-  externalId      String?
-  workoutSessionId String? @unique
-  notes           String?
-  createdAt       DateTime @default(now())
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workoutSession  WorkoutSession? @relation(fields: [workoutSessionId], references: [id], onDelete: Cascade)
+  id               String          @id @default(cuid())
+  userId           String
+  sport            String
+  title            String?
+  dateKey          String
+  startedAt        DateTime        @default(now())
+  durationMin      Float
+  intensity        String          @default("moderate") // light | moderate | vigorous
+  rpe              Int?
+  distanceKm       Float?
+  elevationM       Float?
+  metrics          String          @default("{}") // sport-specific JSON
+  kcalLow          Int
+  kcalHigh         Int
+  source           String          @default("manual") // manual | workout | import
+  externalId       String?
+  workoutSessionId String?         @unique
+  notes            String?
+  createdAt        DateTime        @default(now())
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workoutSession   WorkoutSession? @relation(fields: [workoutSessionId], references: [id], onDelete: Cascade)
 
   @@unique([userId, externalId])
   @@index([userId, dateKey])
@@ -423,7 +424,7 @@ model CheckIn {
   sleepHours Float?
   energy     Int // 1..5
   soreness   Int // 1..5
-  stress     Int?     // 1..5
+  stress     Int? // 1..5
   pain       Boolean  @default(false)
   painNotes  String?
   isRestDay  Boolean  @default(false)
@@ -465,32 +466,32 @@ model BodyMeasurement {
 }
 
 model MediaUpload {
-  id         String   @id @default(cuid())
+  id         String      @id @default(cuid())
   userId     String
   kind       String // progress_photo | form_image | form_video
   pose       String? // front | side | back
   dateKey    String?
   mimeType   String
   sizeBytes  Int
-  storageKey String   @unique
+  storageKey String      @unique
   consentAt  DateTime
-  createdAt  DateTime @default(now())
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime    @default(now())
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   formChecks FormCheck[]
 
   @@index([userId, kind])
 }
 
 model FormCheck {
-  id           String   @id @default(cuid())
+  id           String       @id @default(cuid())
   userId       String
   exerciseSlug String
   mediaId      String?
   mediaKind    String
   provider     String // ai | guided
   result       String // JSON FormCheckResult
-  createdAt    DateTime @default(now())
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime     @default(now())
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   media        MediaUpload? @relation(fields: [mediaId], references: [id], onDelete: SetNull)
 
   @@index([userId])
@@ -519,16 +520,16 @@ model XpEvent {
 }
 
 model WeeklyReview {
-  id          String   @id @default(cuid())
-  userId      String
-  weekIndex   Int // 1..24+ within the roadmap
-  weekStart   String
-  feeling     Int // 1..5
-  difficulty  String // too_easy | right | too_hard
-  notes       String?
-  adjustment  String // JSON recommendation
-  createdAt   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  userId     String
+  weekIndex  Int // 1..24+ within the roadmap
+  weekStart  String
+  feeling    Int // 1..5
+  difficulty String // too_easy | right | too_hard
+  notes      String?
+  adjustment String // JSON recommendation
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, weekIndex])
 }
@@ -547,7 +548,7 @@ model CoachMessage {
 }
 
 model Notification {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
   type      String
   title     String
@@ -555,30 +556,30 @@ model Notification {
   href      String?
   dedupeKey String?
   readAt    DateTime?
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, dedupeKey])
   @@index([userId, readAt])
 }
 
 model Challenge {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  title       String
-  description String
-  metric      String // pushup_reps | workouts | active_minutes | mobility_sessions | plank_seconds
-  target      Int
-  startsOn    String
-  endsOn      String
-  createdAt   DateTime @default(now())
+  id           String                 @id @default(cuid())
+  slug         String                 @unique
+  title        String
+  description  String
+  metric       String // pushup_reps | workouts | active_minutes | mobility_sessions | plank_seconds
+  target       Int
+  startsOn     String
+  endsOn       String
+  createdAt    DateTime               @default(now())
   participants ChallengeParticipant[]
 }
 
 model ChallengeParticipant {
   userId      String
   challengeId String
-  joinedAt    DateTime @default(now())
+  joinedAt    DateTime  @default(now())
   completedAt DateTime?
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
@@ -623,13 +624,13 @@ model Report {
 }
 
 model Group {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   ownerId     String
   name        String
   description String
   sport       String?
-  createdAt   DateTime @default(now())
-  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+  owner       User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   members     GroupMember[]
   posts       Post[]
 }
@@ -646,17 +647,17 @@ model GroupMember {
 }
 
 model Post {
-  id         String   @id @default(cuid())
+  id         String     @id @default(cuid())
   authorId   String
   groupId    String?
   kind       String // text | workout | achievement
   body       String
   refId      String?
-  visibility String   @default("friends") // friends | public | group
-  hidden     Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  group      Group?   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  visibility String     @default("friends") // friends | public | group
+  hidden     Boolean    @default(false)
+  createdAt  DateTime   @default(now())
+  author     User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  group      Group?     @relation(fields: [groupId], references: [id], onDelete: Cascade)
   comments   Comment[]
   reactions  Reaction[]
 
@@ -695,32 +696,32 @@ model Reaction {
 // contentStatus: draft | review | published (only published is visible to users).
 
 model SportCategory {
-  slug        String  @id
+  slug        String @id
   name        String
   description String
-  order       Int     @default(0)
+  order       Int    @default(0)
 }
 
 model Sport {
-  id            String    @id @default(cuid())
-  slug          String    @unique
+  id            String             @id @default(cuid())
+  slug          String             @unique
   name          String
   categorySlug  String
   parentSlug    String? // discipline of another sport (e.g. open-water-swimming → swimming)
   summary       String
-  aliases       String    @default("[]")
-  availability  String    @default("basic") // full | basic | external
-  contentStatus String    @default("published")
+  aliases       String             @default("[]")
+  availability  String             @default("basic") // full | basic | external
+  contentStatus String             @default("published")
   metLight      Float
   metModerate   Float
   metVigorous   Float
   distanceUnit  String? // km | m
-  workoutBased  Boolean   @default(false)
-  profile       String    @default("{}") // JSON SportProfile (sections vary by sport)
-  isCustom      Boolean   @default(false)
+  workoutBased  Boolean            @default(false)
+  profile       String             @default("{}") // JSON SportProfile (sections vary by sport)
+  isCustom      Boolean            @default(false)
   reviewedAt    DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
   metrics       SportMetric[]
   lessons       Lesson[]
   drills        Drill[]
@@ -757,15 +758,15 @@ model SportMetric {
 }
 
 model ContentSource {
-  id         String   @id @default(cuid())
-  slug       String   @unique
-  title      String
-  publisher  String
-  url        String?
-  kind       String // governing_body | education | research | other
-  notes      String?
-  edition    String? // e.g. "2025/26", publication year
-  createdAt  DateTime @default(now())
+  id            String    @id @default(cuid())
+  slug          String    @unique
+  title         String
+  publisher     String
+  url           String?
+  kind          String // governing_body | education | research | other
+  notes         String?
+  edition       String? // e.g. "2025/26", publication year
+  createdAt     DateTime  @default(now())
   // Access & change tracking — accessedAt is only set when someone actually opened the source.
   accessedAt    DateTime?
   accessedBy    String? // "admin:<email>", "ai_web_research", …
@@ -777,23 +778,23 @@ model ContentSource {
 /// A single, citable piece of sports knowledge (technique, tactic, rule detail, safety, science…).
 /// Only claims with status "verified" are used by the coach; everything else is research in progress.
 model KnowledgeClaim {
-  id          String    @id @default(cuid())
-  sportId     String?
-  topic       String
-  category    String // technique | tactics | training | safety | science | history | rules | equipment
-  level       String    @default("all")
-  statement   String
-  sourceRefs  String    @default("[]") // JSON [{ url, title, publisher, section, accessed }]
-  confidence  String    @default("low") // high | medium | low
-  status      String    @default("unverified") // unverified | verified | disputed | outdated | rejected
-  evidence    String    @default("snippet") // snippet (search results only) | source_opened | admin_checked
-  origin      String    @default("research") // research | ai_web_research | admin | seed
-  note        String?
-  reviewedAt  DateTime?
-  reviewedBy  String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  sport       Sport?    @relation(fields: [sportId], references: [id], onDelete: Cascade)
+  id         String    @id @default(cuid())
+  sportId    String?
+  topic      String
+  category   String // technique | tactics | training | safety | science | history | rules | equipment
+  level      String    @default("all")
+  statement  String
+  sourceRefs String    @default("[]") // JSON [{ url, title, publisher, section, accessed }]
+  confidence String    @default("low") // high | medium | low
+  status     String    @default("unverified") // unverified | verified | disputed | outdated | rejected
+  evidence   String    @default("snippet") // snippet (search results only) | source_opened | admin_checked
+  origin     String    @default("research") // research | ai_web_research | admin | seed
+  note       String?
+  reviewedAt DateTime?
+  reviewedBy String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  sport      Sport?    @relation(fields: [sportId], references: [id], onDelete: Cascade)
 
   @@index([sportId, status])
   @@index([status, category])
@@ -831,7 +832,7 @@ model RulesetVersion {
 }
 
 model Ruleset {
-  id            String    @id @default(cuid())
+  id            String           @id @default(cuid())
   sportId       String
   slug          String
   name          String
@@ -839,21 +840,21 @@ model Ruleset {
   scope         String
   editionNote   String
   points        String // JSON [{topic, text}]
-  verification  String    @default("general") // summary (checked against the cited source by a reviewer) | general | unverified
-  sources       String    @default("[]") // ContentSource slugs
-  contentStatus String    @default("published")
+  verification  String           @default("general") // summary (checked against the cited source by a reviewer) | general | unverified
+  sources       String           @default("[]") // ContentSource slugs
+  contentStatus String           @default("published")
   reviewedAt    DateTime?
   reviewFlag    String? // why this ruleset may be outdated (research lead, source change)
   flaggedAt     DateTime?
-  updatedAt     DateTime  @updatedAt
-  sport         Sport     @relation(fields: [sportId], references: [id], onDelete: Cascade)
+  updatedAt     DateTime         @updatedAt
+  sport         Sport            @relation(fields: [sportId], references: [id], onDelete: Cascade)
   versions      RulesetVersion[]
 
   @@unique([sportId, slug])
 }
 
 model Lesson {
-  id                  String   @id @default(cuid())
+  id                  String           @id @default(cuid())
   sportId             String
   slug                String
   title               String
@@ -861,13 +862,13 @@ model Lesson {
   order               Int
   summary             String
   content             String // JSON LessonContent
-  prerequisites       String   @default("[]") // lesson slugs
-  drillSlugs          String   @default("[]")
-  requiresSupervision Boolean  @default(false)
-  sources             String   @default("[]")
-  contentStatus       String   @default("published")
-  updatedAt           DateTime @updatedAt
-  sport               Sport    @relation(fields: [sportId], references: [id], onDelete: Cascade)
+  prerequisites       String           @default("[]") // lesson slugs
+  drillSlugs          String           @default("[]")
+  requiresSupervision Boolean          @default(false)
+  sources             String           @default("[]")
+  contentStatus       String           @default("published")
+  updatedAt           DateTime         @updatedAt
+  sport               Sport            @relation(fields: [sportId], references: [id], onDelete: Cascade)
   progress            LessonProgress[]
 
   @@unique([sportId, slug])
@@ -911,34 +912,42 @@ model UserSport {
 }
 
 model LessonProgress {
-  userId      String
-  lessonId    String
-  status      String // in_progress | completed
-  completedAt DateTime?
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  userId            String
+  lessonId          String
+  status            String // in_progress | awaiting_assessment | completed
+  /**
+   * How completion is known: self_reported (user marked it done) or assessed (a logged result met the lesson's progress test).
+   */
+  evidence          String?
+  /**
+   * The result that passed the progress test, when assessed.
+   */
+  assessmentEntryId String?
+  completedAt       DateTime?
+  updatedAt         DateTime  @updatedAt
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson            Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@id([userId, lessonId])
 }
 
 model PracticePlan {
-  id         String   @id @default(cuid())
-  userId     String
-  sportId    String
-  title      String
-  focus      String
-  minutes    Int
-  content    String // JSON PracticePlanContent
-  source     String   @default("engine") // engine | coach
-  status     String   @default("planned") // planned | completed | archived
-  activityId String?
-  rpe        Int?
-  notes      String?
-  createdAt  DateTime @default(now())
+  id          String    @id @default(cuid())
+  userId      String
+  sportId     String
+  title       String
+  focus       String
+  minutes     Int
+  content     String // JSON PracticePlanContent
+  source      String    @default("engine") // engine | coach
+  status      String    @default("planned") // planned | completed | archived
+  activityId  String?
+  rpe         Int?
+  notes       String?
+  createdAt   DateTime  @default(now())
   completedAt DateTime?
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sport      Sport    @relation(fields: [sportId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sport       Sport     @relation(fields: [sportId], references: [id], onDelete: Cascade)
 
   @@index([userId, sportId, createdAt])
 }
@@ -960,4 +969,18 @@ model SportMetricEntry {
   sport          Sport    @relation(fields: [sportId], references: [id], onDelete: Cascade)
 
   @@index([userId, sportId, metricKey, dateKey])
+}
+
+/// What the user did with a coach recommendation (accept / modify / reject), so it isn't repeated
+/// and future suggestions can respect it.
+model RecommendationFeedback {
+  id        String   @id @default(cuid())
+  userId    String
+  dateKey   String
+  action    String // accepted | modified | rejected
+  detail    String? // JSON: the suggestion shown and any changes / reason
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, dateKey])
 }

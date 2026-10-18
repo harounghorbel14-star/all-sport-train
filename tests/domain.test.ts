@@ -53,11 +53,11 @@ describe("streaks", () => {
 
   it("forgives one missed planned day per week but not two", () => {
     const one = computeStreak({ activeDays: ["2026-10-12", "2026-10-14"], trainingDays: everyDay, today: "2026-10-14" });
-    expect(one.current).toBe(3);
+    expect(one.current).toBe(2); // the forgiven miss keeps the chain but doesn't count as a day
     expect(one.graceUsedThisWeek).toBe(1);
     const two = computeStreak({ activeDays: ["2026-10-12", "2026-10-15"], trainingDays: everyDay, today: "2026-10-15" });
     expect(two.current).toBe(1);
-    expect(two.longest).toBe(2); // active day + forgiven day, then the second miss breaks it
+    expect(two.longest).toBe(1); // the forgiven day doesn't count; the second miss breaks the chain
   });
 
   it("does not break the streak for today before the day is over", () => {

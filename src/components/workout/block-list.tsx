@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowDown, ArrowUp, Info } from "lucide-react";
 import type { Block, GeneratedWorkout } from "@/lib/engine/types";
 import type { ExerciseLookup } from "@/lib/services/views";
-import { MUSCLE_LABELS } from "@/lib/content/exercises";
+import { MUSCLE_LABELS } from "@/lib/exercise-labels";
 import { useI18n } from "../providers";
 import { Badge, cx } from "../ui/primitives";
 

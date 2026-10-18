@@ -1,3 +1,5 @@
+import * as checkin from "@/app/api/recovery/checkin/route";
+import { addDays, todayKey } from "@/lib/domain/dates";
 import { beforeAll, describe, expect, it } from "vitest";
 import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
@@ -29,6 +31,7 @@ import * as friends from "@/app/api/community/friends/route";
 import * as friend from "@/app/api/community/friends/[id]/route";
 import * as block from "@/app/api/community/block/route";
 import * as react from "@/app/api/community/posts/[id]/react/route";
+import * as reportRoute from "@/app/api/community/report/route";
 import * as athlete from "@/app/api/community/athletes/[handle]/route";
 import * as challenges from "@/app/api/challenges/route";
 import * as challenge from "@/app/api/challenges/[id]/route";
@@ -243,13 +246,94 @@ describe("community & privacy", () => {
   });
 });
 
+describe("community robustness", () => {
+  it("survives a double-tapped reaction", async () => {
+    const a = await newUser();
+    const b = await newUser();
+    const p = await call(posts.POST, { cookie: a.cookie, body: { body: "Morning run done", kind: "text", visibility: "public" } });
+    const both = await Promise.all([1, 2].map(() => call(react.POST, { cookie: b.cookie, params: { id: p.json.post.id } })));
+    expect(both.every((r) => r.status === 200)).toBe(true);
+    expect(await db.reaction.count({ where: { postId: p.json.post.id } })).toBeLessThanOrEqual(1);
+  });
+
+  it("brand-new accounts can report but can't hide a post on their own", async () => {
+    const author = await newUser();
+    const p = await call(posts.POST, { cookie: author.cookie, body: { body: "My first 5k!", kind: "text", visibility: "public" } });
+    const reporters = await Promise.all([1, 2, 3].map(() => newUser()));
+    for (const r of reporters) await call(reportRoute.POST, { cookie: r.cookie, body: { targetType: "post", targetId: p.json.post.id, reason: "spam" } });
+    expect((await db.post.findUniqueOrThrow({ where: { id: p.json.post.id } })).hidden).toBe(false);
+    expect(await db.report.count({ where: { targetId: p.json.post.id } })).toBe(3); // still sent to moderation
+    // Established accounts reaching the threshold do hide it.
+    await db.user.updateMany({ where: { id: { in: reporters.map((r) => r.userId) } }, data: { createdAt: new Date(Date.now() - 10 * 86_400_000) } });
+    const fourth = await newUser();
+    await db.user.update({ where: { id: fourth.userId }, data: { createdAt: new Date(Date.now() - 10 * 86_400_000) } });
+    await call(reportRoute.POST, { cookie: fourth.cookie, body: { targetType: "post", targetId: p.json.post.id, reason: "spam" } });
+    expect((await db.post.findUniqueOrThrow({ where: { id: p.json.post.id } })).hidden).toBe(true);
+  });
+});
+
+describe("XP integrity", () => {
+  it("deleting an activity takes back its XP, and only a few activities a day earn XP", async () => {
+    const { cookie, userId } = await newUser();
+    const xp = async () => (await db.profile.findUniqueOrThrow({ where: { userId } })).xp;
+    const start = await xp();
+    const body = { sport: "running", dateKey: todayKey("UTC"), durationMin: 20, intensity: "moderate" };
+    // Farming attempt: log and delete repeatedly.
+    for (let i = 0; i < 3; i++) {
+      const r = await call(activity.POST, { cookie, body });
+      await call(activityItem.DELETE, { method: "DELETE", cookie, params: { id: r.json.entry.id } });
+    }
+    expect(await xp()).toBe(start);
+    for (let i = 0; i < 8; i++) await call(activity.POST, { cookie, body });
+    expect(await db.activityEntry.count({ where: { userId } })).toBe(8); // all logged
+    expect(await db.xpEvent.count({ where: { userId, source: "activity" } })).toBe(5); // XP for 5
+  });
+});
+
+describe("saved meals", () => {
+  it("never links another user's private food, and survives unknown or deleted foods", async () => {
+    const a = await newUser();
+    const b = await newUser();
+    const secret = await db.food.create({ data: { ownerId: b.userId, name: "B's secret recipe", kcalPer100g: 100, proteinG: 1, carbsG: 1, fatG: 1, servings: "[]", source: "custom", isEstimate: false, category: "custom" } });
+    const mine = await db.food.create({ data: { ownerId: a.userId, name: "My oats", kcalPer100g: 380, proteinG: 13, carbsG: 60, fatG: 7, servings: "[]", source: "custom", isEstimate: false, category: "custom" } });
+    const item = (foodId: string, name: string) => ({ foodId, name, grams: 100, kcal: 100, proteinG: 1, carbsG: 1, fatG: 1 });
+    const saved = await call(meals.POST, { cookie: a.cookie, body: { name: "Mix", items: [item(secret.id, "Stolen"), item("does-not-exist", "Ghost"), item(mine.id, "Oats")] } });
+    expect(saved.status).toBe(200);
+    expect(JSON.parse(saved.json.meal.items).map((i: { foodId: string | null }) => i.foodId)).toEqual([null, null, mine.id]);
+    await db.food.delete({ where: { id: mine.id } }); // deleted after saving
+    const logged = await call(meal.POST, { cookie: a.cookie, params: { id: saved.json.meal.id }, body: { dateKey: todayKey("UTC"), meal: "breakfast" } });
+    expect(logged.status).toBe(200);
+    const rows = await db.foodEntry.findMany({ where: { userId: a.userId } });
+    expect(rows).toHaveLength(3);
+    expect(rows.every((r) => r.foodId === null)).toBe(true);
+  });
+});
+
+describe("recovery logging dates", () => {
+  it("only accepts check-ins and mobility for today or yesterday, and logs a double-tapped routine once", async () => {
+    const { cookie, userId } = await newUser();
+    const today = todayKey("UTC");
+    const ok = await call(checkin.POST, { cookie, body: { dateKey: addDays(today, -1), energy: 3, soreness: 2 } });
+    expect(ok.status).toBe(200);
+    for (const dateKey of [addDays(today, -2), addDays(today, -30), addDays(today, 1)]) {
+      expect((await call(checkin.POST, { cookie, body: { dateKey, energy: 3, soreness: 2, isRestDay: true } })).status).toBe(400);
+      expect((await call(mobility.POST, { cookie, body: { routine: "hip-opener", dateKey } })).status).toBe(400);
+    }
+    expect(await db.xpEvent.count({ where: { userId, source: "checkin" } })).toBe(1);
+    await call(mobility.POST, { cookie, body: { routine: "hip-opener", dateKey: today } });
+    await call(mobility.POST, { cookie, body: { routine: "hip-opener", dateKey: today } });
+    expect(await db.mobilitySession.count({ where: { userId } })).toBe(1);
+    expect(await db.xpEvent.count({ where: { userId, source: "mobility" } })).toBe(1);
+  });
+});
+
 describe("challenges & notifications", () => {
   it("computes challenge progress from logged data", async () => {
     const { cookie } = await newUser();
     const list = await call(challenges.GET, { cookie });
     const mob = list.json.challenges.find((c: { metric: string; active: boolean }) => c.metric === "mobility_sessions" && c.active);
     await call(challenge.POST, { cookie, params: { id: mob.id }, body: { join: true } });
-    await call(mobility.POST, { cookie, body: { routine: "hip-opener", dateKey: mob.startsOn } });
+    await call(mobility.POST, { cookie, body: { routine: "hip-opener", dateKey: todayKey("UTC") } });
     const after = await call(challenges.GET, { cookie });
     expect(after.json.challenges.find((c: { id: string }) => c.id === mob.id).progress).toBe(1);
   });

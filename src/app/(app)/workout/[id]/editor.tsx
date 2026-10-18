@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Block, GeneratedWorkout } from "@/lib/engine/types";
 import type { ExerciseLookup } from "@/lib/services/views";
-import { EQUIPMENT_LABELS, MUSCLE_LABELS } from "@/lib/content/exercises";
+import { EQUIPMENT_LABELS, MUSCLE_LABELS } from "@/lib/exercise-labels";
 import { api } from "@/lib/client/api";
 import { useI18n } from "@/components/providers";
 import { Badge, Button, Card, Input, Notice, PageHeader } from "@/components/ui/primitives";

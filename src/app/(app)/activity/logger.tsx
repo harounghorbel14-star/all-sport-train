@@ -3,7 +3,7 @@
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { api } from "@/lib/client/api";
+import { api, attempt } from "@/lib/client/api";
 import { kcalRange, miToKm } from "@/lib/format";
 import { Button, Chip, Field, Input, Notice, Select } from "@/components/ui/primitives";
 import { useToast } from "@/components/ui/overlay";
@@ -104,12 +104,13 @@ export function ActivityLogger({ today, units, initialSport, sports }: { today: 
 
 export function DeleteActivity({ id }: { id: string }) {
   const router = useRouter();
+  const toast = useToast();
   return (
     <button
       aria-label="Delete activity"
       className="grid size-8 place-items-center rounded-lg text-muted hover:text-danger"
       onClick={async () => {
-        await api(`/api/activity/${id}`, { method: "DELETE" }).catch(() => undefined);
+        if (!(await attempt(api(`/api/activity/${id}`, { method: "DELETE" }), toast))) return;
         router.refresh();
       }}
     >

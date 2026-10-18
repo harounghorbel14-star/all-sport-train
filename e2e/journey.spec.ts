@@ -102,3 +102,11 @@ test("sets logged without a connection sync after a reload; a finished workout r
   await expect(page.getByRole("heading", { name: "Workout complete" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Log set" })).toHaveCount(0);
 });
+
+test("today shows a coach suggestion with its reasons, and 'Not today' leaves the plan alone", async ({ page }) => {
+  await registerAndOnboard(page);
+  await expect(page.getByText(/Coach suggestion:/)).toBeVisible();
+  await expect(page.getByText("What we don't know")).toBeVisible(); // no check-in yet → readiness unknown
+  await page.getByRole("button", { name: "Not today" }).click();
+  await expect(page.getByText(/You dismissed today's coach suggestion/)).toBeVisible();
+});

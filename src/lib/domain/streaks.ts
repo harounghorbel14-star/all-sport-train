@@ -21,8 +21,8 @@ export interface StreakResult {
 
 /**
  * Sustainable streak: rest days and planned off-days keep the chain alive,
- * and one missed planned session per week is forgiven by default. A streak
- * only starts on a day with real activity.
+ * and one missed planned session per week is forgiven by default (it protects
+ * the streak without adding to it). A streak only starts on a day with real activity.
  */
 export function computeStreak(input: StreakInput): StreakResult {
   const active = new Set(input.activeDays);
@@ -41,6 +41,7 @@ export function computeStreak(input: StreakInput): StreakResult {
     const isActive = active.has(d);
     const isPlanned = planned.has(weekday(d));
     let kept = isActive || rest.has(d) || !isPlanned;
+    let forgiven = false;
 
     if (!kept && d === input.today) {
       todayPending = true; // the day isn't over yet
@@ -52,10 +53,12 @@ export function computeStreak(input: StreakInput): StreakResult {
       if (used < grace && run > 0) {
         graceUsed.set(wk, used + 1);
         kept = true;
+        forgiven = true;
       }
     }
 
-    if (kept && (run > 0 || isActive)) run += 1;
+    // A forgiven miss protects the chain but isn't counted as a streak day: nothing happened that day.
+    if (kept && !forgiven && (run > 0 || isActive)) run += 1;
     else if (!kept) run = 0;
     longest = Math.max(longest, run);
   }

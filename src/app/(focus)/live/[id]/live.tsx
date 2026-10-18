@@ -7,8 +7,8 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { GeneratedWorkout } from "@/lib/engine/types";
 import type { ExerciseLookup } from "@/lib/services/views";
-import { api, ApiError } from "@/lib/client/api";
-import { formatDuration, kcalRange } from "@/lib/format";
+import { api, ApiError, attempt } from "@/lib/client/api";
+import { formatDuration, formatRecord, kcalRange } from "@/lib/format";
 import { useI18n } from "@/components/providers";
 import { Badge, Button, Card, Chip, Notice, Textarea, cx } from "@/components/ui/primitives";
 import { ProgressRing } from "@/components/ui/charts";
@@ -240,7 +240,7 @@ export function LiveWorkout({
       setOffline(false);
       if (pendingRef.current.length) void flush(); // the connection is back: send what was queued
       if (r.prs.length) {
-        setPr(`${info?.name}: ${r.prs[0].value}${r.prs[0].metric === "seconds" ? "s" : r.prs[0].metric === "loadKg" ? " kg" : " reps"}`);
+        setPr(`${info?.name}: ${formatRecord(r.prs[0].value, r.prs[0].metric, units)}`);
         setTimeout(() => setPr(null), 3500);
       }
     } catch (e) {
@@ -313,7 +313,7 @@ export function LiveWorkout({
 
   async function endWithoutSaving() {
     if (!confirm("End this workout without saving it? Logged sets will be discarded from your history.")) return;
-    await api(`/api/sessions/${session.id}`, { method: "DELETE" }).catch(() => undefined);
+    if (!(await attempt(api(`/api/sessions/${session.id}`, { method: "DELETE" }), toast))) return;
     try {
       localStorage.removeItem(storageKey);
     } catch {
@@ -371,7 +371,7 @@ export function LiveWorkout({
         </div>
         <div className="mt-4 space-y-3">
           {summary.prs.map((p) => (
-            <CelebrationCard key={p.exercise + p.metric} icon={<Flame className="size-5" />} title={`${t.workout.newPr} ${p.exercise}`} body={`${p.value}${p.metric === "seconds" ? " s" : p.metric === "loadKg" ? " kg" : " reps"}`} />
+            <CelebrationCard key={p.exercise + p.metric} icon={<Flame className="size-5" />} title={`${t.workout.newPr} ${p.exercise}`} body={formatRecord(p.value, p.metric, units)} />
           ))}
           {summary.achievements.map((a) => (
             <CelebrationCard key={a.key} icon={<Trophy className="size-5" />} title={a.title} body={`${a.description} +${a.xp} XP`} />

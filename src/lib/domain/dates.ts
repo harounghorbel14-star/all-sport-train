@@ -57,7 +57,12 @@ export function rangeKeys(start: string, end: string): string[] {
   return out;
 }
 
-export const isDateKey = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(keyToUtc(s));
+/** A real calendar date in YYYY-MM-DD form ("2026-02-30" and "2026-13-01" are rejected, not rolled over). */
+export const isDateKey = (s: string) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const t = keyToUtc(s);
+  return !Number.isNaN(t) && new Date(t).toISOString().slice(0, 10) === s;
+};
 
 export function hourInZone(date: Date, timeZone = "UTC"): number {
   const tz = isValidTimeZone(timeZone) ? timeZone : "UTC";

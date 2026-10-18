@@ -104,6 +104,8 @@ export interface GenerateOverrides {
   focus?: string;
   avoidMuscles?: string[];
   ignoreReadiness?: boolean;
+  /** Below 1 makes the session easier (fewer sets), e.g. after very hard sessions or a long break. */
+  volumeScale?: number;
 }
 
 export async function generateForUser(userId: string, overrides: GenerateOverrides = {}, dateKey?: string) {
@@ -118,7 +120,7 @@ export async function generateForUser(userId: string, overrides: GenerateOverrid
     roadmapFor(p, today),
   ]);
   const band = overrides.ignoreReadiness ? undefined : readiness.band;
-  const volume = (overrides.ignoreReadiness ? 1 : readiness.volume) * roadmap.volume;
+  const volume = (overrides.ignoreReadiness ? 1 : readiness.volume) * roadmap.volume * Math.min(1, Math.max(0.5, overrides.volumeScale ?? 1));
   const workout = generateWorkout(exercises, toEngineProfile(p), {
     date: today,
     dayIndex,
@@ -131,7 +133,7 @@ export async function generateForUser(userId: string, overrides: GenerateOverrid
     focusOverride: overrides.focus,
     skillExercise: roadmap.phase.index >= 3 || p.experience !== "zero" ? skillExercise : null,
     avoidMuscles: overrides.avoidMuscles,
-    seed: `${userId}:${today}:${overrides.focus ?? ""}:${overrides.minutes ?? ""}`,
+    seed: `${userId}:${today}:${overrides.focus ?? ""}:${overrides.minutes ?? ""}:${overrides.volumeScale ?? ""}`,
   });
   // Keep the planned volume ≥1 set even after the phase multiplier.
   return { workout, readiness: band, roadmap };

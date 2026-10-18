@@ -22,10 +22,25 @@ export async function api<T = unknown>(path: string, opts: { method?: string; bo
   }
   const data = await res.json().catch(() => null);
   if (!res.ok) {
-    if (res.status === 401 && typeof window !== "undefined" && !path.startsWith("/api/auth")) window.location.href = "/login";
+    // Session expired: sign in again and come back to the same page (login validates `next`).
+    if (res.status === 401 && typeof window !== "undefined" && !path.startsWith("/api/auth")) window.location.href = `/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`;
     const details = data?.error?.details;
     const firstField = details && typeof details === "object" ? Object.values(details as Record<string, string[]>)[0]?.[0] : undefined;
     throw new ApiError(res.status, firstField ? `${data?.error?.message}: ${firstField}` : (data?.error?.message ?? "Something went wrong"), details);
   }
   return data as T;
+}
+
+/**
+ * Runs a user-initiated request (delete, toggle…). On failure it tells the user and resolves
+ * false so the caller can stop, instead of silently pretending the action worked.
+ */
+export async function attempt(request: Promise<unknown>, toast: (message: string, tone: "error") => void) {
+  try {
+    await request;
+    return true;
+  } catch (e) {
+    toast(e instanceof Error && e.message ? e.message : "That didn't work — please try again", "error");
+    return false;
+  }
 }

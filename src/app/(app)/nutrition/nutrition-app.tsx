@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { BookmarkPlus, Camera, ChevronLeft, ChevronRight, Droplets, Pencil, Plus, Search, Sparkles, Trash2, Utensils } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { api } from "@/lib/client/api";
+import { api, attempt } from "@/lib/client/api";
 import { formatDateKey } from "@/lib/format";
 import { useI18n } from "@/components/providers";
 import { Badge, Button, Card, CardTitle, Chip, EmptyState, Field, Input, Notice, Select, Skeleton, cx } from "@/components/ui/primitives";
@@ -88,7 +88,7 @@ export function NutritionApp({ today, initialDay, initialWeek, initialMeals, aiC
     }
   }
   async function resetWater() {
-    await api(`/api/nutrition/water?date=${date}`, { method: "DELETE" }).catch(() => undefined);
+    if (!(await attempt(api(`/api/nutrition/water?date=${date}`, { method: "DELETE" }), toast))) return;
     reload();
   }
   async function remove(id: string) {
@@ -124,7 +124,7 @@ export function NutritionApp({ today, initialDay, initialWeek, initialMeals, aiC
     }
   }
   async function deleteSaved(id: string) {
-    await api(`/api/nutrition/meals/${id}`, { method: "DELETE" }).catch(() => undefined);
+    if (!(await attempt(api(`/api/nutrition/meals/${id}`, { method: "DELETE" }), toast))) return;
     setMeals((m) => m.filter((x) => x.id !== id));
   }
 

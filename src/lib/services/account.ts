@@ -26,6 +26,7 @@ export async function exportAccount(userId: string) {
       xpEvents: true,
       weeklyReviews: true,
       coachMessages: true,
+      recommendationFeedback: true,
       notifications: true,
       challengeEntries: true,
       posts: { include: { comments: true } },

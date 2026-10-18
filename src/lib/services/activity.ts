@@ -8,7 +8,7 @@ import { XP } from "../domain/levels";
 import { sportBySlug } from "./sports";
 import type { activitySchema } from "../validation";
 import { getProfile } from "./profile";
-import { awardXp, evaluateAchievements } from "./gamification";
+import { awardXp, evaluateAchievements, revokeXp } from "./gamification";
 
 type ActivityInput = z.infer<typeof activitySchema>;
 
@@ -24,6 +24,8 @@ export async function activityMet(sport: string, intensity: "light" | "moderate"
   const met = intensity === "light" ? def.met[0] : intensity === "vigorous" ? def.met[2] : def.met[1];
   return { met, basis: "intensity" as const };
 }
+
+const ACTIVITY_XP_PER_DAY = 5;
 
 export async function logActivity(userId: string, input: ActivityInput) {
   const def = await sportBySlug(input.sport);
@@ -66,7 +68,9 @@ export async function logActivity(userId: string, input: ActivityInput) {
         notes: input.notes ?? null,
       },
     });
-    await awardXp(userId, "activity", entry.id, XP.activity);
+    // Activities still count toward stats, but only the first few each day earn XP.
+    const earnedToday = await db.xpEvent.count({ where: { userId, source: "activity", createdAt: { gte: new Date(Date.now() - 86_400_000) } } });
+    if (earnedToday < ACTIVITY_XP_PER_DAY) await awardXp(userId, "activity", entry.id, XP.activity);
     const achievements = await evaluateAchievements(userId);
     return { entry, estimate: { ...kcal, basis, met }, achievements };
   } catch (e) {
@@ -80,6 +84,7 @@ export async function deleteActivity(userId: string, id: string) {
   if (!entry) throw notFound("Activity not found");
   if (entry.source === "workout") throw conflict("Workout activities are managed from the workout history");
   await db.activityEntry.delete({ where: { id: entry.id } });
+  await revokeXp(userId, "activity", entry.id);
 }
 
 export async function listActivities(userId: string, from: string, to: string) {

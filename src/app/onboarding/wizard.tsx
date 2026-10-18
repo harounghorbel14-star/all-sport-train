@@ -8,7 +8,7 @@ import { api } from "@/lib/client/api";
 import { useI18n, fmt } from "@/components/providers";
 import { Button, Chip, Field, Input, Notice, Select, Textarea, cx } from "@/components/ui/primitives";
 import { MuscleMap, emphasisFromRegions, type RegionId } from "@/components/muscle-map";
-import { EQUIPMENT_LABELS, LIMITATION_LABELS } from "@/lib/content/exercises";
+import { EQUIPMENT_LABELS, LIMITATION_LABELS } from "@/lib/exercise-labels";
 import { ACTIVITY_LABELS, AGE_LABELS, DIET_LABELS, EMPHASIS_LABELS, EXPERIENCE_LABELS, GOAL_LABELS, LOCATION_LABELS, PREF_LABELS, WEEKDAYS } from "@/lib/labels";
 import { inToCm, lbToKg } from "@/lib/format";
 

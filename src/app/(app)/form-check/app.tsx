@@ -4,7 +4,7 @@ import { Camera, Eye, EyeOff, HelpCircle, Lightbulb, ShieldCheck, Trash2, Video,
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { FormCheckResult } from "@/lib/ai/form-check";
-import { api } from "@/lib/client/api";
+import { api, attempt } from "@/lib/client/api";
 import { Badge, Button, Card, CardTitle, EmptyState, Field, Notice, Select, Toggle, cx } from "@/components/ui/primitives";
 import { useToast } from "@/components/ui/overlay";
 
@@ -101,7 +101,7 @@ export function FormCheckApp({ aiConfigured, exercises, history: initialHistory 
   }
 
   async function remove(id: string) {
-    await api(`/api/form-check/${id}`, { method: "DELETE" }).catch(() => undefined);
+    if (!(await attempt(api(`/api/form-check/${id}`, { method: "DELETE" }), toast))) return;
     setHistory((h) => h.filter((x) => x.id !== id));
     toast("Analysis and any stored media deleted");
   }

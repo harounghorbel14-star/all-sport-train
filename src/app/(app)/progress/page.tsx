@@ -5,7 +5,7 @@ import { requireUser } from "@/lib/auth/server";
 import { analytics, RANGES, type RangeKey } from "@/lib/services/progress";
 import { listProgressPhotos } from "@/lib/services/media";
 import { SKILL_BY_SLUG } from "@/lib/content/skills";
-import { formatDateKey, formatLength, formatWeight, kgToLb } from "@/lib/format";
+import { cmToIn, formatDateKey, formatLength, formatWeight, kgToLb } from "@/lib/format";
 import { Card, CardTitle, EmptyState, PageHeader, Stat } from "@/components/ui/primitives";
 import { BarChart, LineChart, MeterBar } from "@/components/ui/charts";
 import { cx } from "@/lib/cx";
@@ -21,7 +21,7 @@ export default async function ProgressPage({ searchParams }: { searchParams: Pro
   const units = profile.units as "metric" | "imperial";
   const label = (w: string) => formatDateKey(w, profile.locale, { month: "short", day: "numeric" });
   const weights = [...a.measurements].filter((m) => m.weightKg).map((m) => ({ label: formatDateKey(m.dateKey, profile.locale, { month: "short", day: "numeric" }), value: Math.round((units === "imperial" ? kgToLb(m.weightKg!) : m.weightKg!) * 10) / 10 }));
-  const waists = [...a.measurements].filter((m) => m.waistCm).map((m) => ({ label: formatDateKey(m.dateKey, profile.locale, { month: "short", day: "numeric" }), value: m.waistCm! }));
+  const waists = [...a.measurements].filter((m) => m.waistCm).map((m) => ({ label: formatDateKey(m.dateKey, profile.locale, { month: "short", day: "numeric" }), value: Math.round((units === "imperial" ? cmToIn(m.waistCm!) : m.waistCm!) * 10) / 10 }));
 
   return (
     <div className="space-y-6">
@@ -57,7 +57,7 @@ export default async function ProgressPage({ searchParams }: { searchParams: Pro
         <Card>
           <CardTitle>Total reps per week</CardTitle>
           <BarChart data={a.perWeek.map((w, i) => ({ label: label(w.week), value: w.reps, highlight: i === a.perWeek.length - 1 }))} />
-          {a.perWeek.some((w) => w.loadVolumeKg > 0) && <p className="mt-2 text-xs text-muted">Loaded volume this period: {a.perWeek.reduce((s, w) => s + w.loadVolumeKg, 0).toLocaleString()} kg</p>}
+          {a.perWeek.some((w) => w.loadVolumeKg > 0) && <p className="mt-2 text-xs text-muted">Loaded volume this period: {formatWeight(a.perWeek.reduce((s, w) => s + w.loadVolumeKg, 0), units)}</p>}
         </Card>
         <Card>
           <CardTitle>All activity (minutes)</CardTitle>
@@ -120,7 +120,7 @@ export default async function ProgressPage({ searchParams }: { searchParams: Pro
           {waists.length > 1 && (
             <div className="mt-4">
               <p className="mb-1 text-xs text-subtle">Waist trend</p>
-              <LineChart points={waists} unit=" cm" height={120} color="var(--info)" />
+              <LineChart points={waists} unit={units === "imperial" ? " in" : " cm"} height={120} color="var(--info)" />
             </div>
           )}
         </Card>

@@ -13,7 +13,7 @@ import { formatMetricValue } from "@/lib/sport-format";
 import { formatDistance } from "@/lib/format";
 import { Badge, ButtonLink, Card, CardTitle, Notice, PageHeader, Stat } from "@/components/ui/primitives";
 import { cx } from "@/lib/cx";
-import { AvailabilityBadge, DrillBadges, SourceList, VerificationBadge } from "@/components/sports/badges";
+import { AvailabilityBadge, DrillBadges, LessonStatusBadge, SourceList, VerificationBadge } from "@/components/sports/badges";
 import { EnrollPanel, MetricPanel, PracticeBuilder } from "./client";
 
 const TABS = [
@@ -111,6 +111,7 @@ export default async function SportHubPage({ params, searchParams }: { params: P
                               <span className="flex flex-wrap items-center gap-2 font-medium">
                                 {l.title}
                                 {isNext && <Badge tone="accent">Next</Badge>}
+                                {state && state.lessonStates[l.slug]?.state !== "not_started" && <LessonStatusBadge state={state.lessonStates[l.slug].state} evidence={state.lessonStates[l.slug].evidence} />}
                                 {l.requiresSupervision && <Badge tone="danger">Coach required</Badge>}
                               </span>
                               <span className="block text-xs text-muted">{l.summary}</span>

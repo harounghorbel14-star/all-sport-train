@@ -187,9 +187,20 @@ export async function createCustomFood(userId: string, input: { name: string; kc
 const mealItemSchema = z.object({ foodId: z.string().nullable().optional(), name: z.string(), grams: z.number(), kcal: z.number(), proteinG: z.number(), carbsG: z.number(), fatG: z.number() });
 export const savedMealItems = z.array(mealItemSchema).min(1).max(30);
 
+/** Food ids a user may link to: shared database foods and their own custom foods (USDA ids aren't stored rows). */
+async function usableFoodIds(userId: string, ids: (string | null | undefined)[]) {
+  const local = [...new Set(ids.filter((id): id is string => !!id && !id.startsWith("usda:")))];
+  if (!local.length) return new Set<string>();
+  const rows = await db.food.findMany({ where: { id: { in: local }, OR: [{ ownerId: null }, { ownerId: userId }] }, select: { id: true } });
+  return new Set(rows.map((r) => r.id));
+}
+
 export async function saveMeal(userId: string, input: { name: string; items: z.infer<typeof savedMealItems>; isRecipe?: boolean; servings?: number; notes?: string }) {
+  const ok = await usableFoodIds(userId, input.items.map((i) => i.foodId));
+  // Another user's private food (or an unknown id) is kept as a plain named item, never linked.
+  const items = input.items.map((i) => ({ ...i, foodId: i.foodId && (i.foodId.startsWith("usda:") || ok.has(i.foodId)) ? i.foodId : null }));
   return db.savedMeal.create({
-    data: { userId, name: input.name, items: JSON.stringify(input.items), isRecipe: !!input.isRecipe, servings: input.servings ?? 1, notes: input.notes ?? null },
+    data: { userId, name: input.name, items: JSON.stringify(items), isRecipe: !!input.isRecipe, servings: input.servings ?? 1, notes: input.notes ?? null },
   });
 }
 
@@ -203,10 +214,11 @@ export async function logSavedMeal(userId: string, mealId: string, dateKey: stri
   if (!saved) throw notFound("Saved meal not found");
   const items = parseJson(saved.items, savedMealItems, []);
   const factor = portion / (saved.servings || 1);
+  const ok = await usableFoodIds(userId, items.map((i) => i.foodId)); // a linked food may have been deleted since
   await db.foodEntry.createMany({
     data: items.map((i) => ({
       userId,
-      foodId: i.foodId && !i.foodId.startsWith("usda:") ? i.foodId : null,
+      foodId: i.foodId && ok.has(i.foodId) ? i.foodId : null,
       dateKey,
       meal,
       name: i.name,
