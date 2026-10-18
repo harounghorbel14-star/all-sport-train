@@ -13,11 +13,11 @@ Each item names how it was verified. Audit of 2026-10-18 (findings verified by r
 - ✅ Practice completion not idempotent/atomic (duplicate activities on retry) → plan claimed atomically before logging — test: api-sports "logs a practice once…" (fails on the old code)
 - ✅ Sets from abandoned ("end without saving") workouts count toward bests, skills and achievements → excluded everywhere
 - ✅ Personal records never cleaned up when a set is corrected, substituted or the workout abandoned → reconciled per session, removed on discard — test: api-workouts "keeps personal records consistent…" (fails on the old code)
-- ⬜ Offline set queue: queue overwritten during flush, dropped on server error, not flushed after reload
-- ⬜ Recovery check-in regenerates (archives) a workout the user edited
-- ⬜ Two active sessions possible on double start / two tabs
+- ✅ Offline set queue: queue overwritten during flush, dropped on server error, not flushed after reload → ref-based queue, 5xx kept for retry, auto-flush after reload, finish blocked while sets are unsynced — e2e journey "sets logged without a connection sync after a reload…"
+- ✅ Recovery check-in regenerates (archives) a workout the user edited → edited/coach/started plans are kept and the user is told — test: api-workouts "adapting after a check-in keeps…"
+- ✅ Two active sessions possible on double start / two tabs (and duplicate today plans) → earliest wins, duplicates removed — test: api-workouts "never creates two plans…" (fails on the old code: 3 plans)
 - ⬜ Check-ins and mobility logs can be backdated for XP / streak repair; mobility double-submit
-- ⬜ Completed sessions still render the live logging UI; completion retry loses the summary; duplicate today plans
+- ✅ Completed sessions still render the live logging UI; completion retry loses the summary → reopening shows the summary; retries/races return the same summary, one activity, XP once — tests: api-workouts "completes once when two completions race", e2e journey
 - ⬜ Sport hub drops newest metric entries after 2,000
 - ⬜ Guest import drops XP / achievements
 - ✅ Installable app (Android/iPhone) + offline saved lessons/plans — e2e + service-worker unit tests

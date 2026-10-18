@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { BookOpen, Check, ChevronLeft, ChevronRight, Flame, Minus, Pause, Play, Plus, Repeat, SkipForward, Timer, Trophy, WifiOff, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { GeneratedWorkout } from "@/lib/engine/types";
 import type { ExerciseLookup } from "@/lib/services/views";
 import { api, ApiError } from "@/lib/client/api";
@@ -25,7 +25,7 @@ interface SetRec {
   skipped: boolean;
 }
 
-interface Summary {
+export interface Summary {
   durationSeconds: number;
   setsCompleted: number;
   setsSkipped: number;
@@ -45,12 +45,15 @@ export function LiveWorkout({
   workout: initialWorkout,
   lookup,
   units,
+  initialSummary,
 }: {
   session: { id: string; status: string; startedAt: string; pausedAt: string | null; pausedSeconds: number; currentIndex: number; planId: string | null };
   initialSets: SetRec[];
   workout: GeneratedWorkout;
   lookup: ExerciseLookup;
   units: "metric" | "imperial";
+  /** Set when the workout is already finished: show its summary, not the logging screen. */
+  initialSummary?: Summary | null;
 }) {
   const { t } = useI18n();
   const router = useRouter();
@@ -80,7 +83,7 @@ export function LiveWorkout({
   const [finalRpe, setFinalRpe] = useState(6);
   const [notes, setNotes] = useState("");
   const [finishing, setFinishing] = useState(false);
-  const [summary, setSummary] = useState<Summary | null>(session.status === "completed" ? null : null);
+  const [summary, setSummary] = useState<Summary | null>(initialSummary ?? null);
   const [shared, setShared] = useState(false);
 
   const block = workout.main[index];
@@ -143,25 +146,52 @@ export function LiveWorkout({
     }
   }, [rest, restLeft]);
 
-  // Retry queued sets when back online.
-  const flush = useCallback(async () => {
-    if (!pending.length) return;
-    const remaining: SetRec[] = [];
-    for (const p of pending) {
-      try {
-        await api(`/api/sessions/${session.id}/sets`, { body: p });
-      } catch (e) {
-        if (e instanceof ApiError && e.status === 0) remaining.push(p);
+  // Retry queued sets when back online. Reads the queue through a ref so sets queued while a flush
+  // is running are never overwritten, and only removes the sets the server actually answered for.
+  const pendingRef = useRef(pending);
+  pendingRef.current = pending;
+  const flushing = useRef<Promise<number> | null>(null);
+  const flush = useCallback(async (): Promise<number> => {
+    if (flushing.current) return flushing.current;
+    const run = (async () => {
+      const batch = pendingRef.current;
+      const settled: SetRec[] = [];
+      for (const p of batch) {
+        try {
+          await api(`/api/sessions/${session.id}/sets`, { body: p });
+          settled.push(p);
+        } catch (e) {
+          // Network or server trouble: keep it for the next attempt. A refusal (e.g. the workout ended) is final.
+          if (e instanceof ApiError && (e.status === 0 || e.status >= 500)) continue;
+          settled.push(p);
+          setSets((cur) => cur.filter((s) => !(s.blockIndex === p.blockIndex && s.setNumber === p.setNumber)));
+          toast(e instanceof Error ? `A queued set wasn't saved: ${e.message}` : "A queued set wasn't saved", "error");
+        }
       }
+      const left = pendingRef.current.filter((p) => !settled.includes(p));
+      pendingRef.current = left;
+      setPending(left);
+      setOffline(left.length > 0);
+      return left.length;
+    })();
+    flushing.current = run;
+    try {
+      return await run;
+    } finally {
+      flushing.current = null;
     }
-    setPending(remaining);
-    setOffline(remaining.length > 0);
-  }, [pending, session.id]);
+  }, [session.id, toast]);
 
   useEffect(() => {
     window.addEventListener("online", flush);
     return () => window.removeEventListener("online", flush);
   }, [flush]);
+
+  // Sets restored from this device after a reload are sent as soon as there's a connection.
+  const hasPending = pending.length > 0;
+  useEffect(() => {
+    if (hasPending && navigator.onLine) void flush();
+  }, [hasPending, flush]);
 
   async function patch(body: object) {
     try {
@@ -208,13 +238,15 @@ export function LiveWorkout({
     try {
       const r = await api<{ prs: { metric: string; value: number }[] }>(`/api/sessions/${session.id}/sets`, { body: rec });
       setOffline(false);
+      if (pendingRef.current.length) void flush(); // the connection is back: send what was queued
       if (r.prs.length) {
         setPr(`${info?.name}: ${r.prs[0].value}${r.prs[0].metric === "seconds" ? "s" : r.prs[0].metric === "loadKg" ? " kg" : " reps"}`);
         setTimeout(() => setPr(null), 3500);
       }
     } catch (e) {
       if (e instanceof ApiError && e.status === 0) {
-        setPending((p) => [...p, rec]);
+        // Latest value per set wins; one queue entry per set.
+        setPending((p) => [...p.filter((x) => !(x.blockIndex === rec.blockIndex && x.setNumber === rec.setNumber)), rec]);
         setOffline(true);
       } else {
         setSets((cur) => cur.filter((s) => !(s.blockIndex === rec.blockIndex && s.setNumber === rec.setNumber)));
@@ -257,7 +289,11 @@ export function LiveWorkout({
 
   async function finish() {
     setFinishing(true);
-    await flush();
+    if ((await flush()) > 0) {
+      toast("Some sets are still saved only on this device. Reconnect so they sync, then finish.", "error");
+      setFinishing(false);
+      return;
+    }
     try {
       const r = await api<{ summary: Summary }>(`/api/sessions/${session.id}/complete`, { body: { rpe: finalRpe, notes: notes || undefined } });
       setSummary(r.summary);

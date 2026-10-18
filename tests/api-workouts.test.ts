@@ -62,6 +62,25 @@ describe("workout generation & editing", () => {
     expect((await call(plan.PUT, { method: "PUT", cookie, params: { id: json.plan.id }, body: { workout: badReps } })).status).toBe(400);
   });
 
+  it("adapting after a check-in keeps a workout the user edited", async () => {
+    const { cookie } = await newUser();
+    const { json } = await call(today.GET, { cookie });
+    const w = structuredClone(json.workout);
+    w.main[0].sets = 5;
+    await call(plan.PUT, { method: "PUT", cookie, params: { id: json.plan.id }, body: { workout: w } });
+    await call(checkin.POST, { cookie, body: { dateKey: todayKey("UTC"), sleepHours: 5, energy: 2, soreness: 4, pain: false } });
+    const adapted = await call(today.POST, { cookie, body: { keepEdited: true } });
+    expect(adapted.json.kept).toBe(true);
+    expect(adapted.json.plan.id).toBe(json.plan.id);
+    expect(adapted.json.workout.main[0].sets).toBe(5);
+    // An untouched engine plan is still adapted.
+    const other = await newUser();
+    const first = await call(today.GET, { cookie: other.cookie });
+    const r = await call(today.POST, { cookie: other.cookie, body: { keepEdited: true } });
+    expect(r.json.kept).toBe(false);
+    expect(r.json.plan.id).not.toBe(first.json.plan.id);
+  });
+
   it("returns a recovery session after a painful check-in", async () => {
     const { cookie } = await newUser();
     await call(checkin.POST, { cookie, body: { dateKey: todayKey("UTC"), sleepHours: 7, energy: 3, soreness: 3, pain: true } });
@@ -116,13 +135,32 @@ describe("live workout mode", () => {
 
     // Exactly one activity entry per workout (no double counting)
     expect(await db.activityEntry.count({ where: { userId, workoutSessionId: id } })).toBe(1);
-    expect((await call(complete.POST, { cookie, params: { id }, body: {} })).status).toBe(409);
+    // A retried completion (lost response, double tap) returns the same summary and records nothing new.
+    const xpBefore = (await db.profile.findUniqueOrThrow({ where: { userId } })).xp;
+    const retry = await call(complete.POST, { cookie, params: { id }, body: {} });
+    expect(retry.status).toBe(200);
+    expect(retry.json.summary.setsCompleted).toBe(summary.setsCompleted);
+    expect(retry.json.summary.durationSeconds).toBe(summary.durationSeconds);
+    expect(await db.activityEntry.count({ where: { userId, workoutSessionId: id } })).toBe(1);
+    expect((await db.profile.findUniqueOrThrow({ where: { userId } })).xp).toBe(xpBefore);
     expect((await call(sets.POST, { cookie, params: { id }, body: { blockIndex: 0, setNumber: 1, reps: 3 } })).status).toBe(409);
 
     const g = await call(gamification.GET, { cookie });
     expect(g.json.streak.current).toBe(1);
     expect(g.json.streak.level.xp).toBeGreaterThan(0);
     expect(g.json.achievements.find((a: { key: string }) => a.key === "first_workout").unlockedAt).toBeTruthy();
+  });
+
+  it("completes once when two completions race", async () => {
+    const { cookie, userId } = await newUser();
+    const { json } = await call(today.GET, { cookie });
+    const id = (await call(sessions.POST, { cookie, body: { planId: json.plan.id } })).json.session.id;
+    const block = json.workout.main[0];
+    await call(sets.POST, { cookie, params: { id }, body: { blockIndex: 0, setNumber: 1, ...(block.seconds ? { seconds: 20 } : { reps: 5 }) } });
+    const both = await Promise.all([1, 2].map(() => call(complete.POST, { cookie, params: { id }, body: { rpe: 6 } })));
+    expect(both.map((r) => r.status)).toEqual([200, 200]);
+    expect(await db.activityEntry.count({ where: { userId, workoutSessionId: id } })).toBe(1);
+    expect(await db.xpEvent.count({ where: { userId, source: "workout", refId: id } })).toBe(1);
   });
 
   it("detects personal records against previous sessions", async () => {
@@ -140,6 +178,18 @@ describe("live workout mode", () => {
     expect(first.r.json.prs).toHaveLength(0); // baseline, not a "record"
     const second = await run(12);
     if (second.exercise === first.exercise) expect(second.r.json.prs.map((p: { metric: string }) => p.metric)).toContain("reps");
+  });
+
+  it("never creates two plans for today or two live sessions when requests race", async () => {
+    const { cookie, userId } = await newUser();
+    const plans = await Promise.all([1, 2, 3].map(() => call(today.GET, { cookie })));
+    expect(new Set(plans.map((p) => p.json.plan.id)).size).toBe(1);
+    expect(await db.workoutPlan.count({ where: { userId, status: { not: "archived" } } })).toBe(1);
+    const planId = plans[0].json.plan.id;
+    const starts = await Promise.all([1, 2, 3].map(() => call(sessions.POST, { cookie, body: { planId } })));
+    expect(starts.every((r) => r.status === 200)).toBe(true);
+    expect(new Set(starts.map((r) => r.json.session.id)).size).toBe(1);
+    expect(await db.workoutSession.count({ where: { userId, status: { in: ["active", "paused"] } } })).toBe(1);
   });
 
   it("keeps personal records consistent with corrected and discarded sets", async () => {

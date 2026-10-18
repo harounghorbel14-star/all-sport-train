@@ -66,3 +66,39 @@ test("rule-based coach answers with a workout action", async ({ page }) => {
   await page.getByRole("button", { name: "I only have 20 minutes" }).click();
   await expect(page.getByText(/open to edit or start/)).toBeVisible();
 });
+
+test("sets logged without a connection sync after a reload; a finished workout reopens as its summary", async ({ page }) => {
+  await registerAndOnboard(page, { zero: true });
+  await page.getByRole("button", { name: /Start workout|Train anyway/ }).click();
+  await expect(page).toHaveURL(/\/live\//);
+  const liveUrl = page.url();
+  const sessionId = liveUrl.split("/live/")[1];
+  await page.getByRole("button", { name: "Warm-up done" }).click();
+
+  // The connection drops just for set logging: the set is kept on the device.
+  await page.route("**/api/sessions/*/sets", (route) => route.abort("internetdisconnected"));
+  const startTimer = page.getByRole("button", { name: "Start timer" });
+  if (await startTimer.isVisible()) {
+    await startTimer.click();
+    await page.waitForTimeout(1200);
+  }
+  await page.getByRole("button", { name: "Log set" }).click();
+  await expect(page.getByText(/Offline — 1 set\(s\) saved on this device/)).toBeVisible();
+
+  // Back online and reloaded: the queued set is sent without any further action.
+  await page.unroute("**/api/sessions/*/sets");
+  await page.reload();
+  await expect.poll(async () => (await (await page.request.get(`/api/sessions/${sessionId}`)).json()).session.sets.length).toBe(1);
+  await expect(page.getByText(/Offline —/)).toHaveCount(0);
+
+  const skipRest = page.getByRole("button", { name: "Skip rest" });
+  if (await skipRest.isVisible()) await skipRest.click();
+  await page.getByRole("button", { name: "Finish workout" }).last().click();
+  await page.getByRole("button", { name: "Save workout" }).click();
+  await expect(page.getByRole("heading", { name: "Workout complete" })).toBeVisible();
+
+  // Opening the finished workout again shows its summary, not the logging screen.
+  await page.goto(liveUrl);
+  await expect(page.getByRole("heading", { name: "Workout complete" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Log set" })).toHaveCount(0);
+});
