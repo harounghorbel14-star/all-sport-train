@@ -86,6 +86,16 @@ describe("practice plans", () => {
     expect((await call(practiceComplete.POST, { cookie, params: { id: r.json.plan.id }, body: { durationMin: 40 } })).status).toBe(409);
   });
 
+  it("logs a practice once even when completion is sent twice at the same time", async () => {
+    const { cookie, userId } = await newUser();
+    await call(sport.POST, { cookie, params: { slug: "boxing" }, body: { level: "beginner", supervised: false } });
+    const r = await call(practice.POST, { cookie, params: { slug: "boxing" }, body: { minutes: 30, focus: "balanced", setting: "solo", players: 1 } });
+    const body = { durationMin: 30, intensity: "moderate", results: [] };
+    const both = await Promise.all([1, 2].map(() => call(practiceComplete.POST, { cookie, params: { id: r.json.plan.id }, body })));
+    expect(both.map((x) => x.status).sort()).toEqual([200, 409]);
+    expect(await db.activityEntry.count({ where: { userId, sport: "boxing", source: "practice" } })).toBe(1);
+  });
+
   it("refuses to build practices for sports without a drill library", async () => {
     const { cookie } = await newUser();
     const r = await call(practice.POST, { cookie, params: { slug: "kitesurfing" }, body: { minutes: 30 } });

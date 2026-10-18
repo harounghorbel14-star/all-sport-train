@@ -142,6 +142,36 @@ describe("live workout mode", () => {
     if (second.exercise === first.exercise) expect(second.r.json.prs.map((p: { metric: string }) => p.metric)).toContain("reps");
   });
 
+  it("keeps personal records consistent with corrected and discarded sets", async () => {
+    const { cookie, userId } = await newUser();
+    const t = await call(today.GET, { cookie });
+    const ex = t.json.workout.main.findIndex((b: { seconds: number | null }) => !b.seconds);
+    const slug = t.json.workout.main[ex].exercise;
+    const exercise = await db.exercise.findUniqueOrThrow({ where: { slug } });
+    // Baseline: a self-reported test of 5 reps (not tied to any workout).
+    await call(skillTest.POST, { cookie, body: { exercise: slug, metric: "reps", value: 5 } });
+    const id = (await call(sessions.POST, { cookie, body: { planId: t.json.plan.id } })).json.session.id;
+    const log = (reps: number) => call(sets.POST, { cookie, params: { id }, body: { blockIndex: ex, setNumber: 1, reps } });
+    const sessionRecords = () => db.personalRecord.findMany({ where: { userId, sessionId: id, metric: "reps" } });
+
+    expect((await log(20)).json.prs).toHaveLength(1); // typo: 20 instead of 2
+    expect((await log(6)).json.prs).toHaveLength(1); // corrected: still beats the baseline
+    expect((await sessionRecords()).map((r) => r.value)).toEqual([6]);
+    expect((await log(4)).json.prs).toHaveLength(0); // corrected below the baseline: no record left
+    expect(await sessionRecords()).toHaveLength(0);
+
+    await log(30);
+    expect(await sessionRecords()).toHaveLength(1);
+    // Discarding the workout removes its records and its sets stop counting as bests.
+    expect((await call(session.DELETE, { method: "DELETE", cookie, params: { id } })).status).toBe(200);
+    expect(await sessionRecords()).toHaveLength(0);
+    const { getExercise } = await import("@/lib/services/exercises");
+    const view = await getExercise(slug, userId);
+    expect(view.recentSets).toHaveLength(0);
+    expect(view.records.map((r) => r.value)).toEqual([5]);
+    expect(await db.personalRecord.count({ where: { userId, exerciseId: exercise.id } })).toBe(1);
+  });
+
   it("substitutes exercises mid-workout only with suitable options", async () => {
     const { cookie } = await newUser();
     const { json } = await call(today.GET, { cookie });

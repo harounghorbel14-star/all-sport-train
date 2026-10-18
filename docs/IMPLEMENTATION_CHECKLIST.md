@@ -6,12 +6,13 @@ Each item names how it was verified. Audit of 2026-10-18 (findings verified by r
 ## P0 — security, broken auth, data loss, critical failures
 - ✅ Admin role granted to unverified emails in `ADMIN_EMAILS` → admin now requires role + verified email (Google or reset link); API and pages use `isAdmin()` — tests: api-auth-upgrade "admin access (P0)"
 - ✅ Operator escape hatch for deployments without email: `npm run admin:grant -- you@example.com` (marks the address verified, logs an `admin_granted_by_operator` auth event) — verified manually
+- ✅ Guarded pages were prerendered as a redirect to /login when `next build` ran without APP_BASE_URL (sign-up looped back to login) → session cookie is read before the config check — caught by e2e
 - ✅ Reset/OAuth links built from the request Host → `APP_BASE_URL` required in production (health + setup notice report it) — test: "requires APP_BASE_URL in production"
 
 ## P1 — core workout experience, persistence, progress accuracy
-- ⬜ Practice completion not idempotent/atomic (duplicate activities on retry)
-- ⬜ Sets from abandoned workouts count toward bests, skills and achievements
-- ⬜ Personal records never cleaned up when a set is corrected, substituted or the workout abandoned
+- ✅ Practice completion not idempotent/atomic (duplicate activities on retry) → plan claimed atomically before logging — test: api-sports "logs a practice once…" (fails on the old code)
+- ✅ Sets from abandoned ("end without saving") workouts count toward bests, skills and achievements → excluded everywhere
+- ✅ Personal records never cleaned up when a set is corrected, substituted or the workout abandoned → reconciled per session, removed on discard — test: api-workouts "keeps personal records consistent…" (fails on the old code)
 - ⬜ Offline set queue: queue overwritten during flush, dropped on server error, not flushed after reload
 - ⬜ Recovery check-in regenerates (archives) a workout the user edited
 - ⬜ Two active sessions possible on double start / two tabs

@@ -272,18 +272,32 @@ export interface SetInput {
   skipped?: boolean;
 }
 
-async function previousBest(userId: string, exerciseId: string, metric: "reps" | "seconds" | "loadKg", excludeSetId?: string) {
+async function previousBest(userId: string, sessionId: string, exerciseId: string, metric: "reps" | "seconds" | "loadKg", excludeSetId?: string) {
   const [setMax, pr] = await Promise.all([
     db.setLog.aggregate({
-      where: { exerciseId, skipped: false, session: { userId }, ...(excludeSetId ? { id: { not: excludeSetId } } : {}) },
+      where: { exerciseId, skipped: false, session: { userId, status: { not: "abandoned" } }, ...(excludeSetId ? { id: { not: excludeSetId } } : {}) },
       _max: { [metric]: true } as never,
     }) as Promise<{ _max: Record<string, number | null> }>,
-    db.personalRecord.aggregate({ where: { userId, exerciseId, metric }, _max: { value: true } }),
+    // This session's own records are backed by its sets (counted above), which may since have been corrected.
+    db.personalRecord.aggregate({ where: { userId, exerciseId, metric, OR: [{ sessionId: null }, { sessionId: { not: sessionId } }] }, _max: { value: true } }),
   ]);
   const a = setMax._max[metric];
   const b = pr._max.value;
   if (a == null && b == null) return null;
   return Math.max(a ?? 0, b ?? 0);
+}
+
+/**
+ * Drops personal records from this session that its sets no longer support
+ * (a set was corrected downwards, or its block was substituted away).
+ */
+async function reconcileSessionPrs(userId: string, sessionId: string) {
+  const [prs, sets] = await Promise.all([
+    db.personalRecord.findMany({ where: { userId, sessionId } }),
+    db.setLog.findMany({ where: { sessionId, skipped: false } }),
+  ]);
+  const stale = prs.filter((pr) => !sets.some((s) => s.exerciseId === pr.exerciseId && (s[pr.metric as "reps" | "seconds" | "loadKg"] ?? 0) >= pr.value));
+  if (stale.length) await db.personalRecord.deleteMany({ where: { id: { in: stale.map((p) => p.id) } } });
 }
 
 export async function logSet(userId: string, sessionId: string, input: SetInput) {
@@ -313,7 +327,7 @@ export async function logSet(userId: string, sessionId: string, input: SetInput)
     for (const metric of ["reps", "seconds", "loadKg"] as const) {
       const value = data[metric];
       if (value == null || value <= 0) continue;
-      const prev = await previousBest(userId, exercise.id, metric, existing?.id);
+      const prev = await previousBest(userId, sessionId, exercise.id, metric, existing?.id);
       if (prev != null && value > prev) prs.push({ metric, value, previous: prev });
     }
   }
@@ -323,7 +337,10 @@ export async function logSet(userId: string, sessionId: string, input: SetInput)
     create: { sessionId, blockIndex: input.blockIndex, setNumber: input.setNumber, ...data },
     update: data,
   });
+  if (existing) await reconcileSessionPrs(userId, sessionId);
   for (const pr of prs) {
+    // One record per exercise and metric per session: the new best replaces a lower one from earlier in the workout.
+    await db.personalRecord.deleteMany({ where: { userId, sessionId, exerciseId: exercise.id, metric: pr.metric } });
     await db.personalRecord.create({ data: { userId, exerciseId: exercise.id, metric: pr.metric, value: pr.value, sessionId } });
   }
   return { set, prs };
@@ -372,6 +389,7 @@ export async function updateSessionState(userId: string, sessionId: string, a: S
       workout.main[a.blockIndex] = replaced;
       // Sets already logged for the old exercise in this block are discarded.
       await db.setLog.deleteMany({ where: { sessionId: session.id, blockIndex: a.blockIndex } });
+      await reconcileSessionPrs(userId, session.id);
       return db.workoutSession.update({ where: { id: session.id }, data: { content: JSON.stringify(workout) } });
     }
     case "notes":
@@ -461,7 +479,11 @@ export async function completeSession(userId: string, sessionId: string, input: 
 export async function abandonSession(userId: string, sessionId: string) {
   const { session } = await getSession(userId, sessionId);
   if (session.status === "completed") throw conflict("Completed workouts can't be ended");
-  await db.workoutSession.update({ where: { id: session.id }, data: { status: "abandoned", endedAt: new Date() } });
+  // Discarded workouts leave no trace in bests: their sets are ignored and their records removed.
+  await db.$transaction([
+    db.workoutSession.update({ where: { id: session.id }, data: { status: "abandoned", endedAt: new Date() } }),
+    db.personalRecord.deleteMany({ where: { userId, sessionId: session.id } }),
+  ]);
   if (session.planId) await db.workoutPlan.update({ where: { id: session.planId }, data: { status: "planned" } });
   return { ok: true };
 }

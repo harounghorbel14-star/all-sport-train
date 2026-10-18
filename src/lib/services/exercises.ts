@@ -72,7 +72,7 @@ export async function getExercise(slug: string, userId?: string) {
     db.favoriteExercise.findUnique({ where: { userId_exerciseId: { userId, exerciseId: row.id } } }),
     db.personalRecord.findMany({ where: { userId, exerciseId: row.id }, orderBy: { value: "desc" }, take: 5 }),
     db.setLog.findMany({
-      where: { exerciseId: row.id, skipped: false, session: { userId } },
+      where: { exerciseId: row.id, skipped: false, session: { userId, status: { not: "abandoned" } } },
       orderBy: { completedAt: "desc" },
       take: 10,
       select: { reps: true, seconds: true, loadKg: true, rpe: true, completedAt: true },

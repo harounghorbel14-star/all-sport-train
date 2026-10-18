@@ -9,7 +9,7 @@ async function bestFor(userId: string, slug: string, metric: "reps" | "seconds")
   const ex = await db.exercise.findUnique({ where: { slug }, select: { id: true } });
   if (!ex) return 0;
   const [sets, pr] = await Promise.all([
-    db.setLog.aggregate({ where: { exerciseId: ex.id, skipped: false, session: { userId } }, _max: { reps: true, seconds: true } }),
+    db.setLog.aggregate({ where: { exerciseId: ex.id, skipped: false, session: { userId, status: { not: "abandoned" } } }, _max: { reps: true, seconds: true } }),
     db.personalRecord.aggregate({ where: { userId, exerciseId: ex.id, metric }, _max: { value: true } }),
   ]);
   return Math.max(metric === "reps" ? (sets._max.reps ?? 0) : (sets._max.seconds ?? 0), pr._max.value ?? 0);
