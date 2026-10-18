@@ -26,12 +26,12 @@ Each item names how it was verified. Audit of 2026-10-18 (findings verified by r
 ## P2 — AI coaching, learning, analytics, hardening, performance
 - ⬜ Skill/lesson states: not started / in progress / awaiting assessment / completed; self-reported vs verified
 - ⬜ Adaptive next-workout recommendation with reasons; accept / modify / reject
-- ⬜ IP rate limits trust X-Forwarded-For; limiter never evicts keys
-- ⬜ Uploads parsed fully before size checks
-- ⬜ Saved-meal foodId not ownership-checked
+- ✅ IP rate limits trust X-Forwarded-For; limiter never evicts keys → right-most proxy-added address (`TRUSTED_PROXY_HOPS`, default 1), expired buckets swept — tests: hardening.test.ts
+- ✅ Uploads parsed fully before size checks → Content-Length checked first, stream counted while reading, 413 past the limit — tests: hardening.test.ts
+- ✅ Saved-meal foodId not ownership-checked → only shared or own foods are linked; unknown/deleted foods no longer crash logging — test: api-other "saved meals"
 - ⬜ Knowledge search loads the whole catalog per request; research-gap queue can be flooded
-- ⬜ XP farming via activity log + delete
-- ⬜ Malformed cookie → 500 on every request
+- ✅ XP farming via activity log + delete → XP revoked on delete; at most 5 XP-earning activities per 24 h (all still logged) — test: api-other "XP integrity"
+- ✅ Malformed cookie → 500 on every request → treated as no cookie — test: hardening.test.ts
 - ⬜ Imperial units for PRs, waist and volume; silent failures on deletes/toggles
 - ⬜ N+1 queries: achievements, practice completion, skills list, lesson page; exercise catalog in client bundles
 

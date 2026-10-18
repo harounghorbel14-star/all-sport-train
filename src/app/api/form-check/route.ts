@@ -2,12 +2,14 @@ import { authedRoute } from "@/lib/server/api";
 import { badRequest } from "@/lib/server/errors";
 import { LIMITS, rateLimit } from "@/lib/server/rate-limit";
 import { listFormChecks, runFormCheck } from "@/lib/services/formcheck";
+import { IMAGE_MAX_BYTES } from "@/lib/services/media";
+import { readLimitedForm } from "@/lib/server/request";
 
 export const GET = authedRoute({}, async ({ user }) => ({ checks: await listFormChecks(user.id) }));
 
 export const POST = authedRoute({}, async ({ user, req }) => {
   rateLimit(`ai:${user.id}`, LIMITS.ai.limit, LIMITS.ai.windowMs);
-  const form = await req.formData().catch(() => null);
+  const form = await readLimitedForm(req, 6 * IMAGE_MAX_BYTES + 64 * 1024); // up to 6 frames + form fields
   if (!form) throw badRequest("Expected a multipart form upload");
   const exercise = String(form.get("exercise") ?? "");
   const mediaKind = form.get("mediaKind") === "video" ? "video" : "photo";

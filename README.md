@@ -65,6 +65,7 @@ For Playwright in a custom environment, set `PLAYWRIGHT_CHROMIUM_PATH` to a Chro
 | `APP_BASE_URL` | **yes in production** | Public base URL, e.g. `https://app.example.com`. Used for the OAuth callback and reset links. It is required so that links are never built from a forged Host header. |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | no | Enables "Continue with Google" (see [Google sign-in setup](#google-sign-in-setup)). |
 | `GOOGLE_CALLBACK_URL` | no | Override for the redirect URI; defaults to `${APP_BASE_URL}/api/auth/google/callback`. |
+| `TRUSTED_PROXY_HOPS` | no | How many reverse proxies sit in front of the app (default `1`, right for Railway). Rate limits use the client address the last proxy added to `X-Forwarded-For`, so clients can't spoof it. Use `0` if the app is exposed directly. |
 | `RESEND_API_KEY`, `MAIL_FROM` | for password reset | Transactional email through Resend. Without them, development logs reset links to the server console; production sends nothing. |
 
 Secrets are only read on the server (`src/lib/server/env.ts`, validated with Zod). No key ever reaches the browser.

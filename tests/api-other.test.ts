@@ -245,6 +245,43 @@ describe("community & privacy", () => {
   });
 });
 
+describe("XP integrity", () => {
+  it("deleting an activity takes back its XP, and only a few activities a day earn XP", async () => {
+    const { cookie, userId } = await newUser();
+    const xp = async () => (await db.profile.findUniqueOrThrow({ where: { userId } })).xp;
+    const start = await xp();
+    const body = { sport: "running", dateKey: todayKey("UTC"), durationMin: 20, intensity: "moderate" };
+    // Farming attempt: log and delete repeatedly.
+    for (let i = 0; i < 3; i++) {
+      const r = await call(activity.POST, { cookie, body });
+      await call(activityItem.DELETE, { method: "DELETE", cookie, params: { id: r.json.entry.id } });
+    }
+    expect(await xp()).toBe(start);
+    for (let i = 0; i < 8; i++) await call(activity.POST, { cookie, body });
+    expect(await db.activityEntry.count({ where: { userId } })).toBe(8); // all logged
+    expect(await db.xpEvent.count({ where: { userId, source: "activity" } })).toBe(5); // XP for 5
+  });
+});
+
+describe("saved meals", () => {
+  it("never links another user's private food, and survives unknown or deleted foods", async () => {
+    const a = await newUser();
+    const b = await newUser();
+    const secret = await db.food.create({ data: { ownerId: b.userId, name: "B's secret recipe", kcalPer100g: 100, proteinG: 1, carbsG: 1, fatG: 1, servings: "[]", source: "custom", isEstimate: false, category: "custom" } });
+    const mine = await db.food.create({ data: { ownerId: a.userId, name: "My oats", kcalPer100g: 380, proteinG: 13, carbsG: 60, fatG: 7, servings: "[]", source: "custom", isEstimate: false, category: "custom" } });
+    const item = (foodId: string, name: string) => ({ foodId, name, grams: 100, kcal: 100, proteinG: 1, carbsG: 1, fatG: 1 });
+    const saved = await call(meals.POST, { cookie: a.cookie, body: { name: "Mix", items: [item(secret.id, "Stolen"), item("does-not-exist", "Ghost"), item(mine.id, "Oats")] } });
+    expect(saved.status).toBe(200);
+    expect(JSON.parse(saved.json.meal.items).map((i: { foodId: string | null }) => i.foodId)).toEqual([null, null, mine.id]);
+    await db.food.delete({ where: { id: mine.id } }); // deleted after saving
+    const logged = await call(meal.POST, { cookie: a.cookie, params: { id: saved.json.meal.id }, body: { dateKey: todayKey("UTC"), meal: "breakfast" } });
+    expect(logged.status).toBe(200);
+    const rows = await db.foodEntry.findMany({ where: { userId: a.userId } });
+    expect(rows).toHaveLength(3);
+    expect(rows.every((r) => r.foodId === null)).toBe(true);
+  });
+});
+
 describe("recovery logging dates", () => {
   it("only accepts check-ins and mobility for today or yesterday, and logs a double-tapped routine once", async () => {
     const { cookie, userId } = await newUser();

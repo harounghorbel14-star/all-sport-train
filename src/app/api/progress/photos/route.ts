@@ -2,13 +2,14 @@ import { authedRoute } from "@/lib/server/api";
 import { badRequest } from "@/lib/server/errors";
 import { LIMITS, rateLimit } from "@/lib/server/rate-limit";
 import { isDateKey } from "@/lib/domain/dates";
-import { listProgressPhotos, storeUpload } from "@/lib/services/media";
+import { IMAGE_MAX_BYTES, listProgressPhotos, storeUpload } from "@/lib/services/media";
+import { readLimitedForm } from "@/lib/server/request";
 
 export const GET = authedRoute({}, async ({ user }) => ({ photos: await listProgressPhotos(user.id) }));
 
 export const POST = authedRoute({}, async ({ user, req }) => {
   rateLimit(`upload:${user.id}`, LIMITS.upload.limit, LIMITS.upload.windowMs);
-  const form = await req.formData().catch(() => null);
+  const form = await readLimitedForm(req, IMAGE_MAX_BYTES + 64 * 1024); // photo + form fields
   if (!form) throw badRequest("Expected a multipart form upload");
   const file = form.get("file");
   const pose = String(form.get("pose") ?? "");

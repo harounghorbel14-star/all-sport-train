@@ -53,6 +53,17 @@ export async function awardXp(userId: string, source: string, refId: string, amo
   }
 }
 
+/** Takes back XP when the record that earned it is deleted (log → delete → log can't farm XP). */
+export async function revokeXp(userId: string, source: string, refId: string) {
+  const ev = await db.xpEvent.findUnique({ where: { userId_source_refId: { userId, source, refId } } });
+  if (!ev) return 0;
+  await db.$transaction([
+    db.xpEvent.delete({ where: { id: ev.id } }),
+    db.profile.update({ where: { userId }, data: { xp: { decrement: ev.amount } } }),
+  ]);
+  return ev.amount;
+}
+
 const PUSHUP_SLUGS = ["wall-push-up", "incline-push-up", "knee-push-up", "push-up-negative", "push-up", "decline-push-up", "diamond-push-up", "archer-push-up", "pseudo-planche-push-up"];
 const PULLUP_SLUGS = ["pull-up", "chin-up", "archer-pull-up", "high-pull-up"];
 
