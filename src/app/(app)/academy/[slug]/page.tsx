@@ -41,7 +41,8 @@ export default async function SkillPage({ params }: { params: Promise<{ slug: st
                       {p.label}
                       <span className="text-xs text-subtle">
                         (best: {p.best || "—"}
-                        {p.metric === "seconds" ? "s" : ""})
+                        {p.metric === "seconds" ? "s" : ""}
+                        {p.source === "workout" ? " · logged in a workout" : p.source === "self_reported_test" ? " · self-reported test" : ""})
                       </span>
                     </span>
                     {!p.met && <PrereqTest exercise={p.exercise} metric={p.metric} />}

@@ -5,24 +5,30 @@ import { SKILLS, SKILL_BY_SLUG, type SkillDef } from "../content/skills";
 import { getProfile } from "./profile";
 import { evaluateAchievements } from "./gamification";
 
-type Bests = Map<string, { reps: number; seconds: number }>;
+type Source = "workout" | "self_reported_test" | null;
+type Bests = Map<string, { reps: number; seconds: number; source: { reps: Source; seconds: Source } }>;
 
 /**
- * Best reps / seconds the user has recorded per exercise (logged sets from workouts that weren't
- * discarded, or tests), for many exercises in three grouped queries instead of three per exercise.
+ * Best reps / seconds the user has recorded per exercise, for many exercises in three grouped
+ * queries. Each best says where it came from: a set logged during a workout (not discarded), or a
+ * self-reported test ("I can do 8 pull-ups"). Neither is verified by a coach.
  */
 async function loadBests(userId: string, slugs: string[]): Promise<Bests> {
   const exercises = await db.exercise.findMany({ where: { slug: { in: [...new Set(slugs)] } }, select: { id: true, slug: true } });
   const ids = exercises.map((e) => e.id);
-  const [sets, prs] = await Promise.all([
+  const [sets, tests] = await Promise.all([
     db.setLog.groupBy({ by: ["exerciseId"], where: { exerciseId: { in: ids }, skipped: false, session: { userId, status: { not: "abandoned" } } }, _max: { reps: true, seconds: true } }),
-    db.personalRecord.groupBy({ by: ["exerciseId", "metric"], where: { userId, exerciseId: { in: ids }, metric: { in: ["reps", "seconds"] } }, _max: { value: true } }),
+    // Records without a session are self-reported tests; workout records mirror logged sets.
+    db.personalRecord.groupBy({ by: ["exerciseId", "metric"], where: { userId, exerciseId: { in: ids }, metric: { in: ["reps", "seconds"] }, sessionId: null }, _max: { value: true } }),
   ]);
   const out: Bests = new Map();
   for (const e of exercises) {
     const set = sets.find((x) => x.exerciseId === e.id)?._max;
-    const pr = (metric: string) => prs.find((x) => x.exerciseId === e.id && x.metric === metric)?._max.value ?? 0;
-    out.set(e.slug, { reps: Math.max(set?.reps ?? 0, pr("reps")), seconds: Math.max(set?.seconds ?? 0, pr("seconds")) });
+    const test = (metric: string) => tests.find((x) => x.exerciseId === e.id && x.metric === metric)?._max.value ?? 0;
+    const pick = (fromSet: number, fromTest: number): [number, Source] => (fromSet === 0 && fromTest === 0 ? [0, null] : fromSet >= fromTest ? [fromSet, "workout"] : [fromTest, "self_reported_test"]);
+    const [reps, repsSrc] = pick(set?.reps ?? 0, test("reps"));
+    const [seconds, secSrc] = pick(set?.seconds ?? 0, test("seconds"));
+    out.set(e.slug, { reps, seconds, source: { reps: repsSrc, seconds: secSrc } });
   }
   return out;
 }
@@ -33,8 +39,9 @@ function equipmentOk(skill: SkillDef, owned: string[]) {
 
 function buildState(skill: SkillDef, owned: string[], bests: Bests, progress: SkillProgress | null) {
   const prereqs = skill.prerequisites.map((pr) => {
-    const best = bests.get(pr.exercise)?.[pr.metric] ?? 0;
-    return { ...pr, best, met: best >= pr.value };
+    const b = bests.get(pr.exercise);
+    const best = b?.[pr.metric] ?? 0;
+    return { ...pr, best, source: b?.source[pr.metric] ?? null, met: best >= pr.value };
   });
   const hasEquipment = equipmentOk(skill, owned);
   const prerequisitesMet = prereqs.every((p) => p.met);

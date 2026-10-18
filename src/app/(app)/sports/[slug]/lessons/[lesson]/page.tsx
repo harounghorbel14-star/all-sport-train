@@ -4,8 +4,8 @@ import { ArrowLeft, ArrowRight, Lock, ShieldAlert } from "lucide-react";
 import { requireUser } from "@/lib/auth/server";
 import { AppError } from "@/lib/server/errors";
 import { getLesson } from "@/lib/services/sports";
-import { Badge, Card, CardTitle, Notice, PageHeader } from "@/components/ui/primitives";
-import { DrillBadges, SourceList } from "@/components/sports/badges";
+import { Card, CardTitle, Notice, PageHeader } from "@/components/ui/primitives";
+import { DrillBadges, LessonStatusBadge, SourceList } from "@/components/sports/badges";
 import { LessonActions } from "./actions";
 import { SaveOffline } from "@/components/pwa/save-offline";
 
@@ -21,8 +21,7 @@ async function load(userId: string, slug: string, lesson: string) {
 export default async function LessonPage({ params }: { params: Promise<{ slug: string; lesson: string }> }) {
   const { slug, lesson: lessonSlug } = await params;
   const { user } = await requireUser();
-  const { hub, lesson, drills, completedLessons, prereqsMet, previous, next } = await load(user.id, slug, lessonSlug);
-  const done = completedLessons.includes(lesson.slug);
+  const { hub, lesson, drills, completedLessons, state, prereqsMet, previous, next } = await load(user.id, slug, lessonSlug);
   const c = lesson.content;
   const missing = lesson.prerequisites.filter((p) => !completedLessons.includes(p)).map((p) => hub.lessons.find((l) => l.slug === p));
   const sources = hub.sources.filter((s) => lesson.sources.includes(s.slug));
@@ -42,7 +41,7 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
       <Link href={`/sports/${slug}?tab=learn`} className="inline-flex items-center gap-1 text-sm text-muted hover:text-accent">
         <ArrowLeft className="size-4 rtl:rotate-180" /> {hub.sport.name} lessons
       </Link>
-      <PageHeader eyebrow={`${hub.sport.name} · ${lesson.level}`} title={lesson.title} subtitle={lesson.summary} />
+      <PageHeader eyebrow={`${hub.sport.name} · ${lesson.level}`} title={lesson.title} subtitle={lesson.summary} action={<LessonStatusBadge state={state.state} evidence={state.evidence} />} />
       {!prereqsMet && (
         <Notice tone="warn" icon={<Lock className="size-4" />}>
           Recommended first:{" "}
@@ -108,6 +107,9 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
         <Card>
           <CardTitle>Check your progress</CardTitle>
           <p className="text-sm text-muted">{c.progressTest.description}</p>
+          {state.state === "awaiting_assessment" && (
+            <p className="mt-2 text-sm">This lesson completes when you log a result that meets this test. Results are self-reported — log what you actually measured.</p>
+          )}
           {c.progressTest.metricKey && (
             <Link href={`/sports/${slug}?tab=progress`} className="mt-2 inline-block text-sm text-accent underline">
               Log a result
@@ -117,7 +119,7 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
       )}
       {sources.length > 0 && <SourceList sources={sources} />}
       <div className="flex flex-wrap items-center gap-2">
-        <LessonActions slug={slug} lesson={lesson.slug} done={done} />
+        <LessonActions slug={slug} lesson={lesson.slug} state={state.state} />
         <SaveOffline url={`/sports/${slug}/lessons/${lesson.slug}`} title={`${hub.sport.name}: ${lesson.title}`} kind="lesson" />
       </div>
       <div className="flex justify-between text-sm">
@@ -134,7 +136,6 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
           </Link>
         )}
       </div>
-      {done && <Badge tone="success">Completed</Badge>}
     </div>
   );
 }

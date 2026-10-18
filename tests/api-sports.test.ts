@@ -1,3 +1,4 @@
+import { todayKey } from "@/lib/domain/dates";
 import { beforeAll, describe, expect, it } from "vitest";
 import { db } from "@/lib/server/db";
 import { seed } from "../prisma/seed";
@@ -65,6 +66,43 @@ describe("learning path", () => {
     const hub = await call(sport.GET, { cookie, params: { slug: "basketball" } });
     expect(hub.json.user.completedLessons).toContain("ball-handling");
     expect(hub.json.user.enrollment.position).toBe("Guard");
+  });
+});
+
+describe("lesson states", () => {
+  it("never completes a lesson just by opening it; measurable lessons wait for a passing result", async () => {
+    const { cookie, userId } = await newUser();
+    const lessonPath = (l: string) => ({ cookie, params: { slug: "football", lesson: l } });
+    const states = async () => (await call(sport.GET, { cookie, params: { slug: "football" } })).json.user.lessonStates;
+
+    // Opening (GET) changes nothing.
+    await call(lesson.GET, lessonPath("first-touch"));
+    expect((await states())["first-touch"]).toEqual({ state: "not_started", evidence: null });
+
+    // A lesson without a measurable test is completed on the user's word, and labelled as such.
+    const offside = await call(lesson.POST, { ...lessonPath("positions-shape-offside"), body: { status: "completed" } });
+    expect(offside.json.status).toBe("completed");
+    expect((await states())["positions-shape-offside"]).toEqual({ state: "completed", evidence: "self_reported" });
+
+    // "Mark complete" on a lesson with a progress test waits for a result that meets it.
+    const ft = await call(lesson.POST, { ...lessonPath("first-touch"), body: { status: "completed" } });
+    expect(ft.json.status).toBe("awaiting_assessment");
+    expect(await db.xpEvent.count({ where: { userId, source: "lesson" } })).toBe(1); // only the offside lesson
+    const hub = await call(sport.GET, { cookie, params: { slug: "football" } });
+    expect(hub.json.user.completedLessons).not.toContain("first-touch");
+
+    // A result below the target (or with too few attempts) doesn't pass it…
+    await call(metrics.POST, { cookie, params: { slug: "football" }, body: { metricKey: "pass_accuracy", made: 5, attempts: 10, dateKey: todayKey("UTC") } });
+    await call(metrics.POST, { cookie, params: { slug: "football" }, body: { metricKey: "pass_accuracy", made: 4, attempts: 4, dateKey: todayKey("UTC") } });
+    expect((await states())["first-touch"].state).toBe("awaiting_assessment");
+    // …a qualifying one does.
+    const pass = await call(metrics.POST, { cookie, params: { slug: "football" }, body: { metricKey: "pass_accuracy", made: 8, attempts: 10, dateKey: todayKey("UTC") } });
+    expect(pass.json.lessonsPassed).toContain("First touch & ball control");
+    expect((await states())["first-touch"]).toEqual({ state: "completed", evidence: "assessed" });
+    expect(await db.xpEvent.count({ where: { userId, source: "lesson" } })).toBe(2);
+
+    // With a qualifying result already logged, the next lesson using that test completes right away.
+    expect((await call(lesson.POST, { ...lessonPath("passing"), body: { status: "completed" } })).json.status).toBe("completed");
   });
 });
 

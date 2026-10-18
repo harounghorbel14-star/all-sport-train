@@ -62,3 +62,21 @@ export function SourceList({ sources }: { sources: { slug: string; title: string
     </div>
   );
 }
+
+const LESSON_STATE: Record<string, { label: string; tone: "neutral" | "info" | "warn" | "success" }> = {
+  not_started: { label: "Not started", tone: "neutral" },
+  in_progress: { label: "In progress", tone: "info" },
+  awaiting_assessment: { label: "Awaiting assessment", tone: "warn" },
+  completed: { label: "Completed", tone: "success" },
+};
+const EVIDENCE: Record<string, string> = {
+  self_reported: "self-reported",
+  result_logged: "result logged",
+  assessed: "progress test passed",
+};
+
+/** Lesson status, with how completion is known (APEX can't verify results — they're logged by the user). */
+export function LessonStatusBadge({ state, evidence }: { state: string; evidence?: string | null }) {
+  const s = LESSON_STATE[state] ?? LESSON_STATE.not_started;
+  return <Badge tone={s.tone}>{s.label}{state === "completed" && evidence ? ` · ${EVIDENCE[evidence] ?? evidence}` : ""}</Badge>;
+}

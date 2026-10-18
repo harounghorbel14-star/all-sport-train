@@ -277,8 +277,9 @@ export function MetricPanel({ slug, today, metrics, entries, personalBests }: { 
     if (typeof input === "string") return toast(input, "error");
     setBusy(true);
     try {
-      const r = await api<{ personalBest: boolean; previousBest: number | null; needsMoreAttempts: number | null }>(`/api/sports/${slug}/metrics`, { body: { metricKey: m.key, ...input, context, dateKey } });
+      const r = await api<{ personalBest: boolean; previousBest: number | null; needsMoreAttempts: number | null; lessonsPassed: string[] }>(`/api/sports/${slug}/metrics`, { body: { metricKey: m.key, ...input, context, dateKey } });
       toast(r.personalBest ? "New personal best!" : r.needsMoreAttempts ? `Saved. Personal bests need at least ${r.needsMoreAttempts} attempts.` : "Result saved");
+      if (r.lessonsPassed?.length) toast(`Progress test passed: ${r.lessonsPassed.join(", ")}`);
       setRaw(EMPTY);
       router.refresh();
     } catch (err) {
@@ -298,6 +299,7 @@ export function MetricPanel({ slug, today, metrics, entries, personalBests }: { 
     <div className="space-y-4">
       <Card>
         <CardTitle>Log a result</CardTitle>
+        <p className="-mt-2 mb-3 text-xs text-subtle">Results are self-reported: APEX records what you enter and can&apos;t verify it. Log what you actually measured — that&apos;s what makes your progress meaningful.</p>
         <form onSubmit={submit} className="space-y-3">
           <Field label="Metric" htmlFor="metric-key">
             <Select

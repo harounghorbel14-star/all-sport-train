@@ -166,6 +166,19 @@ export type SportHub = Awaited<ReturnType<typeof getSportHub>>;
 
 const ENTRY_LIMIT = 2000;
 
+/** Per-lesson state for the UI; lessons without a progress row are "not_started". */
+function lessonStates(lessons: LessonView[], rows: { lessonId: string; status: string; evidence: string | null }[]) {
+  return Object.fromEntries(
+    lessons.map((l) => {
+      const r = rows.find((x) => x.lessonId === l.id);
+      const state = (r?.status ?? "not_started") as LessonState;
+      // Completions recorded before evidence was tracked were marked done by the user.
+      const evidence = state === "completed" ? ((r?.evidence ?? "self_reported") as LessonEvidence) : null;
+      return [l.slug, { state, evidence }];
+    }),
+  ) as Record<string, { state: LessonState; evidence: LessonEvidence | null }>;
+}
+
 async function userSportState(userId: string, sportId: string, lessons: LessonView[], metrics: MetricView[], profile: z.infer<typeof sportProfileSchema>) {
   const [enrollment, progress, latest, practices, all] = await Promise.all([
     db.userSport.findUnique({ where: { userId_sportId: { userId, sportId } } }),
@@ -188,6 +201,7 @@ async function userSportState(userId: string, sportId: string, lessons: LessonVi
   return {
     enrollment: enrollment ? { ...enrollment, goals: parseJson(enrollment.goals, strArr, []) } : null,
     completedLessons: [...completed],
+    lessonStates: lessonStates(lessons, progress),
     nextLesson: nextLesson(lessons, completed, level)?.slug ?? null,
     entries: entries.map((e) => ({ id: e.id, metricKey: e.metricKey, value: e.value, made: e.made, attempts: e.attempts, dateKey: e.dateKey, context: e.context, notes: e.notes })),
     personalBests: Object.fromEntries(Object.entries(pbs).map(([k, v]) => [k, v ? { value: v.value, dateKey: v.dateKey } : null])),
@@ -230,35 +244,93 @@ export async function getLesson(userId: string, sportSlug: string, lessonSlug: s
   const hub = await getSportHub(sportSlug);
   const lesson = hub.lessons.find((l) => l.slug === lessonSlug);
   if (!lesson) throw notFound("Lesson not found");
-  const done = await db.lessonProgress.findMany({ where: { userId, status: "completed", lessonId: { in: hub.lessons.map((l) => l.id) } }, select: { lessonId: true } });
-  const completedLessons = hub.lessons.filter((l) => done.some((d) => d.lessonId === l.id)).map((l) => l.slug);
+  const rows = await db.lessonProgress.findMany({ where: { userId, lessonId: { in: hub.lessons.map((l) => l.id) } }, select: { lessonId: true, status: true, evidence: true } });
+  const states = lessonStates(hub.lessons, rows);
+  const completedLessons = hub.lessons.filter((l) => states[l.slug].state === "completed").map((l) => l.slug);
   const drills = hub.drills.filter((d) => lesson.drillSlugs.includes(d.slug));
   const idx = hub.lessons.indexOf(lesson);
   const prereqsMet = lesson.prerequisites.every((p) => completedLessons.includes(p));
-  return { hub, lesson, drills, completedLessons, prereqsMet, previous: hub.lessons[idx - 1] ?? null, next: hub.lessons[idx + 1] ?? null };
+  return { hub, lesson, drills, completedLessons, state: states[lesson.slug], prereqsMet, previous: hub.lessons[idx - 1] ?? null, next: hub.lessons[idx + 1] ?? null };
 }
 
+export type LessonState = "not_started" | "in_progress" | "awaiting_assessment" | "completed";
+export type LessonEvidence = "self_reported" | "result_logged" | "assessed";
+
+/** Whether a logged result satisfies a lesson's progress test (no target → any measured result counts). */
+function passesTest(metric: MetricView, value: number, target: number | undefined) {
+  if (target == null) return true;
+  if (metric.direction === "lower") return value <= target;
+  if (metric.direction === "higher") return value >= target;
+  return true;
+}
+
+/** A logged result that settles the lesson's progress test, if any. */
+async function qualifyingEntry(userId: string, sportId: string, lesson: LessonView, metrics: MetricView[]) {
+  const test = lesson.content.progressTest;
+  const metric = test?.metricKey ? metrics.find((m) => m.key === test.metricKey) : undefined;
+  if (!test || !metric) return null;
+  const entries = await db.sportMetricEntry.findMany({ where: { userId, sportId, metricKey: metric.key }, orderBy: { createdAt: "desc" }, select: { id: true, value: true, attempts: true } });
+  const eligible = (e: { attempts: number | null }) => metric.kind !== "ratio" || (e.attempts ?? 0) >= (metric.minAttempts ?? 1);
+  return entries.find((e) => eligible(e) && passesTest(metric, e.value, test.target)) ?? null;
+}
+
+/**
+ * Lesson progress. Opening a lesson never changes it. Marking a lesson done is self-reported, unless
+ * the lesson has a measurable progress test: then it waits for a logged result that meets the test
+ * ("awaiting assessment") and only counts as completed — for XP and prerequisites — once it does.
+ */
 export async function setLessonProgress(userId: string, sportSlug: string, lessonSlug: string, status: "in_progress" | "completed" | "reset") {
   const sport = await loadSport(sportSlug);
-  const lesson = sport.lessons.find((l) => l.slug === lessonSlug);
-  if (!lesson) throw notFound("Lesson not found");
+  const row = sport.lessons.find((l) => l.slug === lessonSlug);
+  if (!row) throw notFound("Lesson not found");
+  const lesson = lessonView(row);
+  const key = { userId_lessonId: { userId, lessonId: lesson.id } };
   if (status === "reset") {
     await db.lessonProgress.deleteMany({ where: { userId, lessonId: lesson.id } });
-    return { status: "reset" };
+    return { status: "reset" as const };
   }
-  await db.lessonProgress.upsert({
-    where: { userId_lessonId: { userId, lessonId: lesson.id } },
-    create: { userId, lessonId: lesson.id, status, completedAt: status === "completed" ? new Date() : null },
-    update: { status, completedAt: status === "completed" ? new Date() : null },
-  });
+  let state: LessonState = status;
+  let evidence: LessonEvidence | null = null;
+  let entryId: string | null = null;
+  if (status === "completed") {
+    const metrics = sport.metrics.map(metricView);
+    const needsResult = !!lesson.content.progressTest?.metricKey && metrics.some((m) => m.key === lesson.content.progressTest?.metricKey);
+    if (needsResult) {
+      const entry = await qualifyingEntry(userId, sport.id, lesson, metrics);
+      if (entry) {
+        evidence = lesson.content.progressTest?.target != null ? "assessed" : "result_logged";
+        entryId = entry.id;
+      } else state = "awaiting_assessment";
+    } else evidence = "self_reported";
+  }
+  const data = { status: state, evidence, assessmentEntryId: entryId, completedAt: state === "completed" ? new Date() : null };
+  await db.lessonProgress.upsert({ where: key, create: { userId, lessonId: lesson.id, ...data }, update: data });
   // Learning a sport implies enrolment.
   const enrolled = await db.userSport.findUnique({ where: { userId_sportId: { userId, sportId: sport.id } } });
   if (!enrolled) await db.userSport.create({ data: { userId, sportId: sport.id } });
-  if (status === "completed") await awardXp(userId, "lesson", lesson.id, 15);
+  if (state === "completed") await awardXp(userId, "lesson", lesson.id, 15);
   const lessons = sport.lessons.map(lessonView);
   const done = await db.lessonProgress.findMany({ where: { userId, status: "completed", lessonId: { in: lessons.map((l) => l.id) } } });
   const completed = new Set(done.map((d) => lessons.find((l) => l.id === d.lessonId)!.slug));
-  return { status, next: nextLesson(lessons, completed, enrolled?.level ?? "beginner")?.slug ?? null };
+  return { status: state, evidence, progressTest: state === "awaiting_assessment" ? lesson.content.progressTest ?? null : null, next: nextLesson(lessons, completed, enrolled?.level ?? "beginner")?.slug ?? null };
+}
+
+/** After a result is logged: lessons waiting on it are completed (with that result as evidence). */
+async function settleAwaitingLessons(userId: string, sport: Awaited<ReturnType<typeof loadSport>>, metricKey: string) {
+  const lessons = sport.lessons.map(lessonView).filter((l) => l.content.progressTest?.metricKey === metricKey);
+  if (!lessons.length) return [];
+  const waiting = await db.lessonProgress.findMany({ where: { userId, status: "awaiting_assessment", lessonId: { in: lessons.map((l) => l.id) } } });
+  const metrics = sport.metrics.map(metricView);
+  const settled: string[] = [];
+  for (const w of waiting) {
+    const lesson = lessons.find((l) => l.id === w.lessonId)!;
+    const entry = await qualifyingEntry(userId, sport.id, lesson, metrics);
+    if (!entry) continue;
+    await db.lessonProgress.update({ where: { userId_lessonId: { userId, lessonId: lesson.id } }, data: { status: "completed", evidence: lesson.content.progressTest?.target != null ? "assessed" : "result_logged", assessmentEntryId: entry.id, completedAt: new Date() } });
+    await awardXp(userId, "lesson", lesson.id, 15);
+    settled.push(lesson.title);
+  }
+  return settled;
 }
 
 // ── Practice plans ─────────────────────────────────────────────────────
@@ -346,7 +418,8 @@ export async function logMetric(userId: string, slug: string, input: MetricEntry
     data: { userId, sportId: sport.id, metricKey: metric.key, ...resolved, dateKey: input.dateKey, context: input.context, notes: input.notes ?? null, practicePlanId: input.practicePlanId ?? null },
   });
   const eligible = metric.kind !== "ratio" || (resolved.attempts ?? 0) >= (metric.minAttempts ?? 1);
-  return { entry, personalBest: eligible && isImprovement(metric.direction, prevBest, resolved.value), previousBest: prevBest ?? null, needsMoreAttempts: !eligible ? metric.minAttempts : null };
+  const lessonsPassed = await settleAwaitingLessons(userId, sport, metric.key);
+  return { entry, lessonsPassed, personalBest: eligible && isImprovement(metric.direction, prevBest, resolved.value), previousBest: prevBest ?? null, needsMoreAttempts: !eligible ? metric.minAttempts : null };
 }
 
 export async function deleteMetricEntry(userId: string, id: string) {

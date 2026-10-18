@@ -24,7 +24,7 @@ Each item names how it was verified. Audit of 2026-10-18 (findings verified by r
 - ✅ Installable app (Android/iPhone) + offline saved lessons/plans — e2e + service-worker unit tests
 
 ## P2 — AI coaching, learning, analytics, hardening, performance
-- ⬜ Skill/lesson states: not started / in progress / awaiting assessment / completed; self-reported vs verified
+- ✅ Skill/lesson states: not started / in progress / awaiting assessment / completed; self-reported vs verified → opening a lesson changes nothing; lessons with a measurable progress test wait for a logged result that meets it (XP and prerequisites only once passed); evidence shown as self-reported / result logged / progress test passed; skill prerequisites say whether a best came from a workout or a self-reported test; results are labelled self-reported (APEX can't verify) — test: api-sports "lesson states"
 - ⬜ Adaptive next-workout recommendation with reasons; accept / modify / reject
 - ✅ IP rate limits trust X-Forwarded-For; limiter never evicts keys → right-most proxy-added address (`TRUSTED_PROXY_HOPS`, default 1), expired buckets swept — tests: hardening.test.ts
 - ✅ Uploads parsed fully before size checks → Content-Length checked first, stream counted while reading, 413 past the limit — tests: hardening.test.ts
