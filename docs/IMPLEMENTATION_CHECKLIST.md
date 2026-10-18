@@ -18,6 +18,7 @@ Each item names how it was verified. Audit of 2026-10-18 (findings verified by r
 - ✅ Two active sessions possible on double start / two tabs (and duplicate today plans) → earliest wins, duplicates removed — test: api-workouts "never creates two plans…" (fails on the old code: 3 plans)
 - ⬜ Check-ins and mobility logs can be backdated for XP / streak repair; mobility double-submit
 - ✅ Completed sessions still render the live logging UI; completion retry loses the summary → reopening shows the summary; retries/races return the same summary, one activity, XP once — tests: api-workouts "completes once when two completions race", e2e journey
+- ✅ Query-string tabs (sport hubs, Progress) sometimes didn't respond: Next's router fetched the page but never committed it (pre-existing — reproduced on the last merged commit; still present on the latest Next 15 patch; bisected to the chart components but not to any one behaviour) → `TabLink` falls back to a normal page load after 1.5 s — 50-click stress: 0 stuck (was 3–6 of 8); e2e sports "query-string tabs always respond…"
 - ⬜ Sport hub drops newest metric entries after 2,000
 - ⬜ Guest import drops XP / achievements
 - ✅ Installable app (Android/iPhone) + offline saved lessons/plans — e2e + service-worker unit tests
@@ -38,6 +39,7 @@ Each item names how it was verified. Audit of 2026-10-18 (findings verified by r
 - ⬜ RTL decorative offsets; French/Arabic coverage of page strings
 - ⬜ Missing loading states for (focus)/(auth); 401 redirect without `next`; invalid calendar dates accepted
 - ⬜ Community: reaction double-tap 500; report brigading threshold
+- ⚠️ Root cause of the stalled tab navigations is unknown; the fallback costs ~1.5 s plus a page load when it happens
 - ⚠️ Registration reveals existing emails (accepted trade-off for clear UX; reset flow does not)
 
 ## Known limitations (not planned in this pass)
