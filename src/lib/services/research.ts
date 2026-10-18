@@ -4,6 +4,7 @@ import { db } from "../server/db";
 import { badRequest, notFound } from "../server/errors";
 import { parseJson } from "../server/json";
 import { log } from "../server/logger";
+import { rateLimit } from "../server/rate-limit";
 import { lessonContentSchema, rulePointSchema } from "../content/sports/types";
 
 /**
@@ -144,6 +145,7 @@ export async function importResearch(raw: unknown, opts: { origin?: string } = {
   for (const [slug, topics] of flags) {
     const rs = sport.rulesets.find((r) => r.slug === slug);
     if (!rs) continue;
+    invalidateKnowledgeIndex();
     await db.ruleset.update({
       where: { id: rs.id },
       data: { reviewFlag: `Unverified research leads (${data.accessedDate}) suggest changes to: ${[...new Set(topics)].slice(0, 5).join(", ")}. Check the current official rulebook.`.slice(0, 500), flaggedAt: new Date() },
@@ -327,22 +329,71 @@ export interface KnowledgeHit {
  * Retrieves the most relevant *published or verified* knowledge for a question.
  * Keyword scoring over titles (weighted) and bodies; returns at most `limit` hits.
  */
+interface IndexedDoc {
+  hit: Omit<KnowledgeHit, "score">;
+  sportSlug: string;
+  title: Set<string>;
+  body: Set<string>;
+  weight: number;
+}
+
+/**
+ * Published lessons, drills and rule points, tokenised once and cached (instead of loading and
+ * tokenising the whole catalog for every question). Content edits invalidate it; a short TTL
+ * covers changes made by other instances.
+ */
+let index: { at: number; docs: IndexedDoc[] } | null = null;
+const INDEX_TTL_MS = 5 * 60_000;
+export const invalidateKnowledgeIndex = () => {
+  index = null;
+};
+
+async function knowledgeIndex() {
+  if (index && Date.now() - index.at < INDEX_TTL_MS) return index.docs;
+  const published = { contentStatus: "published", sport: { contentStatus: "published" } };
+  const sport = { select: { slug: true, name: true } };
+  const [lessons, drills, rulesets, sources] = await Promise.all([
+    db.lesson.findMany({ where: published, include: { sport } }),
+    db.drill.findMany({ where: published, include: { sport } }),
+    db.ruleset.findMany({ where: published, include: { sport } }),
+    db.contentSource.findMany({ select: { slug: true, title: true, url: true } }),
+  ]);
+  const bySlug = new Map(sources.map((x) => [x.slug, x]));
+  const src = (slugs: string[]) => slugs.map((sl) => bySlug.get(sl)).filter(Boolean).map((x) => ({ title: x!.title, url: x!.url }));
+  const doc = (hit: IndexedDoc["hit"], title: string, body: string, weight = 1): IndexedDoc => ({ hit, sportSlug: hit.sport.slug, title: new Set(tokens(title)), body: new Set(tokens(body)), weight });
+  const docs: IndexedDoc[] = [];
+  for (const l of lessons) {
+    const c = parseJson(l.content, lessonContentSchema, { objectives: [], keyPoints: [] });
+    const body = [l.summary, ...c.keyPoints, ...(c.steps ?? []), ...(c.mistakes ?? []), ...(c.safety ?? [])].join(" ");
+    docs.push(doc({ kind: "lesson", sport: l.sport, title: l.title, text: [l.summary, ...c.keyPoints.slice(0, 4)].join(" "), href: `/sports/${l.sport.slug}/lessons/${l.slug}`, verification: "editorial", sources: src(parseJson(l.sources, z.array(z.string()), [])) }, l.title, body));
+  }
+  for (const d of drills) {
+    docs.push(doc({ kind: "drill", sport: d.sport, title: d.title, text: d.purpose, href: `/sports/${d.sport.slug}?tab=drills#${d.slug}`, verification: "editorial", sources: [] }, d.title, `${d.purpose} ${d.content}`));
+  }
+  for (const r of rulesets) {
+    for (const p of parseJson(r.points, z.array(rulePointSchema), [])) {
+      docs.push(doc({ kind: "rule", sport: r.sport, title: `${r.name}: ${p.topic}`, text: p.text, href: `/sports/${r.sport.slug}?tab=rules`, verification: r.reviewFlag ? `${r.verification} (flagged: possibly outdated)` : r.verification, sources: src(parseJson(r.sources, z.array(z.string()), [])) }, `${p.topic} rule`, p.text));
+    }
+  }
+  index = { at: Date.now(), docs };
+  return docs;
+}
+
+/**
+ * Retrieves the most relevant *published or verified* knowledge for a question.
+ * Keyword scoring over titles (weighted) and bodies; returns at most `limit` hits.
+ */
 export async function searchKnowledge(query: string, opts: { sportSlug?: string; limit?: number } = {}): Promise<KnowledgeHit[]> {
   const q = [...new Set(tokens(query))];
   if (!q.length) return [];
-  const sportWhere = opts.sportSlug ? { slug: opts.sportSlug } : {};
-  const [lessons, drills, rulesets, claims, sources] = await Promise.all([
-    db.lesson.findMany({ where: { contentStatus: "published", sport: { contentStatus: "published", ...sportWhere } }, include: { sport: { select: { slug: true, name: true } } } }),
-    db.drill.findMany({ where: { contentStatus: "published", sport: { contentStatus: "published", ...sportWhere } }, include: { sport: { select: { slug: true, name: true } } } }),
-    db.ruleset.findMany({ where: { contentStatus: "published", sport: { contentStatus: "published", ...sportWhere } }, include: { sport: { select: { slug: true, name: true } } } }),
-    db.knowledgeClaim.findMany({ where: { status: "verified", ...(opts.sportSlug ? { sport: sportWhere } : {}) }, include: { sport: { select: { slug: true, name: true } } } }),
-    db.contentSource.findMany(),
+  // Verified claims are few and change on review, so they're read live.
+  const [docs, claims] = await Promise.all([
+    knowledgeIndex(),
+    db.knowledgeClaim.findMany({ where: { status: "verified", ...(opts.sportSlug ? { sport: { slug: opts.sportSlug } } : {}) }, include: { sport: { select: { slug: true, name: true } } } }),
   ]);
   // A hit must share enough of the question's key terms; one common word ("grip") is not relevance.
   const needed = Math.min(q.length, Math.max(2, Math.ceil(q.length * 0.5)));
-  const score = (title: string, body: string) => {
-    const t = new Set(tokens(title));
-    const b = new Set(tokens(body));
+  const score = (t: Set<string>, b: Set<string>) => {
     let s = 0;
     let matched = 0;
     for (const w of q) {
@@ -351,37 +402,38 @@ export async function searchKnowledge(query: string, opts: { sportSlug?: string;
     }
     return matched >= needed ? s / Math.sqrt(q.length) : 0;
   };
-  const src = (slugs: string[]) => slugs.map((sl) => sources.find((x) => x.slug === sl)).filter(Boolean).map((x) => ({ title: x!.title, url: x!.url }));
   const hits: KnowledgeHit[] = [];
-  for (const l of lessons) {
-    const c = parseJson(l.content, lessonContentSchema, { objectives: [], keyPoints: [] });
-    const body = [l.summary, ...c.keyPoints, ...(c.steps ?? []), ...(c.mistakes ?? []), ...(c.safety ?? [])].join(" ");
-    hits.push({ kind: "lesson", sport: l.sport, title: l.title, text: [l.summary, ...c.keyPoints.slice(0, 4)].join(" "), href: `/sports/${l.sport.slug}/lessons/${l.slug}`, score: score(l.title, body), verification: "editorial", sources: src(parseJson(l.sources, z.array(z.string()), [])) });
-  }
-  for (const d of drills) {
-    hits.push({ kind: "drill", sport: d.sport, title: d.title, text: d.purpose, href: `/sports/${d.sport.slug}?tab=drills#${d.slug}`, score: score(d.title, `${d.purpose} ${d.content}`), verification: "editorial", sources: [] });
-  }
-  for (const r of rulesets) {
-    for (const p of parseJson(r.points, z.array(rulePointSchema), [])) {
-      hits.push({ kind: "rule", sport: r.sport, title: `${r.name}: ${p.topic}`, text: p.text, href: `/sports/${r.sport.slug}?tab=rules`, score: score(`${p.topic} rule`, p.text), verification: r.reviewFlag ? `${r.verification} (flagged: possibly outdated)` : r.verification, sources: src(parseJson(r.sources, z.array(z.string()), [])) });
-    }
+  for (const d of docs) {
+    if (opts.sportSlug && d.sportSlug !== opts.sportSlug) continue;
+    const sc = score(d.title, d.body) * d.weight;
+    if (sc >= 1) hits.push({ ...d.hit, score: sc });
   }
   for (const c of claims) {
     const refs = parseJson(c.sourceRefs, z.array(z.object({ title: z.string().optional(), url: z.string().nullable().optional(), section: z.string().optional() }).passthrough()), []);
-    hits.push({ kind: "claim", sport: c.sport ?? { slug: "", name: "General" }, title: c.topic, text: c.statement, href: c.sport ? `/sports/${c.sport.slug}` : "/sports", score: score(c.topic, c.statement) * 1.2, verification: "verified", sources: refs.map((r) => ({ title: r.title ?? "Source", url: r.url, section: r.section })) });
+    const sc = score(new Set(tokens(c.topic)), new Set(tokens(c.statement))) * 1.2;
+    if (sc >= 1) hits.push({ kind: "claim", sport: c.sport ?? { slug: "", name: "General" }, title: c.topic, text: c.statement, href: c.sport ? `/sports/${c.sport.slug}` : "/sports", score: sc, verification: "verified", sources: refs.map((r) => ({ title: r.title ?? "Source", url: r.url, section: r.section })) });
   }
-  return hits
-    .filter((h) => h.score >= 1)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, opts.limit ?? 6);
+  return hits.sort((a, b) => b.score - a.score).slice(0, opts.limit ?? 6);
 }
 
+const GAPS_PER_USER_PER_DAY = 10;
+const MAX_OPEN_GAPS = 500;
+
 /** Records a question the knowledge base couldn't answer, so it gets researched (deduplicated). */
-export async function recordKnowledgeGap(sportSlug: string | null, question: string) {
+export async function recordKnowledgeGap(sportSlug: string | null, question: string, userId?: string) {
   const sport = sportSlug ? await db.sport.findUnique({ where: { slug: sportSlug }, select: { id: true } }) : null;
   const topic = `Question: ${question.trim().replace(/\s+/g, " ").slice(0, 140)}`;
   const existing = await db.researchTask.findFirst({ where: { sportId: sport?.id ?? null, kind: "knowledge_gap", topic } });
   if (existing) return existing;
+  // Keep the admin queue useful: a few new questions per user per day, and a ceiling on open gaps.
+  if (userId) {
+    try {
+      rateLimit(`gap:${userId}`, GAPS_PER_USER_PER_DAY, 86_400_000);
+    } catch {
+      return null;
+    }
+  }
+  if ((await db.researchTask.count({ where: { kind: "knowledge_gap", status: { in: ["queued", "blocked"] } } })) >= MAX_OPEN_GAPS) return null;
   try {
     return await db.researchTask.create({ data: { sportId: sport?.id ?? null, kind: "knowledge_gap", topic, status: "queued", priority: 2, detail: "Asked by a user; no published or verified knowledge matched." } });
   } catch (e) {
@@ -525,6 +577,7 @@ export async function checkSources(opts: { fetchImpl?: typeof fetch; delayMs?: n
       summary.changed++;
       const sports = await db.ruleset.findMany({ where: { sources: { contains: `"${s.slug}"` } }, select: { id: true, sportId: true } });
       for (const r of sports) {
+        invalidateKnowledgeIndex();
         await db.ruleset.update({ where: { id: r.id }, data: { reviewFlag: `The cited source "${s.title}" changed on ${new Date().toISOString().slice(0, 10)}. Re-check this summary.`, flaggedAt: new Date() } });
         await db.researchTask.create({ data: { sportId: r.sportId, kind: "source_change", topic: `Source changed: ${s.title}`.slice(0, 160), status: "needs_review", priority: 1, detail: s.url } });
       }

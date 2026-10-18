@@ -29,11 +29,12 @@ Each item names how it was verified. Audit of 2026-10-18 (findings verified by r
 - ✅ IP rate limits trust X-Forwarded-For; limiter never evicts keys → right-most proxy-added address (`TRUSTED_PROXY_HOPS`, default 1), expired buckets swept — tests: hardening.test.ts
 - ✅ Uploads parsed fully before size checks → Content-Length checked first, stream counted while reading, 413 past the limit — tests: hardening.test.ts
 - ✅ Saved-meal foodId not ownership-checked → only shared or own foods are linked; unknown/deleted foods no longer crash logging — test: api-other "saved meals"
-- ⬜ Knowledge search loads the whole catalog per request; research-gap queue can be flooded
+- ✅ Knowledge search loads the whole catalog per request; research-gap queue can be flooded → tokenised index cached (invalidated by content edits, 5-min TTL); 10 new gaps per user per day, 500 open gaps max; the coach only says a question was queued when it was — tests: research "knowledge index and gap queue"
 - ✅ XP farming via activity log + delete → XP revoked on delete; at most 5 XP-earning activities per 24 h (all still logged) — test: api-other "XP integrity"
 - ✅ Malformed cookie → 500 on every request → treated as no cookie — test: hardening.test.ts
-- ⬜ Imperial units for PRs, waist and volume; silent failures on deletes/toggles
-- ⬜ N+1 queries: achievements, practice completion, skills list, lesson page; exercise catalog in client bundles
+- ✅ Imperial units for PRs, waist and volume; silent failures on deletes/toggles → shared `formatRecord`/`formatWeight` everywhere; user actions use `attempt()` which shows the error and stops — tests: hardening.test.ts
+- ✅ Streaks counted a forgiven missed day as a streak day → grace protects the chain without adding to it — test: domain "forgives one missed planned day…"
+- ✅ N+1 queries: achievements, practice completion, skills list, lesson page; exercise catalog in client bundles → achievements stats in one round trip; skills list uses 4 grouped queries; lesson page no longer loads the results history; practice completion reuses the loaded sport; labels moved to `src/lib/exercise-labels.ts` (no client component imports the catalog); coach context and sport hub built once per message
 
 ## P3 — community, integrations, polish
 - ⬜ RTL decorative offsets; French/Arabic coverage of page strings

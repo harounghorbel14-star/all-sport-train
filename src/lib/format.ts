@@ -41,3 +41,10 @@ export function formatDateKey(key: string, locale = "en", opts: Intl.DateTimeFor
   return new Date(`${key}T12:00:00Z`).toLocaleDateString(locale, { ...opts, timeZone: "UTC" });
 }
 export const kcalRange = (low: number, high: number) => (low === high ? `~${low}` : `${low}–${high}`);
+
+/** A personal record or logged value in the user's units: "12 reps", "45 s", "100 lb". */
+export function formatRecord(value: number, metric: string, units: Units) {
+  if (metric === "loadKg") return formatWeight(value, units);
+  if (metric === "seconds") return `${round(value)} s`;
+  return `${round(value)} reps`;
+}

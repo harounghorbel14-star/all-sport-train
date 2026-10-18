@@ -80,3 +80,24 @@ describe("cookies", () => {
     expect(readCookie("a=1; apex_session=abc%3D", "apex_session")).toBe("abc=");
   });
 });
+
+describe("units", () => {
+  it("shows records and loads in the user's units", async () => {
+    const { formatRecord } = await import("@/lib/format");
+    expect(formatRecord(100, "loadKg", "imperial")).toBe("220.5 lb");
+    expect(formatRecord(100, "loadKg", "metric")).toBe("100 kg");
+    expect(formatRecord(45, "seconds", "imperial")).toBe("45 s");
+    expect(formatRecord(12, "reps", "metric")).toBe("12 reps");
+  });
+});
+
+describe("user-initiated actions", () => {
+  it("reports a failed request instead of swallowing it", async () => {
+    const { attempt } = await import("@/lib/client/api");
+    const shown: string[] = [];
+    const toast = (m: string) => void shown.push(m);
+    expect(await attempt(Promise.resolve({ ok: true }), toast)).toBe(true);
+    expect(await attempt(Promise.reject(new Error("Post not found")), toast)).toBe(false);
+    expect(shown).toEqual(["Post not found"]);
+  });
+});

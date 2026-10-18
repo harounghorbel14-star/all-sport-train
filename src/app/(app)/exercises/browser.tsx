@@ -3,7 +3,7 @@
 import { Heart, Search, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { DIFFICULTY_LABELS, EQUIPMENT_LABELS, MUSCLE_LABELS, PATTERN_LABELS } from "@/lib/content/exercises";
+import { DIFFICULTY_LABELS, EQUIPMENT_LABELS, MUSCLE_LABELS, PATTERN_LABELS } from "@/lib/exercise-labels";
 import { Badge, Card, Chip, EmptyState, Input, Select, cx } from "@/components/ui/primitives";
 import { MuscleMap, MUSCLE_REGIONS, type RegionId } from "@/components/muscle-map";
 import { Stagger, StaggerItem } from "@/components/ui/motion";

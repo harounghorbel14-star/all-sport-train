@@ -29,3 +29,17 @@ export async function api<T = unknown>(path: string, opts: { method?: string; bo
   }
   return data as T;
 }
+
+/**
+ * Runs a user-initiated request (delete, toggle…). On failure it tells the user and resolves
+ * false so the caller can stop, instead of silently pretending the action worked.
+ */
+export async function attempt(request: Promise<unknown>, toast: (message: string, tone: "error") => void) {
+  try {
+    await request;
+    return true;
+  } catch (e) {
+    toast(e instanceof Error && e.message ? e.message : "That didn't work — please try again", "error");
+    return false;
+  }
+}

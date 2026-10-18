@@ -1,7 +1,8 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { db } from "@/lib/server/db";
 import { invalidateSportsCache } from "@/lib/services/sports";
-import { checkSources, coverage, importResearch, reviewClaim, robotsAllows, runAiResearch, searchKnowledge } from "@/lib/services/research";
+import { checkSources, coverage, importResearch, recordKnowledgeGap, reviewClaim, robotsAllows, runAiResearch, searchKnowledge } from "@/lib/services/research";
+import { resetRateLimits } from "@/lib/server/rate-limit";
 import { seed } from "../prisma/seed";
 import { call, newUser } from "./helpers";
 import * as coach from "@/app/api/coach/route";
@@ -116,6 +117,30 @@ describe("coach knowledge use", () => {
     const r = await runAiResearch(t.id);
     expect(r.ok).toBe(false);
     expect((await db.researchTask.findUnique({ where: { id: t.id } }))!.status).toBe("blocked");
+  });
+});
+
+describe("knowledge index and gap queue", () => {
+  it("serves search from a cached index that content edits refresh", async () => {
+    const before = await searchKnowledge("zorblat paddle humidity technique", { sportSlug: "tennis" });
+    expect(before.some((h) => h.kind === "lesson")).toBe(false);
+    const sport = await db.sport.findUniqueOrThrow({ where: { slug: "tennis" } });
+    await db.lesson.create({ data: { sportId: sport.id, slug: "zorblat-test", title: "Zorblat paddle humidity technique", level: "beginner", order: 99, summary: "Test lesson.", content: JSON.stringify({ objectives: ["x"], keyPoints: ["zorblat paddle humidity"] }), contentStatus: "published" } });
+    // Cached: the new lesson is not visible until content changes are signalled…
+    expect((await searchKnowledge("zorblat paddle humidity technique", { sportSlug: "tennis" })).some((h) => h.title.startsWith("Zorblat"))).toBe(false);
+    invalidateSportsCache(); // …which every admin content edit does.
+    expect((await searchKnowledge("zorblat paddle humidity technique", { sportSlug: "tennis" })).some((h) => h.title.startsWith("Zorblat"))).toBe(true);
+    await db.lesson.delete({ where: { sportId_slug: { sportId: sport.id, slug: "zorblat-test" } } });
+    invalidateSportsCache();
+  });
+
+  it("limits how many research gaps one user can queue", async () => {
+    resetRateLimits();
+    const { userId } = await newUser();
+    const made = [];
+    for (let i = 0; i < 14; i++) made.push(await recordKnowledgeGap("tennis", `Unique flood question number ${i} about qwzx`, userId));
+    expect(made.filter(Boolean)).toHaveLength(10);
+    expect(await db.researchTask.count({ where: { kind: "knowledge_gap", topic: { contains: "flood question" } } })).toBe(10);
   });
 });
 

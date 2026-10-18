@@ -29,6 +29,7 @@ import {
 } from "../engine/practice";
 import { getProfile } from "./profile";
 import { awardXp, evaluateAchievements } from "./gamification";
+import { invalidateKnowledgeIndex } from "./research";
 
 const strArr = z.array(z.string());
 
@@ -79,6 +80,7 @@ export type RulesetView = ReturnType<typeof rulesetView>;
 let cache: { at: number; sports: (SportSummary & { metrics: MetricView[] })[] } | null = null;
 export const invalidateSportsCache = () => {
   cache = null;
+  invalidateKnowledgeIndex();
 };
 
 /** Published sports with their metric definitions, cached briefly. */
@@ -224,13 +226,16 @@ export async function mySports(userId: string) {
 
 // ── Lessons ────────────────────────────────────────────────────────────
 export async function getLesson(userId: string, sportSlug: string, lessonSlug: string) {
-  const hub = await getSportHub(sportSlug, userId);
+  // The public hub plus one progress query — not the user's whole results history.
+  const hub = await getSportHub(sportSlug);
   const lesson = hub.lessons.find((l) => l.slug === lessonSlug);
   if (!lesson) throw notFound("Lesson not found");
+  const done = await db.lessonProgress.findMany({ where: { userId, status: "completed", lessonId: { in: hub.lessons.map((l) => l.id) } }, select: { lessonId: true } });
+  const completedLessons = hub.lessons.filter((l) => done.some((d) => d.lessonId === l.id)).map((l) => l.slug);
   const drills = hub.drills.filter((d) => lesson.drillSlugs.includes(d.slug));
   const idx = hub.lessons.indexOf(lesson);
-  const prereqsMet = lesson.prerequisites.every((p) => hub.user?.completedLessons.includes(p));
-  return { hub, lesson, drills, prereqsMet, previous: hub.lessons[idx - 1] ?? null, next: hub.lessons[idx + 1] ?? null };
+  const prereqsMet = lesson.prerequisites.every((p) => completedLessons.includes(p));
+  return { hub, lesson, drills, completedLessons, prereqsMet, previous: hub.lessons[idx - 1] ?? null, next: hub.lessons[idx + 1] ?? null };
 }
 
 export async function setLessonProgress(userId: string, sportSlug: string, lessonSlug: string, status: "in_progress" | "completed" | "reset") {
@@ -330,8 +335,8 @@ function resolveMetricValue(metric: MetricView, input: MetricEntryInput) {
   return { value: v, made: null, attempts: null };
 }
 
-export async function logMetric(userId: string, slug: string, input: MetricEntryInput & { dateKey: string; practicePlanId?: string | null }) {
-  const sport = await loadSport(slug);
+export async function logMetric(userId: string, slug: string, input: MetricEntryInput & { dateKey: string; practicePlanId?: string | null }, loaded?: Awaited<ReturnType<typeof loadSport>>) {
+  const sport = loaded ?? (await loadSport(slug));
   const metric = sport.metrics.map(metricView).find((m) => m.key === input.metricKey);
   if (!metric) throw badRequest("Unknown metric for this sport");
   const resolved = resolveMetricValue(metric, input);
@@ -387,7 +392,7 @@ export async function completePractice(userId: string, id: string, input: z.infe
     throw e;
   }
   const results = [];
-  for (const r of input.results) results.push(await logMetric(userId, sport.slug, { ...r, dateKey, practicePlanId: plan.id }));
+  for (const r of input.results) results.push(await logMetric(userId, sport.slug, { ...r, dateKey, practicePlanId: plan.id }, full));
   await awardXp(userId, "practice", plan.id, XP.activity + 10);
   const achievements = await evaluateAchievements(userId);
   return { activityId: activity.id, kcal, results: results.map((r) => ({ metricKey: r.entry.metricKey, value: r.entry.value, personalBest: r.personalBest })), achievements };

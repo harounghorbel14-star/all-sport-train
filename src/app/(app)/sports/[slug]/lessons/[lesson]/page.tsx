@@ -21,10 +21,10 @@ async function load(userId: string, slug: string, lesson: string) {
 export default async function LessonPage({ params }: { params: Promise<{ slug: string; lesson: string }> }) {
   const { slug, lesson: lessonSlug } = await params;
   const { user } = await requireUser();
-  const { hub, lesson, drills, prereqsMet, previous, next } = await load(user.id, slug, lessonSlug);
-  const done = hub.user?.completedLessons.includes(lesson.slug) ?? false;
+  const { hub, lesson, drills, completedLessons, prereqsMet, previous, next } = await load(user.id, slug, lessonSlug);
+  const done = completedLessons.includes(lesson.slug);
   const c = lesson.content;
-  const missing = lesson.prerequisites.filter((p) => !hub.user?.completedLessons.includes(p)).map((p) => hub.lessons.find((l) => l.slug === p));
+  const missing = lesson.prerequisites.filter((p) => !completedLessons.includes(p)).map((p) => hub.lessons.find((l) => l.slug === p));
   const sources = hub.sources.filter((s) => lesson.sources.includes(s.slug));
   const list = (items?: string[], ordered = false) => {
     if (!items?.length) return null;

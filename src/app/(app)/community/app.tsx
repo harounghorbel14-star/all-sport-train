@@ -4,7 +4,7 @@ import { Flag, Flame, MessageCircle, Search, Send, ShieldBan, Trash2, UserMinus,
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { api } from "@/lib/client/api";
+import { api, attempt } from "@/lib/client/api";
 import { Badge, Button, Card, CardTitle, EmptyState, Input, Notice, Segmented, Select, Textarea, cx } from "@/components/ui/primitives";
 import { Sheet, useToast } from "@/components/ui/overlay";
 
@@ -71,16 +71,16 @@ export function CommunityApp({ initialFeed, connections, groups: initialGroups, 
     }
   }
   async function del(id: string) {
-    await api(`/api/community/posts/${id}`, { method: "DELETE" }).catch(() => undefined);
+    if (!(await attempt(api(`/api/community/posts/${id}`, { method: "DELETE" }), toast))) return;
     setPosts((p) => p.filter((x) => x.id !== id));
   }
   async function delComment(id: string) {
-    await api(`/api/community/comments/${id}`, { method: "DELETE" }).catch(() => undefined);
+    if (!(await attempt(api(`/api/community/comments/${id}`, { method: "DELETE" }), toast))) return;
     await loadFeed();
   }
   async function block(handle?: string) {
     if (!handle || !confirm(`Block @${handle}? You won't see each other's posts and any connection is removed.`)) return;
-    await api("/api/community/block", { body: { handle } }).catch(() => undefined);
+    if (!(await attempt(api("/api/community/block", { body: { handle } }), toast))) return;
     toast(`@${handle} blocked`);
     await loadFeed();
     router.refresh();
@@ -222,11 +222,11 @@ function FriendsPanel({ connections, compact }: { connections: { friends: Conn[]
     }
   }
   async function respond(id: string, accept: boolean) {
-    await api(`/api/community/friends/${id}`, { method: "PATCH", body: { accept } }).catch(() => undefined);
+    if (!(await attempt(api(`/api/community/friends/${id}`, { method: "PATCH", body: { accept } }), toast))) return;
     router.refresh();
   }
   async function remove(id: string) {
-    await api(`/api/community/friends/${id}`, { method: "DELETE" }).catch(() => undefined);
+    if (!(await attempt(api(`/api/community/friends/${id}`, { method: "DELETE" }), toast))) return;
     router.refresh();
   }
   return (

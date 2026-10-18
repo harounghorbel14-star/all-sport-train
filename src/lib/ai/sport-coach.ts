@@ -80,8 +80,8 @@ export function knowledgeSection(hits: KnowledgeHit[]) {
 }
 
 /** Deterministic sport answer + structured facts for the AI model. */
-export async function sportDraft(userId: string, slug: string, text: string): Promise<{ text: string; actions: CoachAction[]; facts: string }> {
-  const hub = await getSportHub(slug, userId);
+export async function sportDraft(userId: string, slug: string, text: string, loaded?: SportHub): Promise<{ text: string; actions: CoachAction[]; facts: string }> {
+  const hub = loaded ?? (await getSportHub(slug, userId));
   const { intent, minutes } = detectSportIntent(text);
   const s = hub.sport;
   const level = hub.user?.enrollment?.level ?? "beginner";
@@ -115,8 +115,8 @@ export async function sportDraft(userId: string, slug: string, text: string): Pr
       for (const h of hits.filter((x) => x.kind === "lesson").slice(0, 1)) actions.push({ type: "link", href: h.href, label: `Open lesson: ${h.title}` });
       return { text: out, actions, facts: out };
     }
-    await recordKnowledgeGap(slug, text);
-    const out = `I don't have verified ${s.name} information that answers this yet, so I won't guess. I've added your question to the research queue.\n\nIn the meantime: check the current rulebook of your league or federation for rules questions, and ask a qualified coach for technique feedback.${supervision}`;
+    const queued = await recordKnowledgeGap(slug, text, userId);
+    const out = `I don't have verified ${s.name} information that answers this yet, so I won't guess.${queued ? " I've added your question to the research queue." : ""}\n\nIn the meantime: check the current rulebook of your league or federation for rules questions, and ask a qualified coach for technique feedback.${supervision}`;
     return { text: out, actions, facts: "NO_VERIFIED_KNOWLEDGE: the knowledge base has nothing on this question. Say you don't have verified information; do not answer from memory." };
   }
 
@@ -162,8 +162,8 @@ export async function sportDraft(userId: string, slug: string, text: string): Pr
 }
 
 /** Compact sport context for the AI model. */
-export async function sportContext(userId: string, slug: string) {
-  const hub = await getSportHub(slug, userId);
+export async function sportContext(userId: string, slug: string, loaded?: SportHub) {
+  const hub = loaded ?? (await getSportHub(slug, userId));
   const acts = await db.activityEntry.findMany({ where: { userId, sport: slug }, orderBy: { dateKey: "desc" }, take: 8 });
   const e = hub.user?.enrollment;
   const pbs = Object.entries(hub.user?.personalBests ?? {})

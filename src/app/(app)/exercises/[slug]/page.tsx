@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AlertTriangle, ArrowDown, ArrowUp, Wind } from "lucide-react";
 import { requireUser } from "@/lib/auth/server";
+import { formatRecord, formatWeight, type Units } from "@/lib/format";
 import { getExercise, exerciseMap } from "@/lib/services/exercises";
 import { AppError } from "@/lib/server/errors";
 import { DIFFICULTY_LABELS, EQUIPMENT_LABELS, MUSCLE_LABELS, PATTERN_LABELS } from "@/lib/content/exercises";
@@ -11,7 +12,8 @@ import { FavoriteButton } from "./favorite";
 
 export default async function ExercisePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const { user } = await requireUser();
+  const { user, profile } = await requireUser();
+  const units = profile.units as Units;
   let data;
   try {
     data = await getExercise(slug, user.id);
@@ -99,14 +101,14 @@ export default async function ExercisePage({ params }: { params: Promise<{ slug:
               <>
                 {records[0] && (
                   <p className="text-sm">
-                    Best: <span className="num text-xl font-bold text-accent">{records[0].value}{records[0].metric === "seconds" ? "s" : records[0].metric === "loadKg" ? " kg" : " reps"}</span>
+                    Best: <span className="num text-xl font-bold text-accent">{formatRecord(records[0].value, records[0].metric, units)}</span>
                   </p>
                 )}
                 <ul className="mt-2 space-y-1 text-xs text-muted">
                   {recentSets.slice(0, 6).map((s, i) => (
                     <li key={i}>
                       {new Date(s.completedAt).toLocaleDateString()} — {s.reps != null ? `${s.reps} reps` : `${s.seconds}s`}
-                      {s.loadKg ? ` @ ${s.loadKg} kg` : ""}
+                      {s.loadKg ? ` @ ${formatWeight(s.loadKg, units)}` : ""}
                       {s.rpe ? ` · RPE ${s.rpe}` : ""}
                     </li>
                   ))}

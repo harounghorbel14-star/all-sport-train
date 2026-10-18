@@ -14,6 +14,7 @@ import { detectIntent, type Intent } from "./intents";
 import { areasFromText, COACH_RULES, SAFETY_MESSAGES, screen } from "./safety";
 import { buildCoachContext, type FourWeekStats } from "./context";
 import { detectSport, sportContext, sportDraft, SPORT_RULES } from "./sport-coach";
+import { getSportHub } from "../services/sports";
 import { sportBySlug } from "../services/sports";
 
 export const coachActionSchema = z.discriminatedUnion("type", [
@@ -61,8 +62,8 @@ function analysisText(stats: FourWeekStats) {
 }
 
 /** Deterministic, data-driven response used directly when no AI is configured, and as facts for the AI otherwise. */
-async function draftReply(userId: string, text: string, intent: Intent, minutes?: number): Promise<Draft> {
-  const ctx = await buildCoachContext(userId);
+async function draftReply(userId: string, text: string, intent: Intent, minutes?: number, context?: Promise<Awaited<ReturnType<typeof buildCoachContext>>>): Promise<Draft> {
+  const ctx = await (context ?? buildCoachContext(userId));
   const p = ctx.profile;
   switch (intent) {
     case "workout_today":
@@ -168,15 +169,19 @@ export async function coachReply(userId: string, text: string, sportSlug?: strin
 
   const effective = flags.includes("injury") && intent === "general" ? "fatigue_adapt" : intent;
   const sport = effective === "fatigue_adapt" && !sportSlug ? null : await resolveSport(text, effective, sportSlug);
-  const draft = sport ? await sportDraft(userId, sport, text) : await draftReply(userId, text, effective, minutes);
+  // Built once per message and shared by the draft and the AI prompt.
+  let coachCtx: ReturnType<typeof buildCoachContext> | undefined;
+  const getCoachCtx = () => (coachCtx ??= buildCoachContext(userId));
+  const hub = sport ? await getSportHub(sport, userId) : null;
+  const draft = sport ? await sportDraft(userId, sport, text, hub!) : await draftReply(userId, text, effective, minutes, getCoachCtx());
   const prefix = flags.map((f) => SAFETY_MESSAGES[f]).join("\n\n");
   let content = draft.text;
   let provider: "ai" | "rules" = "rules";
 
   if (aiStatus().configured) {
     try {
-      const ctx = await buildCoachContext(userId);
-      const sportCtx = sport ? await sportContext(userId, sport) : undefined;
+      const ctx = await getCoachCtx();
+      const sportCtx = sport ? await sportContext(userId, sport, hub!) : undefined;
       const history = await db.coachMessage.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 12 });
       const messages: ChatMessage[] = history
         .reverse()

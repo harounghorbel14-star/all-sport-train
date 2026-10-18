@@ -70,7 +70,8 @@ const PULLUP_SLUGS = ["pull-up", "chin-up", "archer-pull-up", "high-pull-up"];
 export async function collectStats(userId: string): Promise<AchievementStats> {
   const p = await getProfile(userId);
   const today = todayKey(p.timezone);
-  const [workouts, pushups, pullups, plank, skillsDone, reviews, mobility, prs, activities, sports] = await Promise.all([
+  // One round trip: every query here is independent.
+  const [workouts, pushups, pullups, plank, skillsDone, reviews, mobility, prs, activities, sports, pullPr, plankPr, days] = await Promise.all([
     db.workoutSession.count({ where: { userId, status: "completed" } }),
     db.setLog.aggregate({ where: { skipped: false, session: { userId, status: { not: "abandoned" } }, exercise: { slug: { in: PUSHUP_SLUGS } } }, _sum: { reps: true } }),
     db.setLog.aggregate({ where: { skipped: false, session: { userId, status: { not: "abandoned" } }, exercise: { slug: { in: PULLUP_SLUGS } } }, _max: { reps: true } }),
@@ -81,13 +82,11 @@ export async function collectStats(userId: string): Promise<AchievementStats> {
     db.personalRecord.count({ where: { userId } }),
     db.activityEntry.count({ where: { userId } }),
     db.activityEntry.findMany({ where: { userId }, distinct: ["sport"], select: { sport: true }, take: 50 }),
-  ]);
-  // Assessment PRs (logged tests) count toward pull-up / plank milestones too.
-  const [pullPr, plankPr] = await Promise.all([
+    // Assessment PRs (logged tests) count toward pull-up / plank milestones too.
     db.personalRecord.aggregate({ where: { userId, metric: "reps", exercise: { slug: { in: PULLUP_SLUGS } } }, _max: { value: true } }),
     db.personalRecord.aggregate({ where: { userId, metric: "seconds", exercise: { slug: "front-plank" } }, _max: { value: true } }),
+    activityDays(userId, today),
   ]);
-  const days = await activityDays(userId, today);
   const streak = computeStreak({ activeDays: days.active, restDays: days.rest, trainingDays: p.trainingDays, today });
   // Best weekly streak across history
   let best = 0;

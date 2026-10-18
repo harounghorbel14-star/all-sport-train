@@ -3,7 +3,7 @@
 import { Camera, Columns2, Lock, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { api } from "@/lib/client/api";
+import { api, attempt } from "@/lib/client/api";
 import { inToCm, lbToKg } from "@/lib/format";
 import { Button, Chip, Field, Input, Notice, Select, Toggle, cx } from "@/components/ui/primitives";
 import { Sheet, useToast } from "@/components/ui/overlay";
@@ -65,8 +65,9 @@ export function MeasurementForm({ units }: { units: "metric" | "imperial" }) {
 
 export function DeleteMeasurement({ id }: { id: string }) {
   const router = useRouter();
+  const toast = useToast();
   return (
-    <button aria-label="Delete measurement" className="text-muted hover:text-danger" onClick={async () => { await api(`/api/progress/measurements/${id}`, { method: "DELETE" }).catch(() => undefined); router.refresh(); }}>
+    <button aria-label="Delete measurement" className="text-muted hover:text-danger" onClick={async () => { if (await attempt(api(`/api/progress/measurements/${id}`, { method: "DELETE" }), toast)) router.refresh(); }}>
       <Trash2 className="size-3.5" />
     </button>
   );
@@ -111,7 +112,7 @@ export function PhotoJournal({ photos }: { photos: Photo[] }) {
   }
   async function remove(id: string) {
     if (!confirm("Delete this photo permanently?")) return;
-    await api(`/api/media/${id}`, { method: "DELETE" }).catch(() => undefined);
+    if (!(await attempt(api(`/api/media/${id}`, { method: "DELETE" }), toast))) return;
     router.refresh();
   }
   const pick = (d: string) => photos.find((p) => p.dateKey === d && p.pose === comparePose);

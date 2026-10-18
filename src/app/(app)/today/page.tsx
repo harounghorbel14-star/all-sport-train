@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CalendarCheck, ChevronRight, Dumbbell, Flame, GraduationCap, HeartPulse, Sparkles, Target, Trophy } from "lucide-react";
 import { requireUser } from "@/lib/auth/server";
+import { formatRecord, type Units } from "@/lib/format";
 import { db } from "@/lib/server/db";
 import { todayKey, weekday } from "@/lib/domain/dates";
 import { formatDateKey } from "@/lib/format";
@@ -276,8 +277,7 @@ export default async function TodayPage({ searchParams }: { searchParams: Promis
                       {r.exercise.name}
                     </Link>
                     <span className="num text-lg font-bold text-accent">
-                      {r.value}
-                      {r.metric === "seconds" ? "s" : r.metric === "loadKg" ? "kg" : " reps"}
+                      {formatRecord(r.value, r.metric, profile.units as Units)}
                     </span>
                   </li>
                 ))}
