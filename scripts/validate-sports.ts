@@ -45,8 +45,17 @@ for (const g of groups) {
       err(w, "not a catalog sport slug");
       continue;
     }
-    if (base.availability === "external") err(w, "external-instruction sports must not get lessons");
-    if (base.workoutBased) err(w, "workout-based sports are served by the workout engine");
+    // Instructor-only sports may teach theory, land/dry drills and conditioning, but anything done in
+    // the activity itself (on the water, wall, horse, apparatus…) must be marked as needing supervision.
+    if (base.availability === "external") {
+      const prof = e.profile ?? {};
+      if (!prof.supervisionNote || prof.supervisionNote.length < 60) err(w, "instructor-only sport: profile.supervisionNote must explain that the activity is learned with certified instructors");
+      if (!e.lessons.some((l) => l.requiresSupervision)) err(w, "instructor-only sport: in-activity lessons must set requiresSupervision");
+      for (const d of e.drills) if (d.setting !== "solo" && !d.requiresSupervision) err(`${w}/drill ${d.slug}`, "instructor-only sport: partner/team drills must require supervision");
+      for (const d of e.drills.filter((x) => x.setting === "solo" && !x.requiresSupervision))
+        if (!/\b(dry|land|floor|ground|off-?(water|wall|bike|horse|snow|ice)|at home|mat|simulat|visuali|theory|knot|chalk|bench|mirror)/i.test(`${d.title} ${d.purpose} ${d.content.setup.join(" ")}`))
+          err(`${w}/drill ${d.slug}`, "instructor-only sport: unsupervised solo drills must be land/dry/theory drills (say so in title, purpose or setup)");
+    }
     if (groups.flatMap((x) => x.sports).filter((x) => x.slug === e.slug).length > 1) err(w, "enriched twice");
     const merged = SPORT_SEEDS.find((s) => s.slug === e.slug)!;
     const profile = sportProfileSchema.safeParse(merged.profile ?? {});

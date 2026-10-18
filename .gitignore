@@ -8,6 +8,6 @@ next-env.d.ts
 prisma/*.db
 prisma/*.db-journal
 storage/
-coverage/
-playwright-report/
-test-results/
+/coverage/
+/playwright-report/
+/test-results/

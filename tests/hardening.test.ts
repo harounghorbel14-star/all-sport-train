@@ -110,3 +110,33 @@ describe("dates", () => {
     for (const bad of ["2026-02-29", "2026-02-30", "2026-13-01", "2026-04-31", "2026-00-10", "2026-1-01"]) expect(isDateKey(bad)).toBe(false);
   });
 });
+
+describe("APP_BASE_URL", () => {
+  it("accepts the usual ways an address gets pasted and keeps only the origin", async () => {
+    const { normalizeBaseUrl } = await import("@/lib/server/env");
+    const want = "https://all-sport-train-production-f15e.up.railway.app";
+    for (const v of [
+      "all-sport-train-production-f15e.up.railway.app",
+      " https://all-sport-train-production-f15e.up.railway.app/ ",
+      '"https://all-sport-train-production-f15e.up.railway.app"',
+      "https://all-sport-train-production-f15e.up.railway.app/login",
+      "//all-sport-train-production-f15e.up.railway.app",
+    ])
+      expect(normalizeBaseUrl(v), v).toBe(want);
+    expect(normalizeBaseUrl("http://localhost:3000")).toBe("http://localhost:3000");
+    for (const bad of ["", "   ", "ftp://x.com", "not a url", "railway"]) expect(normalizeBaseUrl(bad), bad).toBeNull();
+  });
+
+  it("no longer reports a bare host as a setup problem", async () => {
+    const { configProblems } = await import("@/lib/server/env");
+    const env = process.env as Record<string, string | undefined>;
+    const [node, base] = [env.NODE_ENV, env.APP_BASE_URL];
+    env.NODE_ENV = "production";
+    env.APP_BASE_URL = "all-sport-train-production-f15e.up.railway.app";
+    expect(configProblems().filter((p) => p.startsWith("APP_BASE_URL"))).toEqual([]);
+    env.APP_BASE_URL = "not a url";
+    expect(configProblems().some((p) => p.startsWith("APP_BASE_URL"))).toBe(true);
+    env.NODE_ENV = node;
+    env.APP_BASE_URL = base;
+  });
+});

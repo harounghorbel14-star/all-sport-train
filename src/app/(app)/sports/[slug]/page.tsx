@@ -70,6 +70,11 @@ export default async function SportHubPage({ params, searchParams }: { params: P
           </div>
         }
       />
+      {sport.availability === "full" && info.externalResources?.some((r) => /certified instruction/i.test(r.label)) && (
+        <Notice tone="warn" icon={<ShieldAlert className="size-4" />}>
+          <strong>Learn this with certified instructors.</strong> The lessons and solo drills here cover theory, land drills and conditioning. Anything marked &quot;Coach required&quot; — and the activity itself — must be learned and practised with qualified supervision and proper equipment.
+        </Notice>
+      )}
       {sport.availability !== "full" && (
         <Notice tone={sport.availability === "external" ? "warn" : "info"} icon={<ShieldAlert className="size-4" />}>
           <strong>{AVAILABILITY_LABELS[sport.availability].label}.</strong> {AVAILABILITY_LABELS[sport.availability].body}
