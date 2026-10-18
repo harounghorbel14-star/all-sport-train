@@ -42,9 +42,9 @@ export function configProblems(): string[] {
   const parsed = schema.safeParse(process.env);
   const problems = parsed.success ? [] : parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`);
   if (process.env.NODE_ENV === "production") {
-    const base = (process.env.APP_BASE_URL ?? "").trim();
-    if (!base) problems.push("APP_BASE_URL: required in production (your public https URL, used for password-reset and sign-in links)");
-    else if (!/^https?:\/\/[^/]+/.test(base)) problems.push("APP_BASE_URL: must be a full URL such as https://your-app.example.com");
+    const raw = process.env.APP_BASE_URL ?? "";
+    if (!raw.trim()) problems.push("APP_BASE_URL: required in production (your public https URL, used for password-reset and sign-in links)");
+    else if (!normalizeBaseUrl(raw)) problems.push("APP_BASE_URL: must be your app's address, such as https://your-app.up.railway.app");
   }
   return problems;
 }
@@ -58,8 +58,26 @@ export function resetEnvCache() {
  * Production requires APP_BASE_URL: deriving it from the request would let a forged
  * Host header point reset links at another site. Development falls back to the request origin.
  */
+/**
+ * Accepts the usual ways people paste their address — "my-app.up.railway.app", "https://my-app.up.railway.app/",
+ * with quotes or a path — and returns just the origin ("https://my-app.up.railway.app"), or null if it isn't one.
+ */
+export function normalizeBaseUrl(raw: string): string | null {
+  let v = raw.trim().replace(/^["'`]+|["'`]+$/g, "").trim();
+  if (!v) return null;
+  if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(v)) v = `https://${v.replace(/^\/+/, "")}`; // bare host → https
+  try {
+    const u = new URL(v);
+    if (u.protocol !== "https:" && u.protocol !== "http:") return null;
+    if (!u.hostname || /\s/.test(u.hostname) || (!u.hostname.includes(".") && u.hostname !== "localhost")) return null;
+    return u.origin;
+  } catch {
+    return null;
+  }
+}
+
 export function appBaseUrl(req?: Request) {
-  const configured = env().APP_BASE_URL.trim().replace(/\/$/, "");
+  const configured = normalizeBaseUrl(env().APP_BASE_URL);
   if (configured) return configured;
   if (process.env.NODE_ENV === "production") throw new Error("APP_BASE_URL must be set in production");
   if (req) return new URL(req.url).origin;
