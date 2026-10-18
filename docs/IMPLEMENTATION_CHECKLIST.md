@@ -37,9 +37,11 @@ Each item names how it was verified. Audit of 2026-10-18 (findings verified by r
 - ✅ N+1 queries: achievements, practice completion, skills list, lesson page; exercise catalog in client bundles → achievements stats in one round trip; skills list uses 4 grouped queries; lesson page no longer loads the results history; practice completion reuses the loaded sport; labels moved to `src/lib/exercise-labels.ts` (no client component imports the catalog); coach context and sport hub built once per message
 
 ## P3 — community, integrations, polish
-- ⬜ RTL decorative offsets; French/Arabic coverage of page strings
-- ⬜ Missing loading states for (focus)/(auth); 401 redirect without `next`; invalid calendar dates accepted
-- ⬜ Community: reaction double-tap 500; report brigading threshold
+- ✅ RTL decorative offsets → centred glows use direction-neutral centring; admin table uses `text-start`; untranslated English text inside the Arabic UI keeps its reading order and punctuation (`unicode-bidi: plaintext`) — verified by screenshot at 390 px, no horizontal overflow
+- ✅ French/Arabic coverage of the shared dictionary → every key translated, placeholders preserved — test: i18n.test.ts (and the `Dictionary` type)
+- ⚠️ Many page bodies (and all sports content) are still English-only: only the shared dictionary (navigation, sign-in, onboarding, Today, workout screens) is translated
+- ✅ Missing loading states for (focus)/(auth); 401 redirect without `next`; invalid calendar dates accepted → skeletons added; expired sessions return to the same page after sign-in; 2026-02-30 etc. rejected — test: hardening.test.ts "dates"
+- ✅ Community: reaction double-tap 500; report brigading threshold → concurrent reactions settle cleanly; only accounts ≥3 days old count toward auto-hiding (all reports still reach moderation) — test: api-other "community robustness"
 - ⚠️ Root cause of the stalled tab navigations is unknown; the fallback costs ~1.5 s plus a page load when it happens
 - ⚠️ Registration reveals existing emails (accepted trade-off for clear UX; reset flow does not)
 

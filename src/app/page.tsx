@@ -20,7 +20,7 @@ export default async function Landing() {
   if (user) redirect(user.isGuest || user.profile?.onboardingCompleted ? "/today" : "/onboarding");
   return (
     <main id="main" className="relative overflow-hidden">
-      <div aria-hidden className="pointer-events-none absolute -top-40 start-1/2 h-[480px] w-[900px] -translate-x-1/2 rounded-full bg-accent/10 blur-[120px]" />
+      <div aria-hidden className="pointer-events-none absolute -top-40 left-1/2 h-[480px] w-[900px] -translate-x-1/2 rounded-full bg-accent/10 blur-[120px]" />
       <nav className="relative mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
         <span className="flex items-center gap-2">
           <span className="grid size-9 place-items-center rounded-xl bg-accent font-black text-accent-fg">A</span>

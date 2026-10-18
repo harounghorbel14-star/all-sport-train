@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { db } from "../server/db";
 import { badRequest, conflict, forbidden, notFound } from "../server/errors";
 
@@ -218,9 +219,17 @@ async function visiblePost(userId: string, postId: string) {
 export async function toggleReaction(userId: string, postId: string) {
   await visiblePost(userId, postId);
   const existing = await db.reaction.findUnique({ where: { postId_userId: { postId, userId } } });
-  if (existing) await db.reaction.delete({ where: { postId_userId: { postId, userId } } });
-  else await db.reaction.create({ data: { postId, userId } });
-  return { reacted: !existing };
+  // deleteMany / a caught duplicate keep a double tap from failing with a 500.
+  if (existing) {
+    await db.reaction.deleteMany({ where: { postId, userId } });
+    return { reacted: false };
+  }
+  try {
+    await db.reaction.create({ data: { postId, userId } });
+  } catch (e) {
+    if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002")) throw e;
+  }
+  return { reacted: true };
 }
 
 export async function addComment(userId: string, postId: string, body: string) {
@@ -240,13 +249,18 @@ export async function deleteComment(userId: string, commentId: string) {
 }
 
 const AUTO_HIDE_REPORTS = 3;
+const REPORTER_MIN_AGE_MS = 3 * 86_400_000;
 
 export async function report(userId: string, input: { targetType: "post" | "comment" | "user"; targetId: string; reason: string }) {
   const reason = checkText(input.reason, 300);
   const dup = await db.report.findFirst({ where: { reporterId: userId, targetType: input.targetType, targetId: input.targetId } });
   if (dup) return dup;
   const r = await db.report.create({ data: { reporterId: userId, targetType: input.targetType, targetId: input.targetId, reason } });
-  const count = await db.report.count({ where: { targetType: input.targetType, targetId: input.targetId, status: "open" } });
+  // Only established accounts count toward auto-hiding, so a few throwaway accounts can't hide
+  // someone's post. Every report still reaches moderation.
+  const count = await db.report.count({
+    where: { targetType: input.targetType, targetId: input.targetId, status: "open", reporter: { isGuest: false, createdAt: { lte: new Date(Date.now() - REPORTER_MIN_AGE_MS) } } },
+  });
   if (count >= AUTO_HIDE_REPORTS) {
     if (input.targetType === "post") await db.post.updateMany({ where: { id: input.targetId }, data: { hidden: true } });
     if (input.targetType === "comment") await db.comment.updateMany({ where: { id: input.targetId }, data: { hidden: true } });

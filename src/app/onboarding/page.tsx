@@ -38,7 +38,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
     : undefined;
   return (
     <main id="main" className="relative min-h-dvh overflow-hidden px-4 py-10">
-      <div aria-hidden className="pointer-events-none absolute -top-40 start-1/2 h-96 w-[800px] -translate-x-1/2 rounded-full bg-accent/10 blur-[110px]" />
+      <div aria-hidden className="pointer-events-none absolute -top-40 left-1/2 h-96 w-[800px] -translate-x-1/2 rounded-full bg-accent/10 blur-[110px]" />
       <div className="relative">
         <OnboardingWizard name={p.displayName} initial={initial} sports={(await publishedSports()).filter((x) => !x.parentSlug).map((x) => ({ slug: x.slug, name: x.name }))} />
       </div>

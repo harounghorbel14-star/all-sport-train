@@ -22,7 +22,8 @@ export async function api<T = unknown>(path: string, opts: { method?: string; bo
   }
   const data = await res.json().catch(() => null);
   if (!res.ok) {
-    if (res.status === 401 && typeof window !== "undefined" && !path.startsWith("/api/auth")) window.location.href = "/login";
+    // Session expired: sign in again and come back to the same page (login validates `next`).
+    if (res.status === 401 && typeof window !== "undefined" && !path.startsWith("/api/auth")) window.location.href = `/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`;
     const details = data?.error?.details;
     const firstField = details && typeof details === "object" ? Object.values(details as Record<string, string[]>)[0]?.[0] : undefined;
     throw new ApiError(res.status, firstField ? `${data?.error?.message}: ${firstField}` : (data?.error?.message ?? "Something went wrong"), details);

@@ -31,6 +31,7 @@ import * as friends from "@/app/api/community/friends/route";
 import * as friend from "@/app/api/community/friends/[id]/route";
 import * as block from "@/app/api/community/block/route";
 import * as react from "@/app/api/community/posts/[id]/react/route";
+import * as reportRoute from "@/app/api/community/report/route";
 import * as athlete from "@/app/api/community/athletes/[handle]/route";
 import * as challenges from "@/app/api/challenges/route";
 import * as challenge from "@/app/api/challenges/[id]/route";
@@ -242,6 +243,32 @@ describe("community & privacy", () => {
     const { cookie } = await newUser();
     const r = await call(posts.POST, { cookie, body: { body: "buy http://a.com http://b.com http://c.com", kind: "text", visibility: "public" } });
     expect(r.status).toBe(400);
+  });
+});
+
+describe("community robustness", () => {
+  it("survives a double-tapped reaction", async () => {
+    const a = await newUser();
+    const b = await newUser();
+    const p = await call(posts.POST, { cookie: a.cookie, body: { body: "Morning run done", kind: "text", visibility: "public" } });
+    const both = await Promise.all([1, 2].map(() => call(react.POST, { cookie: b.cookie, params: { id: p.json.post.id } })));
+    expect(both.every((r) => r.status === 200)).toBe(true);
+    expect(await db.reaction.count({ where: { postId: p.json.post.id } })).toBeLessThanOrEqual(1);
+  });
+
+  it("brand-new accounts can report but can't hide a post on their own", async () => {
+    const author = await newUser();
+    const p = await call(posts.POST, { cookie: author.cookie, body: { body: "My first 5k!", kind: "text", visibility: "public" } });
+    const reporters = await Promise.all([1, 2, 3].map(() => newUser()));
+    for (const r of reporters) await call(reportRoute.POST, { cookie: r.cookie, body: { targetType: "post", targetId: p.json.post.id, reason: "spam" } });
+    expect((await db.post.findUniqueOrThrow({ where: { id: p.json.post.id } })).hidden).toBe(false);
+    expect(await db.report.count({ where: { targetId: p.json.post.id } })).toBe(3); // still sent to moderation
+    // Established accounts reaching the threshold do hide it.
+    await db.user.updateMany({ where: { id: { in: reporters.map((r) => r.userId) } }, data: { createdAt: new Date(Date.now() - 10 * 86_400_000) } });
+    const fourth = await newUser();
+    await db.user.update({ where: { id: fourth.userId }, data: { createdAt: new Date(Date.now() - 10 * 86_400_000) } });
+    await call(reportRoute.POST, { cookie: fourth.cookie, body: { targetType: "post", targetId: p.json.post.id, reason: "spam" } });
+    expect((await db.post.findUniqueOrThrow({ where: { id: p.json.post.id } })).hidden).toBe(true);
   });
 });
 

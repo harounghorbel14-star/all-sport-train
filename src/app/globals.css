@@ -153,3 +153,9 @@ body {
   transition-duration: 0.001ms !important;
 }
 input[type="range"] { accent-color: var(--accent); }
+
+/* Arabic UI: blocks of text that aren't translated yet (English) keep their own reading order and
+   punctuation instead of being reordered right-to-left; Arabic text is unaffected. */
+[dir="rtl"] :where(p, li, td, th, h1, h2, h3, button, label) {
+  unicode-bidi: plaintext;
+}

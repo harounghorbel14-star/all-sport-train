@@ -54,7 +54,7 @@ export default async function ResearchPage({ searchParams }: { searchParams: Pro
           Coverage by sport ({list.length})
         </CardTitle>
         <div className="-mx-2 overflow-x-auto">
-          <table className="w-full min-w-[900px] text-left text-xs">
+          <table className="w-full min-w-[900px] text-start text-xs">
             <thead className="text-subtle">
               <tr>
                 {["Sport", "Lessons", "Drills", "Rulesets (verified)", "Sources (opened/cited)", "Claims ✓ / pending", "Open tasks", "Review", "Missing", "Last research"].map((h) => (

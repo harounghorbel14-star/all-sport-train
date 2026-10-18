@@ -101,3 +101,12 @@ describe("user-initiated actions", () => {
     expect(shown).toEqual(["Post not found"]);
   });
 });
+
+describe("dates", () => {
+  it("rejects impossible calendar dates instead of rolling them over", async () => {
+    const { isDateKey } = await import("@/lib/domain/dates");
+    expect(isDateKey("2026-02-28")).toBe(true);
+    expect(isDateKey("2028-02-29")).toBe(true); // leap year
+    for (const bad of ["2026-02-29", "2026-02-30", "2026-13-01", "2026-04-31", "2026-00-10", "2026-1-01"]) expect(isDateKey(bad)).toBe(false);
+  });
+});
