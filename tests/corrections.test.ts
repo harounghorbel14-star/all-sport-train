@@ -76,3 +76,27 @@ describe("correcting recorded results", () => {
     expect(await db.recordCorrection.count({ where: { userId: b.userId } })).toBe(0);
   });
 });
+
+describe("monthly report", () => {
+  it("compares each sport with itself month to month, using the user's time zone, and only their own data", async () => {
+    const { monthlyReport } = await import("@/lib/services/progress");
+    const { cookie, userId } = await newUser();
+    const other = await newUser();
+    await db.profile.update({ where: { userId }, data: { timezone: "Pacific/Kiritimati" } }); // UTC+14
+    const now = new Date();
+    const thisMonth = now.toISOString().slice(0, 7);
+    const lastMonthDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 15)).toISOString().slice(0, 10);
+    await call(activity.POST, { cookie, body: { sport: "running", dateKey: lastMonthDate, durationMin: 30, intensity: "moderate" } });
+    await call(activity.POST, { cookie: other.cookie, body: { sport: "running", dateKey: lastMonthDate, durationMin: 99, intensity: "moderate" } });
+    // A record set at 12:00 UTC on the last day of last month is already the 1st of this month in UTC+14.
+    const ex = await db.exercise.findFirstOrThrow();
+    const lastDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0, 12));
+    await db.personalRecord.create({ data: { userId, exerciseId: ex.id, metric: "reps", value: 10, achievedAt: lastDay } });
+
+    const r = await monthlyReport(userId, thisMonth);
+    expect(r.previous.sports).toEqual([{ sport: "running", sessions: 1, minutes: 30 }]); // not the other user's 99
+    expect(r.current.personalRecords).toHaveLength(1); // assigned by local date
+    expect(r.previous.personalRecords).toHaveLength(0);
+    expect(JSON.stringify(r)).not.toMatch(/score/i); // no combined cross-sport score
+  });
+});

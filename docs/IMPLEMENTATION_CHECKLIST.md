@@ -39,7 +39,7 @@ Status: COMPLETE (verified end to end) · PARTIAL · MISSING · BROKEN · BLOCKE
 | Recommendation feedback used for future suggestions | COMPLETE (2026-10-19) | last 3 weeks of responses: repeatedly shortened sessions set the suggested length; two declined effort-only lighter sessions stop that adjustment (stated in the reasons); pain, recovery and re-entry rules are never overridden — tests: recommendation.test.ts |
 | Research queue, claims, review, ruleset versions, coverage | COMPLETE | research.test.ts |
 | Coverage report per sport (missing topics) | PARTIAL | admin coverage counts; topic gaps limited → P2 |
-| Weekly review; monthly summary | PARTIAL | weekly only → P2 |
+| Weekly review; monthly summary | COMPLETE (2026-10-19) | Monthly report on Progress (+ `GET /api/progress/report?month=`): workouts, time, active days, records, lessons, results; per-sport sessions/minutes compared only with the same sport; months in the user's time zone; no combined score — test: corrections.test "monthly report" |
 | Training calendar: reschedule, cancel, recurring activities | COMPLETE (2026-10-19) | Plans page calendar (last week + 2 weeks): schedule (one per day, not in the past, ≤90 days ahead), reschedule, cancel/restore (nothing deleted), completed/started workouts locked; skipped derived from data; weekly sport schedule = recurring activities, matched to logged activities; load warnings (never blocking) — tests: calendar.test.ts, e2e "schedule … then reschedule" |
 | Reminders | PARTIAL | in-app notifications; no push |
 | Offline saved lessons/plans, offline set queue | COMPLETE | e2e pwa, journey offline sync, sw tests |

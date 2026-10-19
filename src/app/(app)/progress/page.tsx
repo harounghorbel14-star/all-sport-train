@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { TabLink } from "@/components/ui/tab-link";
-import { Download, Dumbbell, LineChart as LineIcon, Ruler } from "lucide-react";
+import { CalendarRange, Download, Dumbbell, LineChart as LineIcon, Ruler } from "lucide-react";
 import { requireUser } from "@/lib/auth/server";
 import { CorrectRecord } from "@/components/records/correct-record";
-import { analytics, RANGES, type RangeKey } from "@/lib/services/progress";
+import { analytics, monthlyReport, RANGES, type RangeKey } from "@/lib/services/progress";
 import { listProgressPhotos } from "@/lib/services/media";
 import { SKILL_BY_SLUG } from "@/lib/content/skills";
 import { cmToIn, formatDateKey, formatLength, formatWeight, kgToLb } from "@/lib/format";
@@ -18,7 +18,7 @@ export default async function ProgressPage({ searchParams }: { searchParams: Pro
   const { user, profile } = await requireUser();
   const sp = await searchParams;
   const range = (sp.range && sp.range in RANGES ? sp.range : "12w") as RangeKey;
-  const [a, photos] = await Promise.all([analytics(user.id, range, sp.exercise), listProgressPhotos(user.id)]);
+  const [a, photos, report] = await Promise.all([analytics(user.id, range, sp.exercise), listProgressPhotos(user.id), monthlyReport(user.id)]);
   const units = profile.units as "metric" | "imperial";
   const label = (w: string) => formatDateKey(w, profile.locale, { month: "short", day: "numeric" });
   const weights = [...a.measurements].filter((m) => m.weightKg).map((m) => ({ label: formatDateKey(m.dateKey, profile.locale, { month: "short", day: "numeric" }), value: Math.round((units === "imperial" ? kgToLb(m.weightKg!) : m.weightKg!) * 10) / 10 }));
@@ -41,6 +41,58 @@ export default async function ProgressPage({ searchParams }: { searchParams: Pro
         }
       />
       {!a.hasAnyData && <EmptyState icon={<LineIcon className="size-5" />} title="Your charts will fill in as you train" body="Complete a workout, log an activity or add a measurement to see your first data points." />}
+      <Card id="monthly">
+        <CardTitle icon={<CalendarRange className="size-4" />}>Monthly report</CardTitle>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-xs text-subtle">
+                <th className="py-1 text-start font-medium" />
+                <th className="text-start font-medium">{formatDateKey(`${report.previous.month}-01`, profile.locale, { month: "long" })}</th>
+                <th className="text-start font-medium">{formatDateKey(`${report.current.month}-01`, profile.locale, { month: "long" })}{report.partial ? " (so far)" : ""}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                ["Workouts", report.previous.workouts, report.current.workouts],
+                ["Workout time (min)", report.previous.workoutMinutes, report.current.workoutMinutes],
+                ["Active days", report.previous.activeDays, report.current.activeDays],
+                ["Personal records", report.previous.personalRecords.length, report.current.personalRecords.length],
+                ["Lessons completed", report.previous.lessonsCompleted.length, report.current.lessonsCompleted.length],
+                ["Sport results logged", report.previous.sportResultsLogged, report.current.sportResultsLogged],
+              ].map(([label, before, now]) => (
+                <tr key={label} className="border-t border-line">
+                  <td className="py-1.5 text-muted">{label}</td>
+                  <td>{before}</td>
+                  <td className="font-semibold">{now}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {report.current.sports.length > 0 && (
+          <div className="mt-3">
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-subtle">By sport (each compared only with itself)</p>
+            <ul className="space-y-1 text-sm">
+              {report.current.sports.map((x) => {
+                const before = report.previous.sports.find((y) => y.sport === x.sport);
+                return (
+                  <li key={x.sport} className="flex justify-between gap-2">
+                    <span className="capitalize">{x.sport.replace(/-/g, " ")}</span>
+                    <span className="text-muted">
+                      {x.sessions} sessions · {x.minutes} min{before ? ` (last month: ${before.sessions} · ${before.minutes} min)` : " (not logged last month)"}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+        {report.notes.map((n) => (
+          <p key={n} className="mt-2 text-xs text-muted">{n}</p>
+        ))}
+      </Card>
+
       <div className="grid gap-4 sm:grid-cols-3">
         <Card><Stat label="Workouts" value={a.totals.workouts} hint={`last ${range}`} /></Card>
         <Card><Stat label="Training time" value={Math.round(a.totals.minutes / 60 * 10) / 10} unit="h" /></Card>
