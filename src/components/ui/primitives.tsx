@@ -2,7 +2,7 @@
 
 import { motion, type HTMLMotionProps } from "framer-motion";
 import Link from "next/link";
-import { forwardRef, type ComponentProps, type ReactNode } from "react";
+import { forwardRef, useId, type ComponentProps, type ReactNode } from "react";
 import { Loader2 } from "lucide-react";
 
 export { cx } from "@/lib/cx";
@@ -163,17 +163,23 @@ export function Field({ label, hint, error, children, htmlFor, optional }: { lab
 }
 
 export function Toggle({ checked, onChange, label, description, id }: { checked: boolean; onChange: (v: boolean) => void; label: string; description?: string; id?: string }) {
+  // The switch is named and described explicitly; a wrapping <label> alone doesn't name a button for every screen reader.
+  const auto = useId();
+  const labelId = `${id ?? auto}-label`;
+  const descId = `${id ?? auto}-desc`;
   return (
     <label htmlFor={id} className="flex cursor-pointer items-center justify-between gap-4 py-2">
       <span>
-        <span className="block text-sm font-medium">{label}</span>
-        {description && <span className="block text-xs text-subtle">{description}</span>}
+        <span id={labelId} className="block text-sm font-medium">{label}</span>
+        {description && <span id={descId} className="block text-xs text-subtle">{description}</span>}
       </span>
       <button
         id={id}
         type="button"
         role="switch"
         aria-checked={checked}
+        aria-labelledby={labelId}
+        aria-describedby={description ? descId : undefined}
         onClick={() => onChange(!checked)}
         className={cx("relative h-7 w-12 shrink-0 rounded-full transition-colors", checked ? "bg-accent" : "bg-surface-3")}
       >

@@ -49,6 +49,7 @@ Status: COMPLETE (verified end to end) · PARTIAL · MISSING · BROKEN · BLOCKE
 | AI data disclosure in coach chat | COMPLETE (2026-10-19) | "What is sent to the AI provider?" panel lists exactly what the context builder sends; food data (incl. allergies/diet prefs and weight-derived targets) sent only with nutrition sharing on — test: api-other "AI data minimisation" |
 | Security headers | COMPLETE (2026-10-19) | HSTS added in production (verified with `curl -I` on a production build) alongside nosniff, frame DENY, referrer and permissions policies; no CSP yet (Next inline scripts would need nonces) → KNOWN_LIMITATIONS |
 | Community, challenges | COMPLETE | api-other community tests |
+| Automated accessibility checks | COMPLETE (2026-10-19) | e2e/a11y.spec.ts on 14 core pages, desktop + mobile: lang, one h1, main landmark, named buttons/links/controls, img alt, unique ids, no horizontal overflow, visible focus. Found and fixed: unnamed toggle switches (all pages) and a 70 px mobile overflow on Progress |
 | Health-service integrations | MISSING (P3) | not planned |
 
 ## P0 — security, broken auth, data loss, critical failures

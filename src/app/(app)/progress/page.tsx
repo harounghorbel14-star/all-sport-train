@@ -98,7 +98,7 @@ export default async function ProgressPage({ searchParams }: { searchParams: Pro
         <Card><Stat label="Training time" value={Math.round(a.totals.minutes / 60 * 10) / 10} unit="h" /></Card>
         <Card><Stat label="All active minutes" value={a.totals.activeMinutes} unit="min" /></Card>
       </div>
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
         <Card>
           <CardTitle icon={<Dumbbell className="size-4" />}>Workouts per week</CardTitle>
           <BarChart data={a.perWeek.map((w, i) => ({ label: label(w.week), value: w.workouts, highlight: i === a.perWeek.length - 1 }))} />
@@ -159,7 +159,7 @@ export default async function ProgressPage({ searchParams }: { searchParams: Pro
         </Card>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
         <Card>
           <CardTitle icon={<Ruler className="size-4" />}>Body measurements</CardTitle>
           <p className="mb-3 text-xs text-muted">Optional and private. There&apos;s no need to weigh in daily — monthly is plenty for most goals.</p>
