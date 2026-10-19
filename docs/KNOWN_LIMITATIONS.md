@@ -14,7 +14,8 @@ Honest list of what APEX FIT does **not** do (yet). Updated with each work sessi
 - Plateau detection needs at least 4 comparable sessions over 3+ weeks; with less data it says nothing.
 
 ## Scheduling
-- No rescheduling, cancelling or recurring activities in the calendar yet (plans have a date only). Reminders are in-app notifications; there are no push notifications.
+- Recurring activities are weekly (the profile's sport schedule); there are no custom intervals (e.g. every other week) or times of day yet.
+- Reminders are in-app notifications; there are no push notifications.
 
 ## Localisation
 - Only the shared dictionary (navigation, sign-in, onboarding, Today, workout screens) is translated into French and Arabic. Most page bodies and all sports content are English-only; in Arabic, untranslated English text is laid out left-to-right inside the RTL page.

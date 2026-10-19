@@ -264,6 +264,7 @@ export async function startSession(userId: string, planId: string) {
   }
   const { plan, workout } = await getPlan(userId, planId);
   if (plan.status === "completed") throw conflict("This workout is already completed");
+  if (plan.status === "cancelled") throw conflict("This workout was cancelled — restore it first.");
   // activeKey is unique per user while a session is live, so a double tap or a second tab can't start two.
   let session;
   try {

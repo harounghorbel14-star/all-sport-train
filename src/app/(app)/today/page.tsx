@@ -19,6 +19,7 @@ import { AnimatedNumber, Stagger, StaggerItem } from "@/components/ui/motion";
 import { WorkoutSections } from "@/components/workout/block-list";
 import { CheckInCard, RegenerateButtons, StartWorkoutButton } from "./widgets";
 import { CoachSuggestion } from "./recommendation";
+import { RestorePlanButton } from "@/components/calendar/plan-actions";
 import { nextRecommendation } from "@/lib/services/recommendation";
 
 export const metadata = { title: "Today" };
@@ -92,6 +93,14 @@ export default async function TodayPage({ searchParams }: { searchParams: Promis
               <div className="py-6 text-center">
                 <p className="num text-4xl font-bold uppercase text-accent">Done for today</p>
                 <p className="mt-2 text-sm text-muted">Great work. Recovery, food and sleep turn this session into progress.</p>
+              </div>
+            ) : plan.status === "cancelled" && !active ? (
+              <div className="py-6 text-center">
+                <p className="num text-3xl font-bold uppercase">Cancelled for today</p>
+                <p className="mt-2 text-sm text-muted">You cancelled {workout.title}. Nothing was deleted — restore it if you change your mind.</p>
+                <div className="mt-4 flex justify-center">
+                  <RestorePlanButton planId={plan.id} />
+                </div>
               </div>
             ) : (
               <>

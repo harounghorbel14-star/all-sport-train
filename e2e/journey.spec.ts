@@ -110,3 +110,23 @@ test("today shows a coach suggestion with its reasons, and 'Not today' leaves th
   await page.getByRole("button", { name: "Not today" }).click();
   await expect(page.getByText(/You dismissed today's coach suggestion/)).toBeVisible();
 });
+
+test("schedule a workout on the calendar, then reschedule it", async ({ page }) => {
+  await registerAndOnboard(page);
+  await page.goto("/plans#calendar");
+  const schedule = page.getByRole("button", { name: /^Schedule a workout on / }).first();
+  const label = (await schedule.getAttribute("aria-label"))!;
+  const dateKey = label.replace("Schedule a workout on ", "");
+  await schedule.click();
+  const reschedule = page.getByRole("button", { name: new RegExp(`^Reschedule .* on ${dateKey}$`) });
+  await expect(reschedule).toBeVisible();
+  await reschedule.click();
+  const [y, m, d] = dateKey.split("-").map(Number);
+  const later = new Date(Date.UTC(y, m - 1, d + 2)).toISOString().slice(0, 10);
+  await page.getByLabel("New date").fill(later);
+  await page.getByRole("button", { name: "Move workout" }).click();
+  await expect(page.getByText("Workout moved")).toBeVisible();
+  // After a reload the move persisted: the original day offers "Schedule" again.
+  await page.reload();
+  await expect(page.getByRole("button", { name: `Schedule a workout on ${dateKey}` })).toBeVisible();
+});
