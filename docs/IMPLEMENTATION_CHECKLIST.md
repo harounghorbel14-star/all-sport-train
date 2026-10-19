@@ -36,7 +36,7 @@ Status: COMPLETE (verified end to end) · PARTIAL · MISSING · BROKEN · BLOCKE
 | Quizzes / coach verification of results | MISSING | no coach role; results are self-reported → P2 |
 | Prerequisite cycle detection in content | COMPLETE (2026-10-19) | `findPrerequisiteCycle` in the content validator and in admin lesson saves (unknown prerequisites rejected too) — tests: sports.test "prerequisite graph", api-sports admin workflow |
 | Adaptive coach suggestion (reasons, gaps, plateaus, accept/modify/reject) | COMPLETE | recommendation.test.ts, e2e |
-| Recommendation feedback used for future suggestions | PARTIAL | recorded, not yet used → P2 |
+| Recommendation feedback used for future suggestions | COMPLETE (2026-10-19) | last 3 weeks of responses: repeatedly shortened sessions set the suggested length; two declined effort-only lighter sessions stop that adjustment (stated in the reasons); pain, recovery and re-entry rules are never overridden — tests: recommendation.test.ts |
 | Research queue, claims, review, ruleset versions, coverage | COMPLETE | research.test.ts |
 | Coverage report per sport (missing topics) | PARTIAL | admin coverage counts; topic gaps limited → P2 |
 | Weekly review; monthly summary | PARTIAL | weekly only → P2 |

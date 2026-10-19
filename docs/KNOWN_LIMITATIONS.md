@@ -10,7 +10,7 @@ Honest list of what APEX FIT does **not** do (yet). Updated with each work sessi
 
 ## Coaching
 - **Live AI coaching needs a connection and an API key.** Without a key, the coach uses deterministic, rule-based answers.
-- **Recommendation feedback** (accept / modify / reject) is recorded but not yet used to change future suggestions.
+- **Recommendation feedback** adjusts only session length and effort-only lightening; it never overrides pain, recovery or re-entry rules.
 - Plateau detection needs at least 4 comparable sessions over 3+ weeks; with less data it says nothing.
 
 ## Scheduling
