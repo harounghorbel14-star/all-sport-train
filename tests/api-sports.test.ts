@@ -136,7 +136,9 @@ describe("practice plans", () => {
 
   it("refuses to build practices for sports without a drill library", async () => {
     const { cookie } = await newUser();
-    const r = await call(practice.POST, { cookie, params: { slug: "kitesurfing" }, body: { minutes: 30 } });
+    await db.sport.upsert({ where: { slug: "test-nodrills" }, create: { slug: "test-nodrills", name: "No drills yet", categorySlug: "other", summary: "Test sport without drills.", availability: "basic", metLight: 3, metModerate: 4, metVigorous: 5 }, update: {} });
+    invalidateSportsCache();
+    const r = await call(practice.POST, { cookie, params: { slug: "test-nodrills" }, body: { minutes: 30 } });
     expect(r.status).toBe(400);
   });
 
@@ -258,7 +260,9 @@ describe("sport-aware coach (rule-based mode)", () => {
 
   it("says it has no verified rules summary instead of inventing one", async () => {
     const { cookie } = await newUser();
-    const r = await call(coach.POST, { cookie, body: { message: "What are the rules of kitesurfing?" } });
+    await db.sport.upsert({ where: { slug: "test-norules" }, create: { slug: "test-norules", name: "Zorbleball", categorySlug: "other", summary: "Test sport without rules.", availability: "basic", metLight: 3, metModerate: 4, metVigorous: 5 }, update: {} });
+    invalidateSportsCache();
+    const r = await call(coach.POST, { cookie, body: { message: "What are the rules of zorbleball?", sport: "test-norules" } });
     expect(r.json.messages.at(-1).content).toMatch(/don't have a reviewed rules summary/);
   });
 });

@@ -20,6 +20,14 @@ export interface EnrichmentGroup {
   sports: SportEnrichment[];
 }
 
+type Resources = SportProfile["externalResources"];
+function mergeResources(base: Resources, extra: Resources): Resources {
+  const all = [...(base ?? []), ...(extra ?? [])];
+  const seen = new Set<string>();
+  const out = all.filter((r) => !seen.has(r.label) && seen.add(r.label));
+  return out.length ? out.slice(0, 6) : undefined;
+}
+
 export function applyEnrichments(catalog: SportSeed[], groups: EnrichmentGroup[]): SportSeed[] {
   const bySlug = new Map(groups.flatMap((g) => g.sports).map((e) => [e.slug, e]));
   return catalog.map((s) => {
@@ -28,7 +36,12 @@ export function applyEnrichments(catalog: SportSeed[], groups: EnrichmentGroup[]
     return {
       ...s,
       availability: "full",
-      profile: { ...(s.profile ?? {}), ...e.profile },
+      profile: {
+        ...(s.profile ?? {}),
+        ...e.profile,
+        // The catalog's notices (e.g. "Certified instruction required") are kept; enrichment can only add resources.
+        externalResources: mergeResources(s.profile?.externalResources, e.profile.externalResources),
+      },
       metrics: [...(s.metrics ?? []), ...(e.metrics ?? [])],
       lessons: e.lessons,
       drills: e.drills,
