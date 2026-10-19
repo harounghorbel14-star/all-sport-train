@@ -124,7 +124,9 @@ async function draftReply(userId: string, text: string, intent: Intent, minutes?
         ? "Lentil and chickpea bowl with brown rice, roasted vegetables and a tahini drizzle"
         : "Grilled chicken or fish, rice or potatoes, a big serving of vegetables and a little olive oil";
       const t = `A balanced plate: roughly half vegetables, a quarter protein, a quarter starchy carbs, plus some healthy fat. For example: ${meal}.${protein ? ` A daily protein target around ${protein.grams} g (≈${protein.perKg} g/kg) suits your goals.` : ""}${g.target ? ` Your estimated daily energy target is ~${g.target} kcal — an estimate, so adjust based on energy levels and trends.` : ""} ${g.note}${p.allergies.length ? `\n\nRemember to avoid: ${p.allergies.join(", ")}.` : ""}`;
-      return { text: t, actions: [{ type: "link", href: "/nutrition", label: "Log a meal" }], facts: t };
+      // The AI provider only gets weight-derived targets and allergies when the user shared nutrition with the coach.
+      const shared = `A balanced plate: roughly half vegetables, a quarter protein, a quarter starchy carbs, plus some healthy fat. For example: ${meal}. The user has not shared nutrition data (targets, allergies) with the coach; do not guess them — suggest the Nutrition section for personal targets.`;
+      return { text: t, actions: [{ type: "link", href: "/nutrition", label: "Log a meal" }], facts: p.nutritionInCoach ? t : shared };
     }
     default: {
       const t = `I can build today's workout, adapt it when you're tired or short on time, teach technique, analyse your last four weeks, plan your next block, or suggest balanced meals. Try one of the prompts below.`;

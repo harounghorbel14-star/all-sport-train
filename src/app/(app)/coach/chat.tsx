@@ -200,6 +200,18 @@ export function CoachChat({
           </div>
         }
       />
+      {ai.configured && (
+        <details className="rounded-xl border border-line bg-surface-2 p-3 text-xs text-muted">
+          <summary className="cursor-pointer font-medium text-fg">What is sent to the AI provider?</summary>
+          <p className="mt-2">
+            To write each answer, your message, the recent conversation and a short summary of your training data are sent to the AI provider (Anthropic): display name, age
+            range, experience, goals, schedule, equipment, any limitations you entered, your four-week training summary, today&apos;s check-in result, Academy skills and — when you
+            ask about a sport — your level, results and recent activities in it. Today&apos;s food log, diet preferences and allergies are sent only if you switched on nutrition
+            sharing in Settings. Your email, body weight, measurements and photos are not sent. Answers are training guidance, not medical advice; clear the conversation at any
+            time with the bin icon.
+          </p>
+        </details>
+      )}
       {!ai.configured && (
         <Notice tone="info" icon={<Info className="size-4 text-info" />}>
           No AI provider is configured, so the coach uses built-in rules and your real training data. Everything here still works — set <code className="rounded bg-surface-3 px-1">ANTHROPIC_API_KEY</code> on the server for conversational answers.

@@ -1,7 +1,7 @@
 import type { z } from "zod";
 import { db } from "../server/db";
-import { notFound } from "../server/errors";
-import { addDays, todayKey, weekStart } from "../domain/dates";
+import { badRequest, notFound } from "../server/errors";
+import { addDays, dateKey, todayKey, weekStart } from "../domain/dates";
 import type { measurementSchema } from "../validation";
 import { getProfile } from "./profile";
 
@@ -19,6 +19,31 @@ export async function addMeasurement(userId: string, input: z.infer<typeof measu
 
 export async function listMeasurements(userId: string) {
   return db.bodyMeasurement.findMany({ where: { userId }, orderBy: [{ dateKey: "desc" }, { createdAt: "desc" }], take: 200 });
+}
+
+/** Corrects a measurement; previous values are kept in the correction log, and profile weight/height follow the latest entry. */
+export async function correctMeasurement(userId: string, id: string, input: Partial<z.infer<typeof measurementSchema>> & { reason?: string }) {
+  const m = await db.bodyMeasurement.findFirst({ where: { id, userId } });
+  if (!m) throw notFound("Measurement not found");
+  const { reason, ...changes } = input;
+  const keys = Object.keys(changes) as (keyof typeof changes)[];
+  if (!keys.length) throw badRequest("Nothing to correct");
+  const before = Object.fromEntries(keys.map((k) => [k, m[k as keyof typeof m] ?? null]));
+  const updated = await db.$transaction(async (tx) => {
+    const u = await tx.bodyMeasurement.update({ where: { id: m.id }, data: changes });
+    await tx.recordCorrection.create({ data: { userId, recordType: "measurement", recordId: m.id, before: JSON.stringify(before), after: JSON.stringify(changes), reason: reason ?? null } });
+    return u;
+  });
+  const latest = await db.bodyMeasurement.findFirst({ where: { userId }, orderBy: [{ dateKey: "desc" }, { createdAt: "desc" }] });
+  if (latest?.id === m.id && (changes.weightKg !== undefined || changes.heightCm !== undefined)) {
+    await db.profile.update({ where: { userId }, data: { ...(changes.weightKg !== undefined ? { weightKg: changes.weightKg } : {}), ...(changes.heightCm !== undefined ? { heightCm: changes.heightCm } : {}) } });
+  }
+  return updated;
+}
+
+/** The correction history of one of the user's records (original values first). */
+export async function correctionHistory(userId: string, recordType: string, recordId: string) {
+  return db.recordCorrection.findMany({ where: { userId, recordType, recordId }, orderBy: { createdAt: "asc" } });
 }
 
 export async function deleteMeasurement(userId: string, id: string) {
@@ -108,5 +133,67 @@ export async function analytics(userId: string, range: RangeKey = "12w", exercis
     measurements,
     skills,
     hasAnyData: sessions.length + activities.length + food.length + measurements.length + mobility.length > 0,
+  };
+}
+
+// ── Monthly report ───────────────────────────────────────────────────────
+const monthOf = (key: string) => key.slice(0, 7);
+const prevMonth = (m: string) => {
+  const [y, mo] = m.split("-").map(Number);
+  return mo === 1 ? `${y - 1}-12` : `${y}-${String(mo - 1).padStart(2, "0")}`;
+};
+
+/**
+ * This month vs the previous one, from logged data only, in the user's time zone. Each sport is
+ * compared only with itself (minutes and sessions), never through a combined "fitness score".
+ * Missing data is reported as missing, not as zero improvement or decline.
+ */
+export async function monthlyReport(userId: string, month?: string) {
+  const p = await getProfile(userId);
+  const today = todayKey(p.timezone);
+  const m = month && /^\d{4}-(0[1-9]|1[0-2])$/.test(month) ? month : monthOf(today);
+  const prev = prevMonth(m);
+  const from = `${prev}-01`;
+  const to = `${m}-31`;
+  // Timestamped rows are fetched with a day of margin, then assigned to months in the user's time zone.
+  const [sessions, activities, prs, lessons, results] = await Promise.all([
+    db.workoutSession.findMany({ where: { userId, status: "completed", dateKey: { gte: from, lte: to } }, select: { dateKey: true, durationSeconds: true } }),
+    db.activityEntry.findMany({ where: { userId, dateKey: { gte: from, lte: to } }, select: { dateKey: true, sport: true, durationMin: true, source: true } }),
+    db.personalRecord.findMany({ where: { userId, achievedAt: { gte: new Date(Date.parse(`${from}T00:00:00Z`) - 86_400_000), lte: new Date(Date.parse(`${to}T23:59:59Z`) + 86_400_000) } }, include: { exercise: { select: { name: true } } } }),
+    db.lessonProgress.findMany({ where: { userId, status: "completed", completedAt: { gte: new Date(Date.parse(`${from}T00:00:00Z`) - 86_400_000) } }, include: { lesson: { select: { title: true, sport: { select: { name: true } } } } } }),
+    db.sportMetricEntry.findMany({ where: { userId, dateKey: { gte: from, lte: to } }, select: { dateKey: true } }),
+  ]);
+  const summarise = (mk: string) => {
+    const inMonth = (k: string | null) => !!k && monthOf(k) === mk;
+    const w = sessions.filter((s) => inMonth(s.dateKey));
+    const acts = activities.filter((a) => inMonth(a.dateKey) && a.source !== "workout");
+    const bySport = new Map<string, { sessions: number; minutes: number }>();
+    for (const a of acts) {
+      const cur = bySport.get(a.sport) ?? { sessions: 0, minutes: 0 };
+      bySport.set(a.sport, { sessions: cur.sessions + 1, minutes: cur.minutes + Math.round(a.durationMin) });
+    }
+    const activeDays = new Set([...w.map((s) => s.dateKey!), ...acts.map((a) => a.dateKey)]);
+    return {
+      month: mk,
+      workouts: w.length,
+      workoutMinutes: Math.round(w.reduce((t, s) => t + (s.durationSeconds ?? 0), 0) / 60),
+      activeDays: activeDays.size,
+      sports: [...bySport.entries()].map(([sport, v]) => ({ sport, ...v })).sort((a, b) => b.minutes - a.minutes),
+      personalRecords: prs.filter((r) => inMonth(dateKey(r.achievedAt, p.timezone))).map((r) => ({ exercise: r.exercise.name, metric: r.metric, value: r.value })),
+      lessonsCompleted: lessons.filter((l) => l.completedAt && inMonth(dateKey(l.completedAt, p.timezone))).map((l) => ({ title: l.lesson.title, sport: l.lesson.sport.name })),
+      sportResultsLogged: results.filter((r) => inMonth(r.dateKey)).length,
+    };
+  };
+  const current = summarise(m);
+  const previous = summarise(prev);
+  const partial = m === monthOf(today);
+  return {
+    current,
+    previous,
+    partial,
+    notes: [
+      ...(partial ? [`${m} isn't over yet — comparisons are with a full previous month.`] : []),
+      ...(previous.workouts + previous.sports.length === 0 ? ["Nothing was logged the month before, so there's no comparison yet."] : []),
+    ],
   };
 }

@@ -6,7 +6,7 @@ import { call, newUser } from "./helpers";
 import * as rec from "@/app/api/recommendation/route";
 import * as today from "@/app/api/workouts/today/route";
 import * as checkin from "@/app/api/recovery/checkin/route";
-import { todayKey } from "@/lib/domain/dates";
+import { addDays, todayKey } from "@/lib/domain/dates";
 
 const base: RecommendationInput = { today: "2026-10-14", isTrainingDay: true, doneToday: false, checkIn: null, recent: [], lastActiveDate: null, plannedMinutes: 40, series: [], missingPrerequisites: [] };
 const session = (dateKey: string, rpe: number | null, done = 10, skipped = 0) => ({ dateKey, rpe, setsDone: done, setsSkipped: skipped });
@@ -41,6 +41,23 @@ describe("recommendation rules", () => {
     const unrated = recommend({ ...base, recent: [session("2026-10-12", null), session("2026-10-10", 9)], lastActiveDate: "2026-10-12" });
     expect(unrated.difficulty).toBe("as_planned");
     expect(unrated.dataGaps.join(" ")).toMatch(/RPE\) wasn't recorded for 1/);
+  });
+
+  it("learns from feedback without ever overriding safety rules", () => {
+    const hard = { ...base, checkIn: { band: "normal" as const, readiness: 70, pain: false }, recent: [session("2026-10-12", 9), session("2026-10-10", 10)], lastActiveDate: "2026-10-12" };
+    expect(recommend(hard).difficulty).toBe("easier");
+    // Declined lighter sessions twice: an effort-only adjustment isn't pushed again, and the reason says why.
+    const respected = recommend({ ...hard, feedback: { declinedLighter: 2, modifiedMinutes: [] } });
+    expect(respected.difficulty).toBe("as_planned");
+    expect(respected.reasons.join(" ")).toMatch(/chosen your planned difficulty the last 2 times/);
+    // …but pain still means recovery, and a long break still eases back in.
+    expect(recommend({ ...hard, checkIn: { band: "rest", readiness: 70, pain: true }, feedback: { declinedLighter: 5, modifiedMinutes: [] } }).kind).toBe("recover");
+    expect(recommend({ ...base, recent: [session("2026-09-30", 6)], lastActiveDate: "2026-09-30", feedback: { declinedLighter: 5, modifiedMinutes: [] } }).volumeScale).toBe(0.75);
+    // Repeatedly shortened sessions → suggested length follows, with the reason.
+    const shorter = recommend({ ...base, feedback: { declinedLighter: 0, modifiedMinutes: [20, 25, 20] } });
+    expect(shorter.minutes).toBe(20);
+    expect(shorter.reasons.join(" ")).toMatch(/shortened 3 recent sessions/);
+    expect(recommend({ ...base, feedback: { declinedLighter: 0, modifiedMinutes: [20] } }).minutes).toBe(40); // once isn't a pattern
   });
 
   it("respects planned rest days and finished workouts", () => {
@@ -83,6 +100,14 @@ describe("accept / modify / reject", () => {
     expect(mod.status).toBe(200);
     expect(mod.json.workout.estimatedMinutes).toBeLessThanOrEqual(30);
     expect(await db.recommendationFeedback.count({ where: { userId } })).toBe(2);
+
+    // Past modifications (earlier days) shape the next suggestion's length.
+    await db.profile.update({ where: { userId }, data: { trainingDays: JSON.stringify([0, 1, 2, 3, 4, 5, 6]), sessionMinutes: 45 } });
+    await db.workoutSession.deleteMany({ where: { userId } }); // so today isn't "done"
+    await db.recommendationFeedback.createMany({ data: [3, 5].map((d) => ({ userId, dateKey: addDays(todayKey("UTC"), -d), action: "modified", detail: JSON.stringify({ suggestion: { kind: "train", difficulty: "as_planned" }, applied: { minutes: 20 } }) })) });
+    const next = await call(rec.GET, { cookie });
+    expect(next.json.recommendation.kind).toBe("train");
+    expect(next.json.recommendation.minutes).toBe(20);
   });
 
   it("a painful check-in leads to a recovery suggestion that accept turns into a recovery session", async () => {

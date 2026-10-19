@@ -38,6 +38,8 @@ export interface RecommendationInput {
   plannedMinutes: number;
   series: ExerciseSeries[];
   missingPrerequisites: MissingPrerequisite[];
+  /** What the user did with recent suggestions (last 3 weeks). Never overrides pain, recovery or re-entry rules. */
+  feedback?: { declinedLighter: number; modifiedMinutes: number[] };
 }
 
 export interface Plateau {
@@ -130,7 +132,12 @@ export function recommend(input: RecommendationInput): Recommendation {
   };
   if (input.checkIn?.band === "easy") reasons.push(`Your readiness today is ${input.checkIn.readiness}/100, so the plan already lowers volume.`);
   const rated = input.recent.slice(0, 2).filter((r) => r.rpe != null);
-  if (rated.length === 2 && rated.every((r) => (r.rpe ?? 0) >= 9)) easier(0.8, `Your last two workouts were rated very hard (RPE ${rated.map((r) => r.rpe).join(" and ")}), so today is a little lighter.`);
+  const declined = input.feedback?.declinedLighter ?? 0;
+  if (rated.length === 2 && rated.every((r) => (r.rpe ?? 0) >= 9)) {
+    // An effort-only adjustment is a comfort call; after two declines we respect the user's choice and say so.
+    if (declined >= 2) reasons.push(`Your last two workouts were rated very hard (RPE ${rated.map((r) => r.rpe).join(" and ")}). You've chosen your planned difficulty the last ${declined} times, so it stays as planned — lighten it any time if you feel run down.`);
+    else easier(0.8, `Your last two workouts were rated very hard (RPE ${rated.map((r) => r.rpe).join(" and ")}), so today is a little lighter.`);
+  }
   const last2 = input.recent.slice(0, 2);
   const done = last2.reduce((s, r) => s + r.setsDone, 0);
   const skipped = last2.reduce((s, r) => s + r.setsSkipped, 0);
@@ -142,10 +149,18 @@ export function recommend(input: RecommendationInput): Recommendation {
     // already noted in dataGaps
   }
   if (!reasons.length) reasons.push(input.checkIn ? `Readiness ${input.checkIn.readiness}/100 and your recent workouts don't call for changes.` : "Nothing in your logged data calls for a change, so this is your planned session.");
+  // Session length: when the user has repeatedly shortened sessions to about the same length, start from it.
+  let minutes = input.plannedMinutes;
+  const mm = (input.feedback?.modifiedMinutes ?? []).filter((m) => m < input.plannedMinutes);
+  if (mm.length >= 2) {
+    const sorted = [...mm].sort((a, b) => a - b);
+    minutes = sorted[Math.floor(sorted.length / 2)];
+    reasons.push(`You've shortened ${mm.length} recent sessions, so this suggests about ${minutes} minutes instead of ${input.plannedMinutes}. Change your usual length in Settings if that's your new normal.`);
+  }
   const alternatives: Recommendation["alternatives"] = [
     { label: "Shorter session (20 min)", minutes: 20 },
     { label: "Mobility routine instead", href: "/recovery" },
   ];
   if (scale < 1) alternatives.unshift({ label: "Keep my planned difficulty", volumeScale: 1 });
-  return { ...base, kind: "train", title: scale < 1 ? "Train — a bit lighter today" : "Train as planned", difficulty: scale < 1 ? "easier" : "as_planned", volumeScale: scale, alternatives };
+  return { ...base, minutes, kind: "train", title: scale < 1 ? "Train — a bit lighter today" : "Train as planned", difficulty: scale < 1 ? "easier" : "as_planned", volumeScale: scale, alternatives };
 }

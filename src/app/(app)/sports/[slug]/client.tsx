@@ -7,6 +7,7 @@ import { api } from "@/lib/client/api";
 import { DIRECTION_HINT, formatMetricValue, parseTime } from "@/lib/sport-format";
 import { Badge, Button, Card, CardTitle, Field, Input, Notice, Segmented, Select, Toggle } from "@/components/ui/primitives";
 import { LineChart } from "@/components/ui/charts";
+import { CorrectRecord } from "@/components/records/correct-record";
 import { useToast } from "@/components/ui/overlay";
 
 const LEVEL_OPTIONS = [
@@ -366,6 +367,22 @@ export function MetricPanel({ slug, today, metrics, entries, personalBests }: { 
                     </span>
                     <span className="flex items-center gap-2 text-xs text-muted">
                       {e.dateKey} · {e.context}
+                      {x.kind !== "select" && (
+                        <CorrectRecord
+                          endpoint={`/api/sport-metrics/${e.id}`}
+                          title={`Correct ${x.label}`}
+                          label={`Correct ${x.label} entry from ${e.dateKey}`}
+                          fields={[
+                            ...(x.kind === "ratio"
+                              ? [
+                                  { key: "made", label: "Made", value: e.made, integer: true, step: "1" },
+                                  { key: "attempts", label: "Attempts", value: e.attempts, integer: true, step: "1" },
+                                ]
+                              : [{ key: "value", label: `${x.label}${x.kind === "time" ? " (seconds)" : x.unit ? ` (${x.unit})` : ""}`, value: e.value }]),
+                            { key: "dateKey", label: "Date", value: e.dateKey, type: "date" as const },
+                          ]}
+                        />
+                      )}
                       <button onClick={() => remove(e.id)} aria-label={`Delete ${x.label} entry from ${e.dateKey}`} className="text-subtle hover:text-danger">
                         <Trash2 className="size-3.5" />
                       </button>

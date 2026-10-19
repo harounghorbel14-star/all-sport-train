@@ -28,6 +28,7 @@ export async function nextRecommendation(userId: string): Promise<Recommendation
     exerciseMap(),
     db.recommendationFeedback.findFirst({ where: { userId, dateKey: today }, orderBy: { createdAt: "desc" } }),
   ]);
+  const history = await db.recommendationFeedback.findMany({ where: { userId, dateKey: { gte: addDays(today, -21), lt: today } }, orderBy: { createdAt: "desc" }, take: 30 });
   const recent = sessions.map((s) => ({ dateKey: s.dateKey!, rpe: s.rpe, setsDone: s.sets.filter((x) => !x.skipped).length, setsSkipped: s.sets.filter((x) => x.skipped).length }));
   const lastWorkout = recent[0]?.dateKey ?? null;
   const lastActiveDate = [lastWorkout, lastActivity?.dateKey ?? null].filter(Boolean).sort().at(-1) ?? null;
@@ -74,9 +75,29 @@ export async function nextRecommendation(userId: string): Promise<Recommendation
     plannedMinutes: p.sessionMinutes,
     series: [...series.values()],
     missingPrerequisites,
+    feedback: summariseFeedback(history),
   });
   return { ...rec, dateKey: today, feedback: feedback ? { action: feedback.action, at: feedback.createdAt } : null };
 }
+
+/** Reads past responses: declined lighter suggestions, and session lengths the user chose. */
+function summariseFeedback(rows: { action: string; detail: string | null }[]) {
+  let declinedLighter = 0;
+  const modifiedMinutes: number[] = [];
+  for (const r of rows) {
+    const d = parseJson(r.detail ?? "{}", detailSchema, {});
+    const wasLighter = d.suggestion?.difficulty === "easier" && d.suggestion?.kind === "train";
+    if (wasLighter && (r.action === "rejected" || (r.action === "modified" && (d.applied?.volumeScale ?? 1) >= 1))) declinedLighter++;
+    if (r.action === "modified" && typeof d.applied?.minutes === "number") modifiedMinutes.push(d.applied.minutes);
+  }
+  return { declinedLighter, modifiedMinutes };
+}
+const detailSchema = z
+  .object({
+    suggestion: z.object({ kind: z.string().optional(), difficulty: z.string().optional() }).passthrough().optional(),
+    applied: z.object({ minutes: z.number().optional(), volumeScale: z.number().optional() }).passthrough().optional(),
+  })
+  .passthrough();
 
 export const respondSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("accept") }),
@@ -98,7 +119,7 @@ export async function respondToRecommendation(userId: string, input: z.infer<typ
   if (input.action === "accept" && rec.kind !== "train" && rec.kind !== "recover") throw badRequest("There's no workout change to apply today.");
   const overrides =
     input.action === "accept"
-      ? { volumeScale: rec.volumeScale }
+      ? { volumeScale: rec.volumeScale, minutes: rec.minutes }
       : { minutes: input.minutes, focus: input.focus, volumeScale: input.volumeScale };
   const result = await regenerateToday(userId, overrides);
   await db.recommendationFeedback.create({ data: { userId, dateKey: rec.dateKey, action: input.action === "accept" ? "accepted" : "modified", detail: detail({ applied: overrides, planId: result.plan.id }) } });

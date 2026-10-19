@@ -246,6 +246,21 @@ describe("community & privacy", () => {
   });
 });
 
+describe("AI data minimisation", () => {
+  it("sends nothing about food to the AI unless nutrition sharing is on", async () => {
+    const { buildCoachContext } = await import("@/lib/ai/context");
+    const { userId } = await newUser();
+    await db.profile.update({ where: { userId }, data: { allergies: JSON.stringify(["peanuts"]), dietPrefs: JSON.stringify(["vegan"]), weightKg: 81.5 } });
+    const off = (await buildCoachContext(userId)).text;
+    expect(off).not.toMatch(/peanuts|vegan|81\.5/);
+    expect(off).toMatch(/not shared by the user/);
+    await db.profile.update({ where: { userId }, data: { nutritionInCoach: true } });
+    const on = (await buildCoachContext(userId)).text;
+    expect(on).toMatch(/peanuts/);
+    expect(on).not.toMatch(/81\.5/); // body weight is never part of the coach context
+  });
+});
+
 describe("community robustness", () => {
   it("survives a double-tapped reaction", async () => {
     const a = await newUser();

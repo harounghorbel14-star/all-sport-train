@@ -5,6 +5,7 @@
  * Exits non-zero with a list of problems.
  */
 import { EXERCISE_BY_SLUG } from "../src/lib/content/exercises";
+import { findPrerequisiteCycle } from "../src/lib/engine/prerequisites";
 import { CATALOG } from "../src/lib/content/sports/catalog";
 import { ENRICHMENT_GROUPS, GROUPS_BY_FILE } from "../src/lib/content/sports/extended";
 import { SOURCES, SPORT_SEEDS, drillContentSchema, lessonContentSchema, levelRank, metricSeedSchema, rulePointSchema, sportProfileSchema } from "../src/lib/content/sports";
@@ -95,6 +96,9 @@ for (const g of groups) {
       for (const s of l.sources ?? []) if (!sourceSlugs.has(s)) err(lw, `unknown source ${s}`);
       if (l.content.progressTest?.metricKey && !keys.includes(l.content.progressTest.metricKey)) err(lw, `unknown test metric ${l.content.progressTest.metricKey}`);
     }
+    // Prerequisite cycles would make lessons unreachable.
+    const cycle = findPrerequisiteCycle(L.map((l) => ({ slug: l.slug, prerequisites: l.prerequisites ?? [] })));
+    if (cycle) err(w, `circular lesson prerequisites: ${cycle.join(" → ")}`);
     // Drills
     const D = e.drills;
     if (D.length < 10) err(w, `needs ≥10 drills (has ${D.length})`);

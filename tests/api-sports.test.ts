@@ -222,6 +222,13 @@ describe("admin content workflow", () => {
     expect(noSource.status).toBe(400);
 
     const l = await call(adminContent.POST, { cookie: a.cookie, params: { slug: "test-ball" }, body: { type: "lesson", data: { slug: "basics", title: "Basics", level: "beginner", summary: "The basics.", content: { objectives: ["Learn"], keyPoints: ["Point"] } } } });
+    // Lesson prerequisites must exist and can't form a cycle.
+    const lesson = (slug: string, prerequisites: string[]) => call(adminContent.POST, { cookie: a.cookie, params: { slug: "test-ball" }, body: { type: "lesson", data: { slug, title: slug, level: "beginner", summary: "A lesson.", prerequisites, content: { objectives: ["Learn"], keyPoints: ["Point"] } } } });
+    expect((await lesson("ghost-prereq", ["does-not-exist"])).status).toBe(400);
+    expect((await lesson("step-two", ["basics"])).status).toBe(200);
+    const loop = await lesson("basics", ["step-two"]); // basics → step-two → basics
+    expect(loop.status).toBe(400);
+    expect(loop.json.error.message).toMatch(/Circular prerequisites/);
     expect(l.status).toBe(200);
 
     await call(adminStatus.POST, { cookie: a.cookie, body: { type: "sport", id: created.json.sport.id, status: "published" } });

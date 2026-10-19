@@ -46,14 +46,14 @@ export function BarChart({ data, height = 140, unit = "", format = (v: number) =
   const [hover, setHover] = useState<number | null>(null);
   const reduced = useReducedMotion();
   return (
-    <div>
+    <div className="min-w-0">
       <div className="flex items-end gap-1.5" style={{ height }} role="list" aria-label="Bar chart">
         {data.map((d, i) => (
           <div
             key={`${d.label}-${i}`}
             role="listitem"
             aria-label={`${d.label}: ${format(d.value)}${unit}`}
-            className="group relative flex h-full flex-1 flex-col justify-end"
+            className="group relative flex h-full min-w-0 flex-1 flex-col justify-end"
             onMouseEnter={() => setHover(i)}
             onMouseLeave={() => setHover(null)}
           >
@@ -75,7 +75,7 @@ export function BarChart({ data, height = 140, unit = "", format = (v: number) =
       </div>
       <div className="mt-1.5 flex gap-1.5">
         {data.map((d, i) => (
-          <span key={i} className="flex-1 truncate text-center text-[10px] text-subtle">
+          <span key={i} className="min-w-0 flex-1 truncate text-center text-[10px] text-subtle">
             {d.label}
           </span>
         ))}

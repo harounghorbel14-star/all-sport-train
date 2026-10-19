@@ -213,3 +213,17 @@ describe("every full sport", () => {
     }
   });
 });
+
+describe("prerequisite graph", () => {
+  it("finds circular prerequisites and accepts valid chains", async () => {
+    const { findPrerequisiteCycle } = await import("@/lib/engine/prerequisites");
+    expect(findPrerequisiteCycle([{ slug: "a", prerequisites: [] }, { slug: "b", prerequisites: ["a"] }, { slug: "c", prerequisites: ["a", "b"] }])).toBeNull();
+    expect(findPrerequisiteCycle([{ slug: "a", prerequisites: ["c"] }, { slug: "b", prerequisites: ["a"] }, { slug: "c", prerequisites: ["b"] }])).toEqual(["a", "c", "b", "a"]);
+    expect(findPrerequisiteCycle([{ slug: "a", prerequisites: ["a"] }])).toEqual(["a", "a"]);
+  });
+
+  it("no catalog sport has circular lesson prerequisites", async () => {
+    const { findPrerequisiteCycle } = await import("@/lib/engine/prerequisites");
+    for (const s of SPORT_SEEDS) expect(findPrerequisiteCycle((s.lessons ?? []).map((l) => ({ slug: l.slug, prerequisites: l.prerequisites ?? [] }))), s.slug).toBeNull();
+  });
+});

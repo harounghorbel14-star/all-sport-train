@@ -110,3 +110,43 @@ test("today shows a coach suggestion with its reasons, and 'Not today' leaves th
   await page.getByRole("button", { name: "Not today" }).click();
   await expect(page.getByText(/You dismissed today's coach suggestion/)).toBeVisible();
 });
+
+test("schedule a workout on the calendar, then reschedule it", async ({ page }) => {
+  await registerAndOnboard(page);
+  await page.goto("/plans#calendar");
+  const schedule = page.getByRole("button", { name: /^Schedule a workout on / }).first();
+  const label = (await schedule.getAttribute("aria-label"))!;
+  const dateKey = label.replace("Schedule a workout on ", "");
+  await schedule.click();
+  const reschedule = page.getByRole("button", { name: new RegExp(`^Reschedule .* on ${dateKey}$`) });
+  await expect(reschedule).toBeVisible();
+  await reschedule.click();
+  const [y, m, d] = dateKey.split("-").map(Number);
+  const later = new Date(Date.UTC(y, m - 1, d + 2)).toISOString().slice(0, 10);
+  await page.getByLabel("New date").fill(later);
+  await page.getByRole("button", { name: "Move workout" }).click();
+  await expect(page.getByText("Workout moved")).toBeVisible();
+  // After a reload the move persisted: the original day offers "Schedule" again.
+  await page.reload();
+  await expect(page.getByRole("button", { name: `Schedule a workout on ${dateKey}` })).toBeVisible();
+});
+
+test("switch language to French and Arabic (right-to-left) from Settings", async ({ page }) => {
+  await registerAndOnboard(page);
+  const switchTo = async (value: string) => {
+    await page.goto("/profile");
+    await page.getByLabel("Language").selectOption(value);
+    await page.locator("#prefs").getByRole("button", { name: "Save" }).click();
+    await expect(page.getByText("Saved").first()).toBeVisible();
+    await page.goto("/today");
+  };
+  await switchTo("fr");
+  await expect(page.locator("html")).toHaveAttribute("lang", "fr");
+  await expect(page.getByRole("link", { name: "Aujourd'hui" }).first()).toBeVisible();
+  await switchTo("ar");
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  await expect(page.getByRole("link", { name: "اليوم" }).first()).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+  await switchTo("en");
+  await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
+});

@@ -182,14 +182,17 @@ describe("live workout mode", () => {
 
   it("never creates two plans for today or two live sessions when requests race", async () => {
     const { cookie, userId } = await newUser();
-    const plans = await Promise.all([1, 2, 3].map(() => call(today.GET, { cookie })));
+    const plans = await Promise.all([1, 2, 3, 4, 5, 6].map(() => call(today.GET, { cookie })));
     expect(new Set(plans.map((p) => p.json.plan.id)).size).toBe(1);
     expect(await db.workoutPlan.count({ where: { userId, status: { not: "archived" } } })).toBe(1);
     const planId = plans[0].json.plan.id;
-    const starts = await Promise.all([1, 2, 3].map(() => call(sessions.POST, { cookie, body: { planId } })));
+    const starts = await Promise.all([1, 2, 3, 4, 5, 6].map(() => call(sessions.POST, { cookie, body: { planId } })));
     expect(starts.every((r) => r.status === 200)).toBe(true);
     expect(new Set(starts.map((r) => r.json.session.id)).size).toBe(1);
     expect(await db.workoutSession.count({ where: { userId, status: { in: ["active", "paused"] } } })).toBe(1);
+    // Guaranteed by the database, not by timing: a second live session or daily plan is rejected outright.
+    await expect(db.workoutSession.create({ data: { userId, title: "dup", content: "{}", activeKey: userId } })).rejects.toThrow(/Unique constraint/);
+    await expect(db.workoutPlan.create({ data: { userId, title: "dup", focus: "x", content: "{}", dailyKey: plans[0].json.plan.dailyKey } })).rejects.toThrow(/Unique constraint/);
   });
 
   it("keeps personal records consistent with corrected and discarded sets", async () => {

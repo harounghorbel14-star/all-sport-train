@@ -79,6 +79,39 @@ export async function logActivity(userId: string, input: ActivityInput) {
   }
 }
 
+/**
+ * Corrects a logged activity (duration, intensity, distance, date, effort, notes). Energy is re-estimated
+ * from the corrected values; the previous values are kept in the correction log. Workout entries are
+ * corrected from the workout itself, not here.
+ */
+export async function correctActivity(
+  userId: string,
+  id: string,
+  input: { dateKey?: string; durationMin?: number; intensity?: "light" | "moderate" | "vigorous"; distanceKm?: number | null; rpe?: number | null; notes?: string | null; reason?: string },
+) {
+  const entry = await db.activityEntry.findFirst({ where: { id, userId } });
+  if (!entry) throw notFound("Activity not found");
+  if (entry.source === "workout") throw conflict("Workout activities are managed from the workout history");
+  const p = await getProfile(userId);
+  const next = {
+    dateKey: input.dateKey ?? entry.dateKey,
+    durationMin: input.durationMin ?? entry.durationMin,
+    intensity: (input.intensity ?? entry.intensity) as "light" | "moderate" | "vigorous",
+    distanceKm: input.distanceKm === undefined ? entry.distanceKm : input.distanceKm,
+    rpe: input.rpe === undefined ? entry.rpe : input.rpe,
+    notes: input.notes === undefined ? entry.notes : input.notes,
+  };
+  const { met } = await activityMet(entry.sport, next.intensity, next.distanceKm ?? undefined, next.durationMin);
+  const kcal = exerciseKcal(met, next.durationMin, p.weightKg);
+  const before = { dateKey: entry.dateKey, durationMin: entry.durationMin, intensity: entry.intensity, distanceKm: entry.distanceKm, rpe: entry.rpe, notes: entry.notes, kcalLow: entry.kcalLow, kcalHigh: entry.kcalHigh };
+  const after = { ...next, kcalLow: kcal.low, kcalHigh: kcal.high };
+  return db.$transaction(async (tx) => {
+    const u = await tx.activityEntry.update({ where: { id: entry.id }, data: after });
+    await tx.recordCorrection.create({ data: { userId, recordType: "activity", recordId: entry.id, before: JSON.stringify(before), after: JSON.stringify(after), reason: input.reason ?? null } });
+    return u;
+  });
+}
+
 export async function deleteActivity(userId: string, id: string) {
   const entry = await db.activityEntry.findFirst({ where: { id, userId } });
   if (!entry) throw notFound("Activity not found");

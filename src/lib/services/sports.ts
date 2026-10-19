@@ -3,7 +3,7 @@ import { z } from "zod";
 import { db } from "../server/db";
 import { badRequest, conflict, notFound } from "../server/errors";
 import { parseJson } from "../server/json";
-import { addDays, todayKey } from "../domain/dates";
+import { addDays, isDateKey, todayKey } from "../domain/dates";
 import { exerciseKcal } from "../domain/energy";
 import { XP } from "../domain/levels";
 import {
@@ -28,8 +28,9 @@ import {
   type PracticeSetting,
 } from "../engine/practice";
 import { getProfile } from "./profile";
-import { awardXp, evaluateAchievements } from "./gamification";
+import { awardXp, evaluateAchievements, revokeXp } from "./gamification";
 import { invalidateKnowledgeIndex } from "./research";
+import { findPrerequisiteCycle } from "../engine/prerequisites";
 
 const strArr = z.array(z.string());
 
@@ -422,6 +423,56 @@ export async function logMetric(userId: string, slug: string, input: MetricEntry
   return { entry, lessonsPassed, personalBest: eligible && isImprovement(metric.direction, prevBest, resolved.value), previousBest: prevBest ?? null, needsMoreAttempts: !eligible ? metric.minAttempts : null };
 }
 
+export const correctMetricSchema = z.object({
+  value: z.number().optional(),
+  made: z.number().int().min(0).max(10000).optional(),
+  attempts: z.number().int().min(1).max(10000).optional(),
+  dateKey: z.string().optional(),
+  notes: z.string().max(300).nullable().optional(),
+  reason: z.string().max(300).optional(),
+});
+
+/**
+ * Corrects a logged result with the same validation as logging it. The previous values are kept in
+ * the correction log; lessons assessed with this result are re-checked against the corrected value.
+ */
+export async function correctMetricEntry(userId: string, id: string, input: z.infer<typeof correctMetricSchema>) {
+  const entry = await db.sportMetricEntry.findFirst({ where: { id, userId }, include: { sport: { select: { slug: true } } } });
+  if (!entry) throw notFound("Entry not found");
+  const sport = await loadSport(entry.sport.slug);
+  const metric = sport.metrics.map(metricView).find((m) => m.key === entry.metricKey);
+  if (!metric) throw badRequest("This metric no longer exists");
+  const resolved = resolveMetricValue(metric, {
+    metricKey: entry.metricKey,
+    context: entry.context as MetricEntryInput["context"],
+    value: input.value ?? entry.value,
+    made: input.made ?? entry.made ?? undefined,
+    attempts: input.attempts ?? entry.attempts ?? undefined,
+  });
+  if (input.dateKey && !isDateKey(input.dateKey)) throw badRequest("Invalid date");
+  const before = { value: entry.value, made: entry.made, attempts: entry.attempts, dateKey: entry.dateKey, notes: entry.notes };
+  const after = { ...resolved, dateKey: input.dateKey ?? entry.dateKey, notes: input.notes === undefined ? entry.notes : input.notes };
+  const updated = await db.$transaction(async (tx) => {
+    const u = await tx.sportMetricEntry.update({ where: { id: entry.id }, data: after });
+    await tx.recordCorrection.create({ data: { userId, recordType: "sport_metric", recordId: entry.id, before: JSON.stringify(before), after: JSON.stringify(after), reason: input.reason ?? null } });
+    return u;
+  });
+  // A lesson passed with this result is re-checked; it goes back to awaiting assessment if nothing else passes it.
+  const metrics = sport.metrics.map(metricView);
+  for (const row of await db.lessonProgress.findMany({ where: { userId, assessmentEntryId: entry.id } })) {
+    const lesson = sport.lessons.map(lessonView).find((l) => l.id === row.lessonId);
+    if (!lesson) continue;
+    const still = await qualifyingEntry(userId, sport.id, lesson, metrics);
+    await db.lessonProgress.update({
+      where: { userId_lessonId: { userId, lessonId: lesson.id } },
+      data: still ? { assessmentEntryId: still.id } : { status: "awaiting_assessment", evidence: null, assessmentEntryId: null, completedAt: null },
+    });
+    if (!still) await revokeXp(userId, "lesson", lesson.id);
+  }
+  await settleAwaitingLessons(userId, sport, entry.metricKey);
+  return updated;
+}
+
 export async function deleteMetricEntry(userId: string, id: string) {
   const { count } = await db.sportMetricEntry.deleteMany({ where: { id, userId } });
   if (!count) throw notFound("Entry not found");
@@ -615,6 +666,12 @@ export async function adminUpsertContent(sportSlug: string, type: "lesson" | "dr
   if (!sport) throw notFound("Sport not found");
   if (type === "lesson") {
     const v = adminLessonSchema.parse(raw);
+    // Prerequisites must exist in this sport and must not form a cycle (that would lock lessons forever).
+    const others = await db.lesson.findMany({ where: { sportId: sport.id, slug: { not: v.slug } }, select: { slug: true, prerequisites: true } });
+    const unknown = v.prerequisites.filter((p) => !others.some((o) => o.slug === p));
+    if (unknown.length) throw badRequest(`Unknown prerequisite lesson(s): ${unknown.join(", ")}`);
+    const cycle = findPrerequisiteCycle([...others.map((o) => ({ slug: o.slug, prerequisites: parseJson(o.prerequisites, strArr, []) })), { slug: v.slug, prerequisites: v.prerequisites }]);
+    if (cycle) throw badRequest(`Circular prerequisites: ${cycle.join(" → ")}`);
     const data = { title: v.title, level: v.level, order: v.order, summary: v.summary, content: JSON.stringify(v.content), prerequisites: JSON.stringify(v.prerequisites), drillSlugs: JSON.stringify(v.drillSlugs), requiresSupervision: v.requiresSupervision, sources: JSON.stringify(v.sources), contentStatus: "draft" };
     return db.lesson.upsert({ where: { sportId_slug: { sportId: sport.id, slug: v.slug } }, create: { sportId: sport.id, slug: v.slug, ...data }, update: data });
   }
