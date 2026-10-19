@@ -34,7 +34,7 @@ Status: COMPLETE (verified end to end) · PARTIAL · MISSING · BROKEN · BLOCKE
 | Correcting recorded results (sport metrics, measurements, activities) | COMPLETE (2026-10-19) | PATCH endpoints with creation-time validation, owner-only; originals kept in `RecordCorrection`; bests, calories, profile weight and lesson assessments re-evaluated (lesson XP returned if no longer passed) — tests: corrections.test.ts, e2e "record a result, then correct a typo" |
 | Sport lessons, prerequisites, lesson states, progress tests | COMPLETE | api-sports "lesson states" |
 | Quizzes / coach verification of results | MISSING | no coach role; results are self-reported → P2 |
-| Prerequisite cycle detection in content | PARTIAL | validator checks level order, not cycles → P2 |
+| Prerequisite cycle detection in content | COMPLETE (2026-10-19) | `findPrerequisiteCycle` in the content validator and in admin lesson saves (unknown prerequisites rejected too) — tests: sports.test "prerequisite graph", api-sports admin workflow |
 | Adaptive coach suggestion (reasons, gaps, plateaus, accept/modify/reject) | COMPLETE | recommendation.test.ts, e2e |
 | Recommendation feedback used for future suggestions | PARTIAL | recorded, not yet used → P2 |
 | Research queue, claims, review, ruleset versions, coverage | COMPLETE | research.test.ts |

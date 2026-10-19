@@ -30,6 +30,7 @@ import {
 import { getProfile } from "./profile";
 import { awardXp, evaluateAchievements, revokeXp } from "./gamification";
 import { invalidateKnowledgeIndex } from "./research";
+import { findPrerequisiteCycle } from "../engine/prerequisites";
 
 const strArr = z.array(z.string());
 
@@ -665,6 +666,12 @@ export async function adminUpsertContent(sportSlug: string, type: "lesson" | "dr
   if (!sport) throw notFound("Sport not found");
   if (type === "lesson") {
     const v = adminLessonSchema.parse(raw);
+    // Prerequisites must exist in this sport and must not form a cycle (that would lock lessons forever).
+    const others = await db.lesson.findMany({ where: { sportId: sport.id, slug: { not: v.slug } }, select: { slug: true, prerequisites: true } });
+    const unknown = v.prerequisites.filter((p) => !others.some((o) => o.slug === p));
+    if (unknown.length) throw badRequest(`Unknown prerequisite lesson(s): ${unknown.join(", ")}`);
+    const cycle = findPrerequisiteCycle([...others.map((o) => ({ slug: o.slug, prerequisites: parseJson(o.prerequisites, strArr, []) })), { slug: v.slug, prerequisites: v.prerequisites }]);
+    if (cycle) throw badRequest(`Circular prerequisites: ${cycle.join(" → ")}`);
     const data = { title: v.title, level: v.level, order: v.order, summary: v.summary, content: JSON.stringify(v.content), prerequisites: JSON.stringify(v.prerequisites), drillSlugs: JSON.stringify(v.drillSlugs), requiresSupervision: v.requiresSupervision, sources: JSON.stringify(v.sources), contentStatus: "draft" };
     return db.lesson.upsert({ where: { sportId_slug: { sportId: sport.id, slug: v.slug } }, create: { sportId: sport.id, slug: v.slug, ...data }, update: data });
   }
