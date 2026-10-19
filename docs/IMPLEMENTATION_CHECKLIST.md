@@ -46,8 +46,8 @@ Status: COMPLETE (verified end to end) · PARTIAL · MISSING · BROKEN · BLOCKE
 | Arabic RTL, shared dictionary FR/AR | COMPLETE | i18n.test, screenshot |
 | Full page-body localisation | PARTIAL | dictionary only |
 | Data export, account deletion | COMPLETE | api-other export/deletion tests |
-| AI data disclosure in coach chat | MISSING | form check/photos disclose; coach doesn't → P2 |
-| Security headers | PARTIAL | no HSTS → P2 |
+| AI data disclosure in coach chat | COMPLETE (2026-10-19) | "What is sent to the AI provider?" panel lists exactly what the context builder sends; food data (incl. allergies/diet prefs and weight-derived targets) sent only with nutrition sharing on — test: api-other "AI data minimisation" |
+| Security headers | COMPLETE (2026-10-19) | HSTS added in production (verified with `curl -I` on a production build) alongside nosniff, frame DENY, referrer and permissions policies; no CSP yet (Next inline scripts would need nonces) → KNOWN_LIMITATIONS |
 | Community, challenges | COMPLETE | api-other community tests |
 | Health-service integrations | MISSING (P3) | not planned |
 

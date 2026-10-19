@@ -26,6 +26,9 @@ Honest list of what APEX FIT does **not** do (yet). Updated with each work sessi
 - SQLite on a Railway volume: a single instance only; back up the volume.
 - No integrations with health services (Apple Health, Google Fit, Strava).
 
+## Security
+- No Content-Security-Policy header yet: Next.js inline scripts would need per-request nonces. Other headers (HSTS, nosniff, frame DENY, referrer and permissions policies) are set.
+
 ## Known issues
 - Query-string tabs (sport hubs, Progress) occasionally don't commit a client-side navigation (Next.js; root cause unknown). A fallback reloads the page after 1.5 s.
 - Registration reveals whether an email is already registered (accepted trade-off for clear UX; password reset does not).

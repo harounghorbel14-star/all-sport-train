@@ -93,7 +93,8 @@ export async function buildCoachContext(userId: string) {
   if (nutrition) {
     lines.push(`Nutrition today (user enabled sharing): ${nutrition.summary.total.kcal} kcal logged, ${nutrition.summary.total.proteinG} g protein; goal ${nutrition.goals.kcal ?? "not set"} kcal. Diet prefs: ${p.dietPrefs.join(", ") || "none"}; allergies: ${p.allergies.join(", ") || "none"}.`);
   } else {
-    lines.push(`Nutrition context: not shared by the user. Diet prefs: ${p.dietPrefs.join(", ") || "none"}; allergies: ${p.allergies.join(", ") || "none"}.`);
+    // Sharing is off: send nothing about food (not even preferences or allergies). The coach is told why.
+    lines.push("Nutrition context: not shared by the user. Do not give personalised food or meal advice; suggest they enable sharing in Settings or use the Nutrition section.");
   }
   return { profile: p, today, roadmap, readiness, stats, text: lines.join("\n") };
 }
