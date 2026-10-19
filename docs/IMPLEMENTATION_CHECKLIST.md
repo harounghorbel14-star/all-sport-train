@@ -43,7 +43,7 @@ Status: COMPLETE (verified end to end) · PARTIAL · MISSING · BROKEN · BLOCKE
 | Training calendar: reschedule, cancel, recurring activities | COMPLETE (2026-10-19) | Plans page calendar (last week + 2 weeks): schedule (one per day, not in the past, ≤90 days ahead), reschedule, cancel/restore (nothing deleted), completed/started workouts locked; skipped derived from data; weekly sport schedule = recurring activities, matched to logged activities; load warnings (never blocking) — tests: calendar.test.ts, e2e "schedule … then reschedule" |
 | Reminders | PARTIAL | in-app notifications; no push |
 | Offline saved lessons/plans, offline set queue | COMPLETE | e2e pwa, journey offline sync, sw tests |
-| Arabic RTL, shared dictionary FR/AR | COMPLETE | i18n.test, screenshot |
+| Arabic RTL, shared dictionary FR/AR | COMPLETE | i18n.test, e2e journey "switch language to French and Arabic" (lang/dir, translated nav, no overflow) |
 | Full page-body localisation | PARTIAL | dictionary only |
 | Data export, account deletion | COMPLETE | api-other export/deletion tests |
 | AI data disclosure in coach chat | COMPLETE (2026-10-19) | "What is sent to the AI provider?" panel lists exactly what the context builder sends; food data (incl. allergies/diet prefs and weight-derived targets) sent only with nutrition sharing on — test: api-other "AI data minimisation" |
@@ -96,3 +96,20 @@ Status: COMPLETE (verified end to end) · PARTIAL · MISSING · BROKEN · BLOCKE
 
 ## Known limitations
 Moved to [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md).
+
+## Required journeys — status 2026-10-19
+
+| # | Journey | Status | Evidence |
+|---|---|---|---|
+| 1 | Register, sign in, sign out, recover | COMPLETE | e2e auth.spec; api-auth tests (reset token single-use, expiry) |
+| 2 | Create and complete a workout | COMPLETE | e2e journey "start from zero → … → finish" |
+| 3 | Reload; history persists | COMPLETE | same e2e (reload mid-workout), api-workouts |
+| 4 | Record and correct performance metrics | COMPLETE | e2e "record a result, then correct a typo"; corrections.test |
+| 5 | Follow a lesson and complete its assessment | COMPLETE | api-sports "lesson states" (progress test via logged result) |
+| 6 | Prerequisite restrictions and safe next steps | COMPLETE | api-workouts skill locks; lesson prerequisites; coach suggestion lists missing prerequisites |
+| 7 | AI recommendation: explanation, accept/modify/reject | COMPLETE | recommendation.test; e2e "today shows a coach suggestion" |
+| 8 | Schedule and reschedule a workout | COMPLETE | e2e "schedule … then reschedule"; calendar.test |
+| 9 | Switch languages, Arabic RTL | COMPLETE | e2e "switch language to French and Arabic" |
+| 10 | Offline saved content; sync without duplicates | COMPLETE | e2e pwa.spec, journey offline set sync; sw.test |
+| 11 | Unauthorised access to another user's data | COMPLETE | api tests (404 on others' sessions, practices, records, plans) |
+| 12 | Export data; account deletion | COMPLETE | api-other export/deletion tests |

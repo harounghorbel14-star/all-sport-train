@@ -130,3 +130,23 @@ test("schedule a workout on the calendar, then reschedule it", async ({ page }) 
   await page.reload();
   await expect(page.getByRole("button", { name: `Schedule a workout on ${dateKey}` })).toBeVisible();
 });
+
+test("switch language to French and Arabic (right-to-left) from Settings", async ({ page }) => {
+  await registerAndOnboard(page);
+  const switchTo = async (value: string) => {
+    await page.goto("/profile");
+    await page.getByLabel("Language").selectOption(value);
+    await page.locator("#prefs").getByRole("button", { name: "Save" }).click();
+    await expect(page.getByText("Saved").first()).toBeVisible();
+    await page.goto("/today");
+  };
+  await switchTo("fr");
+  await expect(page.locator("html")).toHaveAttribute("lang", "fr");
+  await expect(page.getByRole("link", { name: "Aujourd'hui" }).first()).toBeVisible();
+  await switchTo("ar");
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  await expect(page.getByRole("link", { name: "اليوم" }).first()).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+  await switchTo("en");
+  await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
+});

@@ -244,9 +244,9 @@ export function SettingsApp({ email, tier, profile, ai, usda, security }: { emai
   );
 }
 
-function Section({ title, icon, children, onSave, busy }: { title: string; icon: ReactNode; children: ReactNode; onSave?: () => void; busy?: boolean; id: string }) {
+function Section({ title, icon, children, onSave, busy, id }: { title: string; icon: ReactNode; children: ReactNode; onSave?: () => void; busy?: boolean; id: string }) {
   return (
-    <Card>
+    <Card id={id}>
       <CardTitle icon={icon}>{title}</CardTitle>
       <div className="space-y-3">{children}</div>
       {onSave && (
