@@ -10,6 +10,7 @@ import { cx } from "@/lib/cx";
 import { ProgramBuilder, WeeklyReviewForm } from "./forms";
 import { calendar } from "@/lib/services/calendar";
 import { PlanCalendarActions, ScheduleWorkoutButton } from "@/components/calendar/plan-actions";
+import { fmt, getDictionary } from "@/lib/i18n";
 
 export const metadata = { title: "Plans & Roadmap" };
 
@@ -17,13 +18,14 @@ export default async function PlansPage() {
   const { user, profile } = await requireUser();
   const [road, plans, sessions, cal] = await Promise.all([roadmapOverview(user.id), listPlans(user.id, 12), recentSessions(user.id, 10), calendar(user.id, { days: 21 })]);
   const s = road.state;
+  const tc = getDictionary(profile.locale).calendar;
   return (
     <div className="space-y-6">
       <PageHeader eyebrow="24-week framework" title="Plans & Roadmap" subtitle="An adaptable six-phase progression. Weekly reviews let you repeat, deload or move on — it's a framework, not a fixed schedule." />
 
       <Card id="calendar">
-        <CardTitle icon={<CalendarDays className="size-4" />}>Training calendar</CardTitle>
-        <p className="-mt-2 mb-3 text-xs text-muted">Last week and the next two weeks. Training days get their workout on the day; schedule one ahead, move it, or cancel it — nothing is deleted.</p>
+        <CardTitle icon={<CalendarDays className="size-4" />}>{tc.title}</CardTitle>
+        <p className="-mt-2 mb-3 text-xs text-muted">{tc.intro}</p>
         <ol className="divide-y divide-line">
           {cal.days.map((d) => {
             const empty = !d.plans.length && !d.recurring.length && !d.completed.length;
@@ -31,32 +33,32 @@ export default async function PlansPage() {
               <li key={d.dateKey} className={cx("flex flex-wrap items-start gap-3 py-2.5", d.isToday && "rounded-lg bg-accent-soft px-2")} aria-current={d.isToday ? "date" : undefined}>
                 <span className="w-24 shrink-0 text-xs">
                   <span className="block font-semibold">{formatDateKey(d.dateKey, profile.locale, { weekday: "short", day: "numeric", month: "short" })}</span>
-                  {d.isToday && <span className="text-accent">Today</span>}
-                  {!d.isToday && d.isTrainingDay && <span className="text-subtle">Training day</span>}
-                  {d.restDay && <span className="text-subtle">Rest day logged</span>}
+                  {d.isToday && <span className="text-accent">{tc.today}</span>}
+                  {!d.isToday && d.isTrainingDay && <span className="text-subtle">{tc.trainingDay}</span>}
+                  {d.restDay && <span className="text-subtle">{tc.restLogged}</span>}
                 </span>
                 <span className="min-w-0 flex-1 space-y-1 text-sm">
                   {d.plans.map((p) => (
                     <span key={p.id} className="flex items-center justify-between gap-2">
                       <Link href={`/workout/${p.id}`} className={cx("truncate hover:text-accent", p.status === "cancelled" && "text-subtle line-through")}>{p.title}</Link>
                       <span className="flex items-center gap-1">
-                        <Badge tone={p.status === "completed" ? "success" : p.status === "skipped" ? "warn" : p.status === "cancelled" ? "neutral" : "info"}>{p.status}</Badge>
+                        <Badge tone={p.status === "completed" ? "success" : p.status === "skipped" ? "warn" : p.status === "cancelled" ? "neutral" : "info"}>{tc.status[p.status]}</Badge>
                         {d.dateKey >= cal.today && <PlanCalendarActions planId={p.id} dateKey={d.dateKey} status={p.status} today={cal.today} title={p.title} />}
                       </span>
                     </span>
                   ))}
                   {d.recurring.map((r) => (
                     <span key={r.sport} className="flex items-center justify-between gap-2 text-muted">
-                      <span className="truncate capitalize">{r.sport.replace(/-/g, " ")} <span className="text-xs text-subtle">· weekly</span></span>
-                      <Badge tone={r.status === "done" ? "success" : r.status === "missed" ? "warn" : "neutral"}>{r.status}</Badge>
+                      <span className="truncate capitalize">{r.sport.replace(/-/g, " ")} <span className="text-xs text-subtle">· {tc.weekly}</span></span>
+                      <Badge tone={r.status === "done" ? "success" : r.status === "missed" ? "warn" : "neutral"}>{tc.status[r.status]}</Badge>
                     </span>
                   ))}
                   {d.completed.map((c, i) => (
                     <span key={i} className="flex items-center gap-1 text-muted"><Check className="size-3.5 text-accent" />{c.title}</span>
                   ))}
-                  {empty && d.dateKey > cal.today && !d.isTrainingDay && <span className="text-xs text-subtle">Rest</span>}
+                  {empty && d.dateKey > cal.today && !d.isTrainingDay && <span className="text-xs text-subtle">{tc.rest}</span>}
                 </span>
-                {d.dateKey > cal.today && !d.plans.some((p) => p.status !== "cancelled") && <ScheduleWorkoutButton dateKey={d.dateKey} label={`Schedule a workout on ${d.dateKey}`} />}
+                {d.dateKey > cal.today && !d.plans.some((p) => p.status !== "cancelled") && <ScheduleWorkoutButton dateKey={d.dateKey} label={fmt(tc.scheduleOn, { date: d.dateKey })} />}
               </li>
             );
           })}
