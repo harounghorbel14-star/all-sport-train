@@ -1,5 +1,6 @@
 import { Activity, Flame, Link2, Watch } from "lucide-react";
 import { requireUser } from "@/lib/auth/server";
+import { CorrectRecord } from "@/components/records/correct-record";
 import { activityOverview } from "@/lib/services/activity";
 import { publishedSports } from "@/lib/services/sports";
 import { formatDateKey, formatDistance, kcalRange } from "@/lib/format";
@@ -68,6 +69,19 @@ export default async function ActivityPage({ searchParams }: { searchParams: Pro
                   </span>
                   <span className="flex items-center gap-1">
                     <Badge tone={a.source === "workout" ? "accent" : "neutral"}>{a.source}</Badge>
+                    {a.source !== "workout" && (
+                      <CorrectRecord
+                        endpoint={`/api/activity/${a.id}`}
+                        title="Correct activity"
+                        label={`Correct ${a.title ?? a.sport} on ${a.dateKey}`}
+                        fields={[
+                          { key: "durationMin", label: "Duration (min)", value: a.durationMin },
+                          { key: "distanceKm", label: `Distance (${units === "imperial" ? "mi" : "km"})`, value: a.distanceKm, scale: units === "imperial" ? 0.621371 : 1 },
+                          { key: "intensity", label: "Intensity", value: a.intensity, type: "select", options: [{ value: "light", label: "Light" }, { value: "moderate", label: "Moderate" }, { value: "vigorous", label: "Vigorous" }] },
+                          { key: "dateKey", label: "Date", value: a.dateKey, type: "date" },
+                        ]}
+                      />
+                    )}
                     {a.source !== "workout" && <DeleteActivity id={a.id} />}
                   </span>
                 </li>

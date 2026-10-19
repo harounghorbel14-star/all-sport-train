@@ -1,6 +1,6 @@
 import type { z } from "zod";
 import { db } from "../server/db";
-import { notFound } from "../server/errors";
+import { badRequest, notFound } from "../server/errors";
 import { addDays, todayKey, weekStart } from "../domain/dates";
 import type { measurementSchema } from "../validation";
 import { getProfile } from "./profile";
@@ -19,6 +19,31 @@ export async function addMeasurement(userId: string, input: z.infer<typeof measu
 
 export async function listMeasurements(userId: string) {
   return db.bodyMeasurement.findMany({ where: { userId }, orderBy: [{ dateKey: "desc" }, { createdAt: "desc" }], take: 200 });
+}
+
+/** Corrects a measurement; previous values are kept in the correction log, and profile weight/height follow the latest entry. */
+export async function correctMeasurement(userId: string, id: string, input: Partial<z.infer<typeof measurementSchema>> & { reason?: string }) {
+  const m = await db.bodyMeasurement.findFirst({ where: { id, userId } });
+  if (!m) throw notFound("Measurement not found");
+  const { reason, ...changes } = input;
+  const keys = Object.keys(changes) as (keyof typeof changes)[];
+  if (!keys.length) throw badRequest("Nothing to correct");
+  const before = Object.fromEntries(keys.map((k) => [k, m[k as keyof typeof m] ?? null]));
+  const updated = await db.$transaction(async (tx) => {
+    const u = await tx.bodyMeasurement.update({ where: { id: m.id }, data: changes });
+    await tx.recordCorrection.create({ data: { userId, recordType: "measurement", recordId: m.id, before: JSON.stringify(before), after: JSON.stringify(changes), reason: reason ?? null } });
+    return u;
+  });
+  const latest = await db.bodyMeasurement.findFirst({ where: { userId }, orderBy: [{ dateKey: "desc" }, { createdAt: "desc" }] });
+  if (latest?.id === m.id && (changes.weightKg !== undefined || changes.heightCm !== undefined)) {
+    await db.profile.update({ where: { userId }, data: { ...(changes.weightKg !== undefined ? { weightKg: changes.weightKg } : {}), ...(changes.heightCm !== undefined ? { heightCm: changes.heightCm } : {}) } });
+  }
+  return updated;
+}
+
+/** The correction history of one of the user's records (original values first). */
+export async function correctionHistory(userId: string, recordType: string, recordId: string) {
+  return db.recordCorrection.findMany({ where: { userId, recordType, recordId }, orderBy: { createdAt: "asc" } });
 }
 
 export async function deleteMeasurement(userId: string, id: string) {

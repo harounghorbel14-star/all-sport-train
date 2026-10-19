@@ -66,6 +66,7 @@ model User {
   practicePlans          PracticePlan[]
   sportMetrics           SportMetricEntry[]
   recommendationFeedback RecommendationFeedback[]
+  corrections            RecordCorrection[]
 }
 
 /// External identity (e.g. Google). The provider's stable subject id is the key — never the email.
@@ -987,4 +988,19 @@ model RecommendationFeedback {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, dateKey])
+}
+
+/// Audit trail for user corrections of recorded data: the original values are kept, never silently lost.
+model RecordCorrection {
+  id         String   @id @default(cuid())
+  userId     String
+  recordType String // sport_metric | measurement | activity
+  recordId   String
+  before     String // JSON of the corrected fields before the change
+  after      String // JSON of the same fields after the change
+  reason     String?
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, recordType, recordId])
 }

@@ -31,7 +31,7 @@ Status: COMPLETE (verified end to end) · PARTIAL · MISSING · BROKEN · BLOCKE
 | Exercise library, instructions, safe substitutions | COMPLETE | api-workouts substitutions, engine tests |
 | Goals, equipment, schedule (onboarding/settings) | COMPLETE | e2e onboarding, api tests |
 | Progress charts, personal records | COMPLETE | api-workouts PR tests |
-| Correcting recorded results (sport metrics, measurements, activities) | PARTIAL | delete only; no edit/audit → P1 |
+| Correcting recorded results (sport metrics, measurements, activities) | COMPLETE (2026-10-19) | PATCH endpoints with creation-time validation, owner-only; originals kept in `RecordCorrection`; bests, calories, profile weight and lesson assessments re-evaluated (lesson XP returned if no longer passed) — tests: corrections.test.ts, e2e "record a result, then correct a typo" |
 | Sport lessons, prerequisites, lesson states, progress tests | COMPLETE | api-sports "lesson states" |
 | Quizzes / coach verification of results | MISSING | no coach role; results are self-reported → P2 |
 | Prerequisite cycle detection in content | PARTIAL | validator checks level order, not cycles → P2 |

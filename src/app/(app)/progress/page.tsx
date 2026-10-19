@@ -2,6 +2,7 @@ import Link from "next/link";
 import { TabLink } from "@/components/ui/tab-link";
 import { Download, Dumbbell, LineChart as LineIcon, Ruler } from "lucide-react";
 import { requireUser } from "@/lib/auth/server";
+import { CorrectRecord } from "@/components/records/correct-record";
 import { analytics, RANGES, type RangeKey } from "@/lib/services/progress";
 import { listProgressPhotos } from "@/lib/services/media";
 import { SKILL_BY_SLUG } from "@/lib/content/skills";
@@ -149,7 +150,20 @@ export default async function ProgressPage({ searchParams }: { searchParams: Pro
                       <td>{formatLength(m.waistCm, units)}</td>
                       <td>{formatLength(m.chestCm, units)}</td>
                       <td>{formatLength(m.armCm, units)}</td>
-                      <td><DeleteMeasurement id={m.id} /></td>
+                      <td className="flex items-center">
+                        <CorrectRecord
+                          endpoint={`/api/progress/measurements/${m.id}`}
+                          title="Correct measurement"
+                          label={`Correct measurement from ${m.dateKey}`}
+                          fields={[
+                            { key: "weightKg", label: `Weight (${units === "imperial" ? "lb" : "kg"})`, value: m.weightKg, scale: units === "imperial" ? 2.20462 : 1 },
+                            { key: "waistCm", label: `Waist (${units === "imperial" ? "in" : "cm"})`, value: m.waistCm, scale: units === "imperial" ? 1 / 2.54 : 1 },
+                            { key: "chestCm", label: `Chest (${units === "imperial" ? "in" : "cm"})`, value: m.chestCm, scale: units === "imperial" ? 1 / 2.54 : 1 },
+                            { key: "armCm", label: `Arm (${units === "imperial" ? "in" : "cm"})`, value: m.armCm, scale: units === "imperial" ? 1 / 2.54 : 1 },
+                          ]}
+                        />
+                        <DeleteMeasurement id={m.id} />
+                      </td>
                     </tr>
                   ))}
                 </tbody>

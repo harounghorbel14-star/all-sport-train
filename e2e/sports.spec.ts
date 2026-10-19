@@ -47,3 +47,20 @@ test("query-string tabs always respond, even on chart-heavy pages", async ({ pag
     }
   }
 });
+
+test("record a result, then correct a typo — bests update and the original is kept", async ({ page }) => {
+  await registerAndOnboard(page);
+  await page.goto("/sports/basketball?tab=progress");
+  await page.getByLabel("Metric").selectOption({ label: "Free throws" });
+  await page.getByLabel("Made").fill("19"); // typo: meant 9
+  await page.getByLabel("Attempts").fill("20");
+  await page.getByRole("button", { name: "Save result" }).click();
+  await expect(page.getByText("Best 95%")).toBeVisible();
+
+  await page.getByRole("button", { name: /^Correct Free throws entry/ }).click();
+  await page.getByLabel("Made").last().fill("9");
+  await page.getByLabel("Reason (optional)").fill("typo");
+  await page.getByRole("button", { name: "Save correction" }).click();
+  await expect(page.getByText("Best 45%")).toBeVisible();
+  await expect(page.getByText("Best 95%")).toHaveCount(0);
+});
