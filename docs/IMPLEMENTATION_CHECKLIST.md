@@ -1,7 +1,55 @@
 # APEX FIT — implementation checklist
 
-Persistent, prioritised list of work. Status: ✅ done (tested) · 🔄 in progress · ⬜ to do · ⚠️ known limitation.
+Persistent, prioritised list of work. Status: ✅ done (tested) · 🔄 in progress · ⬜ to do · ⚠️ known limitation (see [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md)).
 Each item names how it was verified. Audit of 2026-10-18 (findings verified by reading the code) is the source of most P0–P2 items.
+
+## Baseline — 2026-10-19 (branch `claude/modest-wozniak-1x8qcl`, from `main` after PR 9)
+
+Actual architecture (from the code): Next.js 15 App Router (React 19), Prisma 6 + SQLite (Railway volume), session-cookie auth with
+Google OIDC and guest mode, Anthropic SDK (optional — rule-based fallback without a key), PWA (manifest + `public/sw.js`), Railway deploy
+(`npm run start:prod` = migrate + additive seed + start). 35 pages, 101 API routes, 53 models.
+
+| Check | Result |
+|---|---|
+| `tsc --noEmit` | clean |
+| `eslint .` | clean |
+| `vitest run` | 189 passed, **1 failed** (intermittent: duplicate plan/session under concurrent requests) → fixed, see P0 |
+| `validate-sports.ts` | ✓ 135 sports |
+| `next build` | succeeds |
+| Playwright (desktop + mobile) | 23 passed |
+
+## Feature map — 2026-10-19
+
+Status: COMPLETE (verified end to end) · PARTIAL · MISSING · BROKEN · BLOCKED.
+
+| Area | Status | Evidence / gap |
+|---|---|---|
+| Register, login, logout, reset, Google, guest | COMPLETE | api-auth*, e2e auth |
+| Admin authorisation (verified email) | COMPLETE | api-auth-upgrade "admin access (P0)" |
+| Workout generate → edit → live → complete → history | COMPLETE | api-workouts, e2e journey |
+| Duplicate plans / live sessions under concurrency | COMPLETE (2026-10-19) | DB-unique keys + test (was intermittent) |
+| Exercise library, instructions, safe substitutions | COMPLETE | api-workouts substitutions, engine tests |
+| Goals, equipment, schedule (onboarding/settings) | COMPLETE | e2e onboarding, api tests |
+| Progress charts, personal records | COMPLETE | api-workouts PR tests |
+| Correcting recorded results (sport metrics, measurements, activities) | PARTIAL | delete only; no edit/audit → P1 |
+| Sport lessons, prerequisites, lesson states, progress tests | COMPLETE | api-sports "lesson states" |
+| Quizzes / coach verification of results | MISSING | no coach role; results are self-reported → P2 |
+| Prerequisite cycle detection in content | PARTIAL | validator checks level order, not cycles → P2 |
+| Adaptive coach suggestion (reasons, gaps, plateaus, accept/modify/reject) | COMPLETE | recommendation.test.ts, e2e |
+| Recommendation feedback used for future suggestions | PARTIAL | recorded, not yet used → P2 |
+| Research queue, claims, review, ruleset versions, coverage | COMPLETE | research.test.ts |
+| Coverage report per sport (missing topics) | PARTIAL | admin coverage counts; topic gaps limited → P2 |
+| Weekly review; monthly summary | PARTIAL | weekly only → P2 |
+| Training calendar: reschedule, cancel, recurring activities | MISSING | plans have a date only → P2 (journey 8) |
+| Reminders | PARTIAL | in-app notifications; no push |
+| Offline saved lessons/plans, offline set queue | COMPLETE | e2e pwa, journey offline sync, sw tests |
+| Arabic RTL, shared dictionary FR/AR | COMPLETE | i18n.test, screenshot |
+| Full page-body localisation | PARTIAL | dictionary only |
+| Data export, account deletion | COMPLETE | api-other export/deletion tests |
+| AI data disclosure in coach chat | MISSING | form check/photos disclose; coach doesn't → P2 |
+| Security headers | PARTIAL | no HSTS → P2 |
+| Community, challenges | COMPLETE | api-other community tests |
+| Health-service integrations | MISSING (P3) | not planned |
 
 ## P0 — security, broken auth, data loss, critical failures
 - ✅ Admin role granted to unverified emails in `ADMIN_EMAILS` → admin now requires role + verified email (Google or reset link); API and pages use `isAdmin()` — tests: api-auth-upgrade "admin access (P0)"
@@ -45,9 +93,5 @@ Each item names how it was verified. Audit of 2026-10-18 (findings verified by r
 - ⚠️ Root cause of the stalled tab navigations is unknown; the fallback costs ~1.5 s plus a page load when it happens
 - ⚠️ Registration reveals existing emails (accepted trade-off for clear UX; reset flow does not)
 
-## Known limitations (not planned in this pass)
-- ⚠️ No native App Store / Play Store builds — the app installs as a PWA.
-- ⚠️ Live AI coaching and web research need a connection; offline covers saved pages and the live-workout set queue only.
-- ✅ All 135 catalog sports have a learning system (the 21 instructor-only and 9 workout-based sports were added): in-activity lessons/drills for instructor-only sports require supervision, unsupervised drills are land/dry/theory only, and the certified-instruction notice stays on their page — validator + tests: sports.test "keeps instructor-only sports safe"
-- ⚠️ Sports content (135 sports) is editorial and unreviewed by qualified coaches; rules overviews unverified against current rulebooks.
-- ⚠️ Rate limiting is in-memory (single instance).
+## Known limitations
+Moved to [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md).
