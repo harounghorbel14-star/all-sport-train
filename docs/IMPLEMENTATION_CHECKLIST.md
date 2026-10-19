@@ -48,5 +48,6 @@ Each item names how it was verified. Audit of 2026-10-18 (findings verified by r
 ## Known limitations (not planned in this pass)
 - ⚠️ No native App Store / Play Store builds — the app installs as a PWA.
 - ⚠️ Live AI coaching and web research need a connection; offline covers saved pages and the live-workout set queue only.
-- ⚠️ Sports content (113 sports) is editorial and unreviewed by qualified coaches; rules overviews unverified against current rulebooks.
+- ✅ All 135 catalog sports have a learning system (the 21 instructor-only and 9 workout-based sports were added): in-activity lessons/drills for instructor-only sports require supervision, unsupervised drills are land/dry/theory only, and the certified-instruction notice stays on their page — validator + tests: sports.test "keeps instructor-only sports safe"
+- ⚠️ Sports content (135 sports) is editorial and unreviewed by qualified coaches; rules overviews unverified against current rulebooks.
 - ⚠️ Rate limiting is in-memory (single instance).

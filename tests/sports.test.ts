@@ -33,11 +33,16 @@ describe("sports catalog integrity", () => {
     expect(PRIORITY_SPORTS.map((s) => s.slug).sort()).toEqual(["baseball", "basketball", "boxing", "calisthenics", "football", "running", "swimming", "tennis"]);
   });
 
-  it("gives external sports an instruction note instead of lessons", () => {
-    for (const s of SPORT_SEEDS.filter((x) => x.availability === "external")) {
-      expect(s.lessons ?? [], s.slug).toHaveLength(0);
-      expect(s.profile?.externalResources?.length ?? 0, s.slug).toBeGreaterThan(0);
+  it("keeps instructor-only sports safe: certified-instruction notice, supervision note, supervised in-activity lessons", () => {
+    const instructorOnly = SPORT_SEEDS.filter((x) => x.profile?.externalResources?.some((r) => /certified instruction/i.test(r.label)));
+    expect(instructorOnly.length).toBeGreaterThanOrEqual(21);
+    for (const s of instructorOnly) {
+      expect(s.profile?.supervisionNote?.length ?? 0, s.slug).toBeGreaterThan(60);
+      expect((s.lessons ?? []).some((l) => l.requiresSupervision), s.slug).toBe(true);
+      for (const d of s.drills ?? []) if (d.setting !== "solo") expect(d.requiresSupervision, `${s.slug}/${d.slug}`).toBe(true);
     }
+    // Every catalog sport now has a learning system.
+    expect(SPORT_SEEDS.filter((x) => x.availability !== "full").map((x) => x.slug)).toEqual([]);
   });
 
   it("references only existing lessons, drills, metrics, sources and exercises", () => {
