@@ -166,6 +166,9 @@ export async function importGuestData(req: Request, accountId: string, guestId: 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- same updateMany shape on each delegate
       moved[name] = (await (model as any).updateMany({ where: { userId: guestId }, data: { userId: accountId } })).count;
     }
+    // Moved rows keep no guest-scoped uniqueness keys (they'd otherwise block or confuse the account's own).
+    await tx.workoutSession.updateMany({ where: { userId: accountId, activeKey: guestId }, data: { activeKey: null } });
+    await tx.workoutPlan.updateMany({ where: { userId: accountId, dailyKey: { startsWith: `${guestId}:` } }, data: { dailyKey: null } });
     // Activities: skip imported entries whose externalId the account already has.
     const acts = await tx.activityEntry.findMany({ where: { userId: guestId }, select: { id: true, externalId: true } });
     const takenExt = new Set((await tx.activityEntry.findMany({ where: { userId: accountId, externalId: { not: null } }, select: { externalId: true } })).map((a) => a.externalId));

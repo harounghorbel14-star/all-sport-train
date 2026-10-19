@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { db } from "../server/db";
 import { badRequest, conflict, notFound } from "../server/errors";
@@ -139,6 +140,8 @@ export async function generateForUser(userId: string, overrides: GenerateOverrid
   return { workout, readiness: band, roadmap };
 }
 
+const isUniqueViolation = (e: unknown) => e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002";
+
 // ── Plans ──────────────────────────────────────────────────────────────
 export async function getOrCreateTodayPlan(userId: string) {
   const p = await getProfile(userId);
@@ -149,19 +152,17 @@ export async function getOrCreateTodayPlan(userId: string) {
   });
   if (existing) return { plan: existing, workout: parseWorkout(existing.content) };
   const { workout } = await generateForUser(userId, {}, today);
-  const plan = await db.workoutPlan.create({
-    data: { userId, title: workout.title, focus: workout.focus, scheduledOn: today, source: "engine", content: JSON.stringify(workout) },
-  });
-  // Two requests racing (e.g. two tabs) may both have created a plan: keep the first, drop ours.
-  const first = await db.workoutPlan.findFirst({
-    where: { userId, scheduledOn: today, status: { not: "archived" } },
-    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-  });
-  if (first && first.id !== plan.id) {
-    await db.workoutPlan.delete({ where: { id: plan.id } });
+  // dailyKey is unique: if another request (a second tab) created today's plan first, use that one.
+  try {
+    const plan = await db.workoutPlan.create({
+      data: { userId, title: workout.title, focus: workout.focus, scheduledOn: today, source: "engine", content: JSON.stringify(workout), dailyKey: `${userId}:${today}` },
+    });
+    return { plan, workout };
+  } catch (e) {
+    if (!isUniqueViolation(e)) throw e;
+    const first = await db.workoutPlan.findUniqueOrThrow({ where: { dailyKey: `${userId}:${today}` } });
     return { plan: first, workout: parseWorkout(first.content) };
   }
-  return { plan, workout };
 }
 
 export async function createPlan(userId: string, workout: GeneratedWorkout, source: "engine" | "coach" | "custom", scheduledOn?: string) {
@@ -179,7 +180,8 @@ export async function regenerateToday(userId: string, overrides: GenerateOverrid
     // Never silently replace a workout the user changed, or one already under way.
     if (current && (current.source !== "engine" || current.status !== "planned")) return { plan: current, workout: parseWorkout(current.content), kept: true };
   }
-  await db.workoutPlan.updateMany({ where: { userId, scheduledOn: today, status: "planned" }, data: { status: "archived" } });
+  // Archived plans release the day's key so a later automatic plan can be created if needed.
+  await db.workoutPlan.updateMany({ where: { userId, scheduledOn: today, status: "planned" }, data: { status: "archived", dailyKey: null } });
   const { workout } = await generateForUser(userId, overrides, today);
   const plan = await db.workoutPlan.create({
     data: { userId, title: workout.title, focus: workout.focus, scheduledOn: today, source: "engine", content: JSON.stringify(workout) },
@@ -262,17 +264,16 @@ export async function startSession(userId: string, planId: string) {
   }
   const { plan, workout } = await getPlan(userId, planId);
   if (plan.status === "completed") throw conflict("This workout is already completed");
-  const session = await db.workoutSession.create({
-    data: { userId, planId: plan.id, title: workout.title, content: JSON.stringify(workout) },
-  });
-  // A double tap or a second tab may have started one at the same time: the earliest wins.
-  const winner = await db.workoutSession.findFirst({
-    where: { userId, status: { in: ["active", "paused"] } },
-    orderBy: [{ startedAt: "asc" }, { id: "asc" }],
-  });
-  if (winner && winner.id !== session.id) {
-    await db.workoutSession.delete({ where: { id: session.id } });
-    if (winner.planId === planId) return winner;
+  // activeKey is unique per user while a session is live, so a double tap or a second tab can't start two.
+  let session;
+  try {
+    session = await db.workoutSession.create({
+      data: { userId, planId: plan.id, title: workout.title, content: JSON.stringify(workout), activeKey: userId },
+    });
+  } catch (e) {
+    if (!isUniqueViolation(e)) throw e;
+    const winner = await db.workoutSession.findUnique({ where: { activeKey: userId } });
+    if (winner && winner.planId === planId) return winner;
     throw conflict("You already have a workout in progress. Finish or end it first.");
   }
   await db.workoutPlan.update({ where: { id: plan.id }, data: { status: "started" } });
@@ -481,7 +482,7 @@ export async function completeSession(userId: string, sessionId: string, input: 
   // Claim the session atomically: of two concurrent completions only one records anything.
   const claimed = await db.workoutSession.updateMany({
     where: { id: session.id, status: { in: ["active", "paused"] } },
-    data: { status: "completed", endedAt: now, pausedAt: null, durationSeconds, rpe, notes: input.notes?.slice(0, 1000) ?? session.notes, kcalLow: kcal.low, kcalHigh: kcal.high, dateKey },
+    data: { status: "completed", activeKey: null, endedAt: now, pausedAt: null, durationSeconds, rpe, notes: input.notes?.slice(0, 1000) ?? session.notes, kcalLow: kcal.low, kcalHigh: kcal.high, dateKey },
   });
   if (!claimed.count) return completedSummary(userId, sessionId);
   try {
@@ -507,7 +508,7 @@ export async function completeSession(userId: string, sessionId: string, input: 
     ]);
   } catch (e) {
     // Put the session back so the user can finish it again.
-    await db.workoutSession.update({ where: { id: session.id }, data: { status: session.status, endedAt: null, pausedAt: session.pausedAt, durationSeconds: null, dateKey: null } }).catch(() => undefined);
+    await db.workoutSession.update({ where: { id: session.id }, data: { status: session.status, activeKey: userId, endedAt: null, pausedAt: session.pausedAt, durationSeconds: null, dateKey: null } }).catch(() => undefined);
     throw e;
   }
 
@@ -522,7 +523,7 @@ export async function abandonSession(userId: string, sessionId: string) {
   if (session.status === "completed") throw conflict("Completed workouts can't be ended");
   // Discarded workouts leave no trace in bests: their sets are ignored and their records removed.
   await db.$transaction([
-    db.workoutSession.update({ where: { id: session.id }, data: { status: "abandoned", endedAt: new Date() } }),
+    db.workoutSession.update({ where: { id: session.id }, data: { status: "abandoned", activeKey: null, endedAt: new Date() } }),
     db.personalRecord.deleteMany({ where: { userId, sessionId: session.id } }),
   ]);
   if (session.planId) await db.workoutPlan.update({ where: { id: session.planId }, data: { status: "planned" } });
