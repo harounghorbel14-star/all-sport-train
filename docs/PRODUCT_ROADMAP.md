@@ -15,7 +15,7 @@ Baseline 2026-10-20 (branch `claude/modest-wozniak-1x8qcl` from `main` after PR 
 | 8 | AI technique review | K | PARTIAL | photo/frame form check with consent, provider disclosure, confidence labels, "not assessable" list, deletion; full video biomechanics not claimed; needs `ANTHROPIC_API_KEY` for AI (guided fallback otherwise) |
 | 9 | Drill / practice builder | F | COMPLETE | practice builder (supervision, level, setting, time budget), save, complete — api-sports |
 | 10 | Smart workout generator | C | COMPLETE | engine tests (equipment, limitations, time budget, readiness) |
-| 10 / 25 | Workout templates | H | MISSING | plans can be edited and re-run; no saved template library |
+| 10 / 25 | Workout templates | H | COMPLETE (2026-10-20) | `WorkoutTemplate` (migration `20261020130000_workout_templates`): save from a plan (as last saved) or update an existing template from a plan, rename, folders, duplicate, soft delete with 30-day restore, schedule on a day (calendar rules + load warnings; replaces only today's untouched automatic plan, archived not deleted; never a started/edited/scheduled one). Re-validated on use; scheduled plans keep their own copy. Saving/scheduling never counts as training. Export + guest import — tests: templates.test.ts (6), e2e journey "save a workout as a template…". Sharing templates with others not implemented |
 | 11 | Live workout (log, replace, pause, offline, finish once, correct) | C | COMPLETE | api-workouts, e2e journey |
 | 12 | Plateau detection, training load | D | PARTIAL | cautious plateau check in the recommendation (≥4 sessions, ≥3 weeks); no training-load trend view |
 | 13 | Missed-workout recovery | G | PARTIAL | skipped days derived on the calendar; re-entry rule after long breaks; no "rebuild my week" flow |
@@ -45,7 +45,7 @@ Baseline 2026-10-20 (branch `claude/modest-wozniak-1x8qcl` from `main` after PR 
 
 1. ✅ Goal roadmap (§15) — Phase C/D.
 2. ✅ Quizzes and assessment attempts (§7) — Phase F.
-3. Workout templates (§25) — Phase H.
+3. ✅ Workout templates (§25) — Phase H.
 4. Missed-workout recovery and travel mode (§13, §18) — Phase G.
 5. Feature flags (§35), privacy center (§28), AI evaluation suite (§32) — Phases I/L.
 

@@ -30,6 +30,7 @@ export async function exportAccount(userId: string) {
       corrections: true,
       goalItems: true,
       quizAttempts: true,
+      workoutTemplates: true,
       notifications: true,
       challengeEntries: true,
       posts: { include: { comments: true } },

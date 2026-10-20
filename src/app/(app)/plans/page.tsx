@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarCheck, CalendarDays, Check, Clock, Dumbbell, Flag } from "lucide-react";
+import { CalendarCheck, CalendarDays, Check, Clock, Copy, Dumbbell, Flag } from "lucide-react";
 import { requireUser } from "@/lib/auth/server";
 import { roadmapOverview } from "@/lib/services/roadmap";
 import { listPlans, recentSessions } from "@/lib/services/workouts";
@@ -10,15 +10,19 @@ import { cx } from "@/lib/cx";
 import { ProgramBuilder, WeeklyReviewForm } from "./forms";
 import { calendar } from "@/lib/services/calendar";
 import { PlanCalendarActions, ScheduleWorkoutButton } from "@/components/calendar/plan-actions";
+import { listTemplates } from "@/lib/services/templates";
+import { RestoreTemplate, TemplateActions } from "@/components/templates/template-actions";
 import { fmt, getDictionary } from "@/lib/i18n";
 
 export const metadata = { title: "Plans & Roadmap" };
 
 export default async function PlansPage() {
   const { user, profile } = await requireUser();
-  const [road, plans, sessions, cal] = await Promise.all([roadmapOverview(user.id), listPlans(user.id, 12), recentSessions(user.id, 10), calendar(user.id, { days: 21 })]);
+  const [road, plans, sessions, cal, tpl] = await Promise.all([roadmapOverview(user.id), listPlans(user.id, 12), recentSessions(user.id, 10), calendar(user.id, { days: 21 }), listTemplates(user.id)]);
   const s = road.state;
   const tc = getDictionary(profile.locale).calendar;
+  const tt = getDictionary(profile.locale).templates;
+  const folders = [...new Set(tpl.templates.map((x) => x.folder ?? ""))];
   return (
     <div className="space-y-6">
       <PageHeader eyebrow="24-week framework" title="Plans & Roadmap" subtitle="An adaptable six-phase progression. Weekly reviews let you repeat, deload or move on — it's a framework, not a fixed schedule." />
@@ -63,6 +67,44 @@ export default async function PlansPage() {
             );
           })}
         </ol>
+      </Card>
+
+      <Card id="templates">
+        <CardTitle icon={<Copy className="size-4" />}>{tt.title}</CardTitle>
+        <p className="-mt-2 mb-3 text-xs text-muted">{tt.intro}</p>
+        {tpl.templates.length === 0 && <p className="text-sm text-muted">{tt.empty}</p>}
+        {folders.map((f) => (
+          <div key={f || "-"} className="mb-3">
+            {(folders.length > 1 || f) && <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-subtle">{f || tt.noFolder}</p>}
+            <ul className="divide-y divide-line">
+              {tpl.templates.filter((x) => (x.folder ?? "") === f).map((x) => (
+                <li key={x.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                  <span className="min-w-0">
+                    <span className="block truncate font-medium">{x.name}</span>
+                    <span className="text-xs text-muted">
+                      {fmt(tt.meta, { minutes: x.minutes ?? "?", count: x.exercises })}
+                      {x.lastUsedAt && ` · ${fmt(tt.lastUsed, { date: x.lastUsedAt.toLocaleDateString(profile.locale) })}`}
+                    </span>
+                  </span>
+                  <TemplateActions id={x.id} name={x.name} today={cal.today} restoreDays={tpl.restoreDays} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+        {tpl.deleted.length > 0 && (
+          <details className="text-xs text-muted">
+            <summary className="cursor-pointer">{fmt(tt.recentlyDeleted, { n: tpl.deleted.length })}</summary>
+            <ul className="mt-1 divide-y divide-line">
+              {tpl.deleted.map((x) => (
+                <li key={x.id} className="flex items-center justify-between gap-2 py-1.5">
+                  <span className="truncate">{x.name}</span>
+                  <RestoreTemplate id={x.id} name={x.name} />
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
       </Card>
 
       <Card>

@@ -23,6 +23,9 @@ Honest list of what APEX FIT does **not** do (yet). Updated with each work sessi
 - Consistency goals count completed workouts plus other logged activities; a week with nothing logged counts as 0 sessions.
 - Goals aren't summarised inside the monthly report yet.
 
+## Templates
+- Templates can't be shared with other users yet, and template contents are edited by editing a plan and updating the template from it (there's no separate template editor).
+
 ## Localisation
 - French and Arabic cover the shared dictionary (navigation, sign-in, onboarding, workout screens) and the full Today page, training calendar and record corrections. Other page bodies, engine-generated text (workout titles, phase names, missions), server messages (errors, calendar load warnings) and all sports content are English-only; in Arabic, untranslated English text is laid out left-to-right inside the RTL page.
 

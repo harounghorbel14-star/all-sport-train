@@ -5,6 +5,8 @@ import { exerciseLookup } from "@/lib/services/views";
 import { AppError } from "@/lib/server/errors";
 import { PlanEditor } from "./editor";
 import { SaveOffline } from "@/components/pwa/save-offline";
+import { listTemplates } from "@/lib/services/templates";
+import { SaveAsTemplate } from "@/components/templates/template-actions";
 
 export const metadata = { title: "Workout" };
 
@@ -12,10 +14,11 @@ export default async function WorkoutPage({ params }: { params: Promise<{ id: st
   const { user } = await requireUser();
   const { id } = await params;
   try {
-    const [{ plan, workout }, lookup, active] = await Promise.all([getPlan(user.id, id), exerciseLookup(), activeSession(user.id)]);
+    const [{ plan, workout }, lookup, active, tpl] = await Promise.all([getPlan(user.id, id), exerciseLookup(), activeSession(user.id), listTemplates(user.id)]);
     return (
       <div>
-        <div className="mb-3 flex justify-end">
+        <div className="mb-3 flex flex-wrap justify-end gap-2">
+          <SaveAsTemplate planId={plan.id} title={workout.title} templates={tpl.templates.map((x) => ({ id: x.id, name: x.name }))} />
           <SaveOffline url={`/workout/${plan.id}`} title={workout.title} kind="plan" />
         </div>
         <PlanEditor planId={plan.id} status={plan.status} initial={workout} lookup={lookup} activeSessionId={active?.planId === plan.id ? active.id : null} otherActive={!!active && active.planId !== plan.id} />

@@ -5,6 +5,7 @@ import { addDays, isDateKey, todayKey, weekStart, weekday } from "../domain/date
 import { readinessBand } from "../domain/readiness";
 import { getProfile } from "./profile";
 import { generateForUser } from "./workouts";
+import { templateWorkout } from "./templates";
 
 /**
  * Training calendar built from existing records — no separate event table, so nothing can drift:
@@ -143,4 +144,25 @@ export async function restorePlan(userId: string, id: string) {
   const clash = await db.workoutPlan.findFirst({ where: { userId, scheduledOn: plan.scheduledOn, status: { notIn: ["archived", "cancelled"] }, id: { not: plan.id } } });
   if (clash) throw conflict("Another workout is already scheduled that day.");
   return db.workoutPlan.update({ where: { id: plan.id }, data: { status: "planned" } });
+}
+
+/**
+ * Schedules a template's workout on a day (today or up to 90 days ahead). Today's untouched automatic
+ * plan is replaced (archived, not deleted); a workout the user edited, started or scheduled is never replaced.
+ */
+export async function scheduleTemplate(userId: string, templateId: string, dateKey: string) {
+  await assertFutureOrToday(userId, dateKey);
+  const { template, workout } = await templateWorkout(userId, templateId);
+  const p = await getProfile(userId);
+  const today = todayKey(p.timezone);
+  const existing = await db.workoutPlan.findFirst({ where: { userId, scheduledOn: dateKey, status: { notIn: ["archived", "cancelled"] } }, orderBy: { createdAt: "desc" } });
+  const replaceable = existing && dateKey === today && existing.source === "engine" && existing.status === "planned" && !!existing.dailyKey;
+  if (existing && !replaceable) throw conflict("A workout is already scheduled that day — move or cancel it first.");
+  const warnings = await loadWarnings(userId, dateKey, replaceable ? existing!.id : undefined);
+  const plan = await db.$transaction(async (tx) => {
+    if (replaceable) await tx.workoutPlan.update({ where: { id: existing!.id }, data: { status: "archived", dailyKey: null } });
+    await tx.workoutTemplate.update({ where: { id: template.id }, data: { lastUsedAt: new Date() } });
+    return tx.workoutPlan.create({ data: { userId, title: workout.title, focus: workout.focus, scheduledOn: dateKey, source: "custom", content: JSON.stringify(workout) } });
+  });
+  return { plan, warnings, replacedAutomatic: !!replaceable };
 }

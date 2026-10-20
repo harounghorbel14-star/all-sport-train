@@ -178,3 +178,27 @@ test("set a weekly goal, see honest progress, abandon and restore it", async ({ 
   await card.getByRole("button", { name: "Restore" }).click();
   await expect(card.getByRole("button", { name: "Abandon" })).toBeVisible();
 });
+
+test("save a workout as a template and schedule it on a later day", async ({ page }) => {
+  await registerAndOnboard(page);
+  await page.goto("/today");
+  await page.getByRole("link", { name: "View & edit" }).click();
+  await expect(page).toHaveURL(/\/workout\//);
+  await page.getByRole("button", { name: "Save as template" }).click();
+  await page.getByLabel("Name").fill("My go-to session");
+  await page.getByLabel("Folder (optional)").fill("Home");
+  await page.getByRole("dialog").getByRole("button", { name: "Save as template" }).click();
+  await expect(page.getByText("Template saved")).toBeVisible();
+
+  await page.goto("/plans#templates");
+  const card = page.locator("#templates");
+  await expect(card.getByText("My go-to session")).toBeVisible();
+  // The first day the calendar offers for scheduling is free: use it.
+  const free = (await page.getByRole("button", { name: /^Schedule a workout on / }).first().getAttribute("aria-label"))!.replace("Schedule a workout on ", "");
+  await card.getByRole("button", { name: "Schedule: My go-to session" }).click();
+  await page.getByLabel("Date").fill(free);
+  await page.getByRole("button", { name: "Schedule workout" }).click();
+  await expect(page.getByText("Workout scheduled")).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("button", { name: new RegExp(`^Reschedule .* on ${free}$`) })).toBeVisible();
+});

@@ -68,6 +68,7 @@ model User {
   recommendationFeedback RecommendationFeedback[]
   goalItems              Goal[]
   quizAttempts           QuizAttempt[]
+  workoutTemplates       WorkoutTemplate[]
   corrections            RecordCorrection[]
 }
 
@@ -1070,4 +1071,22 @@ model QuizAttempt {
   quiz        LessonQuiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
   @@index([userId, quizId])
+}
+
+/// A reusable workout. Never counts as training: only a scheduled plan that is completed does.
+model WorkoutTemplate {
+  id           String    @id @default(cuid())
+  userId       String
+  name         String
+  folder       String?
+  content      String // JSON GeneratedWorkout (validated like an edited plan)
+  sourcePlanId String?
+  lastUsedAt   DateTime?
+  /// Soft delete: restorable for 30 days, then removed.
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, deletedAt])
 }
