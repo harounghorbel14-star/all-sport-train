@@ -32,7 +32,7 @@ Baseline 2026-10-20 (branch `claude/modest-wozniak-1x8qcl` from `main` after PR 
 | 24 | Smart streaks | H | COMPLETE | domain tests (rest days, grace, weekly targets) |
 | 26 | Coach workspace | K | MISSING | needs a product decision (coach role, client consent model) |
 | 27 | Wearables / health services | K | BLOCKED | provider credentials and developer accounts required |
-| 28 | Privacy center | I | PARTIAL | privacy settings, AI disclosure, export, deletion exist; spread across pages |
+| 28 | Privacy center | I | COMPLETE (2026-10-20) | `/profile/privacy`: per-category counts of everything stored (own records only) with links to manage each; sharing settings; what is sent to the AI provider (or that none is configured), nutrition-sharing state, provider-retention caveat; clear AI conversation; connected services (Google; no health services); retention rules; export and account deletion — tests: privacy.test.ts, a11y spec (desktop + mobile). Per-category bulk deletion (e.g. "delete all food entries") not added; individual deletes and account deletion exist |
 | 29 | Offline | J | COMPLETE | e2e pwa + offline set sync; cache cleared on logout |
 | 30 | Accessibility & localisation | J | PARTIAL | automated a11y checks on 14 pages; FR/AR for shared UI + Today/calendar/corrections only |
 | 31 | Product health | L | PARTIAL | `/api/health` readiness (DB, config); no performance budget |

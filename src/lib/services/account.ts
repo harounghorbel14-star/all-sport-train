@@ -54,3 +54,30 @@ export async function deleteAccount(userId: string) {
   await deleteAllUploads(userId);
   await db.user.delete({ where: { id: userId } });
 }
+
+/** What the app stores about the user, by category (counts only), plus the sharing settings that apply. */
+export async function privacySummary(userId: string) {
+  const [workouts, activities, foods, water, measurements, photos, formChecks, coachMessages, posts, goals, quizAttempts, templates, trips, corrections, google] = await Promise.all([
+    db.workoutSession.count({ where: { userId } }),
+    db.activityEntry.count({ where: { userId } }),
+    db.foodEntry.count({ where: { userId } }),
+    db.waterLog.count({ where: { userId } }),
+    db.bodyMeasurement.count({ where: { userId } }),
+    db.mediaUpload.count({ where: { userId, kind: "progress_photo" } }),
+    db.formCheck.count({ where: { userId } }),
+    db.coachMessage.count({ where: { userId } }),
+    db.post.count({ where: { authorId: userId } }),
+    db.goal.count({ where: { userId } }),
+    db.quizAttempt.count({ where: { userId } }),
+    db.workoutTemplate.count({ where: { userId } }),
+    db.travelPeriod.count({ where: { userId } }),
+    db.recordCorrection.count({ where: { userId } }),
+    db.authAccount.findFirst({ where: { userId, provider: "google" }, select: { id: true } }),
+  ]);
+  const p = await db.profile.findUniqueOrThrow({ where: { userId }, select: { visibility: true, shareWorkouts: true, nutritionInCoach: true } });
+  return {
+    counts: { workouts, activities, foods, water, measurements, photos, formChecks, coachMessages, posts, goals, quizAttempts, templates, trips, corrections },
+    sharing: { visibility: p.visibility, shareWorkouts: p.shareWorkouts, nutritionInCoach: p.nutritionInCoach },
+    connected: { google: !!google, healthServices: [] as string[] },
+  };
+}
