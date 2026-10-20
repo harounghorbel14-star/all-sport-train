@@ -8,7 +8,7 @@ import { EXERCISE_BY_SLUG } from "../src/lib/content/exercises";
 import { findPrerequisiteCycle } from "../src/lib/engine/prerequisites";
 import { CATALOG } from "../src/lib/content/sports/catalog";
 import { ENRICHMENT_GROUPS, GROUPS_BY_FILE } from "../src/lib/content/sports/extended";
-import { SOURCES, SPORT_SEEDS, drillContentSchema, lessonContentSchema, levelRank, metricSeedSchema, rulePointSchema, sportProfileSchema } from "../src/lib/content/sports";
+import { LESSON_QUIZZES, SOURCES, SPORT_SEEDS, quizContentSchema, drillContentSchema, lessonContentSchema, levelRank, metricSeedSchema, rulePointSchema, sportProfileSchema } from "../src/lib/content/sports";
 
 const group = process.argv[2];
 if (group && !GROUPS_BY_FILE[group]) throw new Error(`Unknown group ${group}; use one of ${Object.keys(GROUPS_BY_FILE).join(", ")}`);
@@ -144,8 +144,19 @@ for (const g of groups) {
   }
 }
 if (!allSlugs.length) err("catalog", "empty");
+// Knowledge checks: valid shape, and attached to a lesson that exists (never to an instructor-only activity's lessons).
+let quizzes = 0;
+for (const [key, quiz] of Object.entries(LESSON_QUIZZES)) {
+  const [sportSlug, lessonSlug] = key.split("/");
+  const sport = SPORT_SEEDS.find((x) => x.slug === sportSlug);
+  if (!sport?.lessons?.some((l) => l.slug === lessonSlug)) err(`quiz ${key}`, "no such lesson");
+  if (sport?.availability === "external") err(`quiz ${key}`, "instructor-only activities don't get self-graded checks");
+  const parsed = quizContentSchema.safeParse(quiz);
+  if (!parsed.success) err(`quiz ${key}`, parsed.error.issues.map((i) => i.message).join("; "));
+  quizzes++;
+}
 if (problems.length) {
   console.error(`✗ ${problems.length} problem(s) in ${count} sport(s):\n- ${problems.join("\n- ")}`);
   process.exit(1);
 }
-console.log(`✓ ${count} enriched sport(s) valid`);
+console.log(`✓ ${count} enriched sport(s) valid, ${quizzes} knowledge check(s) valid`);

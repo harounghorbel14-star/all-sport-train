@@ -5,7 +5,8 @@ Honest list of what APEX FIT does **not** do (yet). Updated with each work sessi
 ## Content and knowledge
 - **Sports content is editorial.** All 135 sports have lessons, drills and rules overviews written for the app; none has been reviewed by qualified coaches yet. Rules overviews are labelled "general / unverified" and were not checked against the current rulebooks.
 - **Results are self-reported.** The app records what users enter; it cannot verify performances. There is no coach role to verify results yet.
-- **No quizzes.** Lessons complete on the user's word or, where defined, when a logged result meets the lesson's progress test.
+- **Knowledge checks cover 14 beginner lessons** in the priority sports (61 questions written from each lesson's own text, not reviewed by a coach). Other lessons complete on the user's word or, where defined, when a logged result meets the progress test. A failed attempt shows the correct answers, so a retry tests recall rather than discovery; 5 attempts a day per check limit guessing.
+- **No coach verification.** There is no coach role; practical results are self-reported and labelled as such.
 - **Research needs credentials.** AI web research requires `ANTHROPIC_API_KEY`; without it, research tasks stay queued/blocked. No claim is ever marked verified without a human reviewer.
 
 ## Coaching

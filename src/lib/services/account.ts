@@ -29,6 +29,7 @@ export async function exportAccount(userId: string) {
       recommendationFeedback: true,
       corrections: true,
       goalItems: true,
+      quizAttempts: true,
       notifications: true,
       challengeEntries: true,
       posts: { include: { comments: true } },

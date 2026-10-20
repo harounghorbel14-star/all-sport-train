@@ -171,3 +171,41 @@ export const CATEGORIES = [
   { slug: "outdoor", name: "Outdoor, mountain & adventure", description: "Mountain, snow, wheel, target and precision sports." },
   { slug: "other", name: "Dance, adaptive & other", description: "Dance, cheer, adaptive and Paralympic disciplines, and regional sports." },
 ] as const;
+
+/**
+ * Lesson knowledge check. Questions must be answerable from the lesson's own text (it is a check on
+ * understanding, not a test of outside knowledge). Grading happens on the server only.
+ */
+const quizId = z.string().regex(/^[a-z0-9-]{1,40}$/);
+export const quizQuestionSchema = z
+  .object({
+    id: quizId,
+    type: z.enum(["single", "multiple"]),
+    scenario: z.string().trim().min(1).max(400).optional(),
+    prompt: z.string().trim().min(1).max(300),
+    options: z.array(z.object({ id: quizId, text: z.string().trim().min(1).max(200) })).min(2).max(6),
+    correct: z.array(quizId).min(1),
+    explanation: z.string().trim().min(1).max(500),
+  })
+  .superRefine((q, ctx) => {
+    const ids = q.options.map((o) => o.id);
+    if (new Set(ids).size !== ids.length) ctx.addIssue({ code: "custom", message: `${q.id}: duplicate option ids` });
+    if (q.correct.some((c) => !ids.includes(c))) ctx.addIssue({ code: "custom", message: `${q.id}: correct answer is not an option` });
+    if (new Set(q.correct).size !== q.correct.length) ctx.addIssue({ code: "custom", message: `${q.id}: duplicate correct answers` });
+    if (q.type === "single" && q.correct.length !== 1) ctx.addIssue({ code: "custom", message: `${q.id}: single-answer questions need exactly one correct option` });
+    if (q.type === "multiple" && q.correct.length >= q.options.length) ctx.addIssue({ code: "custom", message: `${q.id}: at least one option must be wrong` });
+  });
+export const quizContentSchema = z
+  .object({
+    passPercent: z.number().int().min(50).max(100).default(80),
+    /** Questions drawn per attempt (random subset); all when omitted. */
+    perAttempt: z.number().int().min(2).max(20).optional(),
+    questions: z.array(quizQuestionSchema).min(3).max(20),
+  })
+  .superRefine((q, ctx) => {
+    const ids = q.questions.map((x) => x.id);
+    if (new Set(ids).size !== ids.length) ctx.addIssue({ code: "custom", message: "duplicate question ids" });
+    if (q.perAttempt && q.perAttempt > q.questions.length) ctx.addIssue({ code: "custom", message: "perAttempt exceeds the number of questions" });
+  });
+export type QuizContent = z.infer<typeof quizContentSchema>;
+export type QuizQuestion = z.infer<typeof quizQuestionSchema>;

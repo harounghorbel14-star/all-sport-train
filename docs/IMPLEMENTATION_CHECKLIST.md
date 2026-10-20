@@ -33,7 +33,8 @@ Status: COMPLETE (verified end to end) · PARTIAL · MISSING · BROKEN · BLOCKE
 | Progress charts, personal records | COMPLETE | api-workouts PR tests |
 | Correcting recorded results (sport metrics, measurements, activities) | COMPLETE (2026-10-19) | PATCH endpoints with creation-time validation, owner-only; originals kept in `RecordCorrection`; bests, calories, profile weight and lesson assessments re-evaluated (lesson XP returned if no longer passed) — tests: corrections.test.ts, e2e "record a result, then correct a typo" |
 | Sport lessons, prerequisites, lesson states, progress tests | COMPLETE | api-sports "lesson states" |
-| Quizzes / coach verification of results | MISSING | no coach role; results are self-reported → P2 |
+| Quizzes (knowledge checks) | COMPLETE (2026-10-20) | see PRODUCT_ROADMAP §7 — tests: quizzes.test.ts, e2e sports journey |
+| Coach verification of practical results | MISSING | needs a coach role and client consent model (decision) |
 | Prerequisite cycle detection in content | COMPLETE (2026-10-19) | `findPrerequisiteCycle` in the content validator and in admin lesson saves (unknown prerequisites rejected too) — tests: sports.test "prerequisite graph", api-sports admin workflow |
 | Adaptive coach suggestion (reasons, gaps, plateaus, accept/modify/reject) | COMPLETE | recommendation.test.ts, e2e |
 | Recommendation feedback used for future suggestions | COMPLETE (2026-10-19) | last 3 weeks of responses: repeatedly shortened sessions set the suggested length; two declined effort-only lighter sessions stop that adjustment (stated in the reasons); pain, recovery and re-entry rules are never overridden — tests: recommendation.test.ts |
@@ -70,6 +71,7 @@ Status: COMPLETE (verified end to end) · PARTIAL · MISSING · BROKEN · BLOCKE
 - ✅ Completed sessions still render the live logging UI; completion retry loses the summary → reopening shows the summary; retries/races return the same summary, one activity, XP once — tests: api-workouts "completes once when two completions race", e2e journey
 - ✅ Query-string tabs (sport hubs, Progress) sometimes didn't respond: Next's router fetched the page but never committed it (pre-existing — reproduced on the last merged commit; still present on the latest Next 15 patch; bisected to the chart components but not to any one behaviour) → `TabLink` falls back to a normal page load after 1.5 s — 50-click stress: 0 stuck (was 3–6 of 8); e2e sports "query-string tabs always respond…"
 - ✅ Sport hub drops newest metric entries after 2,000 → newest 2,000 shown, personal bests from every entry — test: api-sports "…thousands of entries"
+- ✅ Guest import dropped lesson evidence (assessed completions became "self-reported") → evidence and assessed result kept; goals, corrections and quiz attempts move too (2026-10-20)
 - ✅ Guest import drops XP / achievements → XP for moved records comes along (no double counting), achievements re-evaluated — test: api-auth-upgrade "conflict-safe import"
 - ✅ Installable app (Android/iPhone) + offline saved lessons/plans — e2e + service-worker unit tests
 

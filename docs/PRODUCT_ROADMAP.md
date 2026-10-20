@@ -10,8 +10,8 @@ Baseline 2026-10-20 (branch `claude/modest-wozniak-1x8qcl` from `main` after PR 
 | 4 | Adaptive next-workout recommendation, reasons, feedback | E | COMPLETE | recommendation.test.ts, e2e journey; feedback shapes later suggestions without overriding safety |
 | 4.6 / 34 | Recommendation audit trail incl. measurable outcome | E | PARTIAL | decision + evidence stored in `RecommendationFeedback`; outcome of the following session not linked yet |
 | 5 | Training twin (inspectable profile of what the app knows) | E | PARTIAL | profile, history and gaps feed the engine; no single "what we know / don't know" view |
-| 6 | Skill trees, prerequisites, cycle detection, lesson states | F | COMPLETE | api-sports "lesson states", sports.test "prerequisite graph" |
-| 7 | Quizzes and verified learning | F | MISSING → next | no assessment engine yet |
+| 6 | Skill trees, prerequisites, cycle detection, lesson states | F | COMPLETE | api-sports "lesson states", sports.test "prerequisite graph"; practical coach verification needs a coach role (§26) |
+| 7 | Quizzes and verified learning | F | COMPLETE (2026-10-20) | Assessment engine: `LessonQuiz` (versioned, seeded additively) + `QuizAttempt` (migration `20261020110000_lesson_quizzes`); single/multiple-answer and scenario questions; questions and option order fixed per attempt (random subset via `perAttempt`); answers never sent to the client; exact-match grading on the server; one open attempt per quiz (DB-unique key); graded once — repeat/concurrent submissions return the same result; XP once per quiz; 5 attempts/day; review with correct answers and explanations; prerequisite-gated with the missing lesson named. Lessons with a check complete only when it is passed (and the progress test too, where defined); evidence "knowledge check passed" vs "assessed". Content: 14 checks / 61 questions for priority-sport beginner lessons, each answer taken from that lesson's own text, not coach-reviewed (validator enforces shape, real lesson, no instructor-only activity) — tests: quizzes.test.ts (10), api-sports lesson states, e2e sports journey (fail → review → retry → pass) |
 | 8 | AI technique review | K | PARTIAL | photo/frame form check with consent, provider disclosure, confidence labels, "not assessable" list, deletion; full video biomechanics not claimed; needs `ANTHROPIC_API_KEY` for AI (guided fallback otherwise) |
 | 9 | Drill / practice builder | F | COMPLETE | practice builder (supervision, level, setting, time budget), save, complete — api-sports |
 | 10 | Smart workout generator | C | COMPLETE | engine tests (equipment, limitations, time budget, readiness) |
@@ -44,7 +44,7 @@ Baseline 2026-10-20 (branch `claude/modest-wozniak-1x8qcl` from `main` after PR 
 ## Order of work (this session)
 
 1. ✅ Goal roadmap (§15) — Phase C/D.
-2. Quizzes and assessment attempts (§7) — Phase F.
+2. ✅ Quizzes and assessment attempts (§7) — Phase F.
 3. Workout templates (§25) — Phase H.
 4. Missed-workout recovery and travel mode (§13, §18) — Phase G.
 5. Feature flags (§35), privacy center (§28), AI evaluation suite (§32) — Phases I/L.

@@ -4,7 +4,7 @@ import { seed } from "../prisma/seed";
 import { invalidateSportsCache } from "@/lib/services/sports";
 import { addDays, todayKey, weekStart } from "@/lib/domain/dates";
 import { evaluateConsistency, evaluateMeasured, type GoalSpec } from "@/lib/domain/goals";
-import { call, newUser } from "./helpers";
+import { call, newUser, passQuiz } from "./helpers";
 import * as goals from "@/app/api/goals/route";
 import * as goalItem from "@/app/api/goals/[id]/route";
 import * as metrics from "@/app/api/sports/[slug]/metrics/route";
@@ -142,6 +142,7 @@ describe("goals API", () => {
     let e = (await call(goalItem.GET, { cookie, params: { id: g.id } })).json.goal.evaluation;
     expect(e.achieved).toBe(false);
     expect(e.notes.map((n: { code: string }) => n.code)).toContain("lesson_awaiting_assessment");
+    expect((await passQuiz(cookie, "running", "run-walk-start")).json.lesson).toBe("awaiting_assessment"); // the run is still needed
     await call(metrics.POST, { cookie, params: { slug: "running" }, body: { metricKey: "longest_run", value: 1.2, dateKey: T } });
     e = (await call(goalItem.GET, { cookie, params: { id: g.id } })).json.goal.evaluation;
     expect(e.achieved).toBe(true);

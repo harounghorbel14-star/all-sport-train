@@ -67,6 +67,7 @@ model User {
   sportMetrics           SportMetricEntry[]
   recommendationFeedback RecommendationFeedback[]
   goalItems              Goal[]
+  quizAttempts           QuizAttempt[]
   corrections            RecordCorrection[]
 }
 
@@ -876,6 +877,7 @@ model Lesson {
   updatedAt           DateTime         @updatedAt
   sport               Sport            @relation(fields: [sportId], references: [id], onDelete: Cascade)
   progress            LessonProgress[]
+  quiz                LessonQuiz?
 
   @@unique([sportId, slug])
 }
@@ -1034,4 +1036,38 @@ model Goal {
   user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, status])
+}
+
+/// Knowledge check attached to a lesson (one per lesson). Seeded additively; versioned so attempts keep what they were graded against.
+model LessonQuiz {
+  id            String        @id @default(cuid())
+  lessonId      String        @unique
+  content       String // JSON QuizContent
+  version       Int           @default(1)
+  contentStatus String        @default("published")
+  updatedAt     DateTime      @updatedAt
+  lesson        Lesson        @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  attempts      QuizAttempt[]
+}
+
+/// One attempt: questions (and option order) are fixed when it starts and graded once, on the server.
+model QuizAttempt {
+  id          String     @id @default(cuid())
+  userId      String
+  quizId      String
+  quizVersion Int
+  questions   String // JSON [{ id, options: optionId[] }] as shown
+  answers     String? // JSON { questionId: optionId[] }
+  correct     Int?
+  total       Int
+  passed      Boolean?
+  status      String     @default("open") // open | submitted
+  /// "userId:quizId" while open, so only one attempt per quiz can be open at a time.
+  openKey     String?    @unique
+  createdAt   DateTime   @default(now())
+  submittedAt DateTime?
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quiz        LessonQuiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@index([userId, quizId])
 }

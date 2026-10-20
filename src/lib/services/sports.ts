@@ -255,7 +255,18 @@ export async function getLesson(userId: string, sportSlug: string, lessonSlug: s
 }
 
 export type LessonState = "not_started" | "in_progress" | "awaiting_assessment" | "completed";
-export type LessonEvidence = "self_reported" | "result_logged" | "assessed";
+export type LessonEvidence = "self_reported" | "result_logged" | "assessed" | "quiz_passed";
+
+/** Whether the lesson has a published knowledge check, and whether the user has passed it. */
+export async function quizRequirement(userId: string, lessonId: string) {
+  const quiz = await db.lessonQuiz.findUnique({ where: { lessonId }, select: { id: true, contentStatus: true } });
+  if (!quiz || quiz.contentStatus !== "published") return { needsQuiz: false, passed: false };
+  return { needsQuiz: true, passed: !!(await db.quizAttempt.findFirst({ where: { userId, quizId: quiz.id, passed: true }, select: { id: true } })) };
+}
+
+/** Evidence for a lesson whose every defined assessment is met. */
+const evidenceFor = (lesson: LessonView, needsResult: boolean, needsQuiz: boolean): LessonEvidence =>
+  needsResult && needsQuiz ? "assessed" : needsQuiz ? "quiz_passed" : lesson.content.progressTest?.target != null ? "assessed" : "result_logged";
 
 /** Whether a logged result satisfies a lesson's progress test (no target → any measured result counts). */
 function passesTest(metric: MetricView, value: number, target: number | undefined) {
@@ -277,8 +288,9 @@ async function qualifyingEntry(userId: string, sportId: string, lesson: LessonVi
 
 /**
  * Lesson progress. Opening a lesson never changes it. Marking a lesson done is self-reported, unless
- * the lesson has a measurable progress test: then it waits for a logged result that meets the test
- * ("awaiting assessment") and only counts as completed — for XP and prerequisites — once it does.
+ * the lesson has an assessment — a measurable progress test and/or a knowledge check (quiz): then it
+ * waits ("awaiting assessment") and only counts as completed — for XP and prerequisites — once every
+ * defined assessment is met.
  */
 export async function setLessonProgress(userId: string, sportSlug: string, lessonSlug: string, status: "in_progress" | "completed" | "reset") {
   const sport = await loadSport(sportSlug);
@@ -296,12 +308,12 @@ export async function setLessonProgress(userId: string, sportSlug: string, lesso
   if (status === "completed") {
     const metrics = sport.metrics.map(metricView);
     const needsResult = !!lesson.content.progressTest?.metricKey && metrics.some((m) => m.key === lesson.content.progressTest?.metricKey);
-    if (needsResult) {
-      const entry = await qualifyingEntry(userId, sport.id, lesson, metrics);
-      if (entry) {
-        evidence = lesson.content.progressTest?.target != null ? "assessed" : "result_logged";
-        entryId = entry.id;
-      } else state = "awaiting_assessment";
+    const quiz = await quizRequirement(userId, lesson.id);
+    const entry = needsResult ? await qualifyingEntry(userId, sport.id, lesson, metrics) : null;
+    if ((needsResult && !entry) || (quiz.needsQuiz && !quiz.passed)) state = "awaiting_assessment";
+    else if (needsResult || quiz.needsQuiz) {
+      evidence = evidenceFor(lesson, needsResult, quiz.needsQuiz);
+      entryId = entry?.id ?? null;
     } else evidence = "self_reported";
   }
   const data = { status: state, evidence, assessmentEntryId: entryId, completedAt: state === "completed" ? new Date() : null };
@@ -313,7 +325,8 @@ export async function setLessonProgress(userId: string, sportSlug: string, lesso
   const lessons = sport.lessons.map(lessonView);
   const done = await db.lessonProgress.findMany({ where: { userId, status: "completed", lessonId: { in: lessons.map((l) => l.id) } } });
   const completed = new Set(done.map((d) => lessons.find((l) => l.id === d.lessonId)!.slug));
-  return { status: state, evidence, progressTest: state === "awaiting_assessment" ? lesson.content.progressTest ?? null : null, next: nextLesson(lessons, completed, enrolled?.level ?? "beginner")?.slug ?? null };
+  const waitingOn = state === "awaiting_assessment" ? await waitingFor(userId, sport.id, lesson, sport.metrics.map(metricView)) : null;
+  return { status: state, evidence, progressTest: waitingOn?.result ? lesson.content.progressTest ?? null : null, quizRequired: !!waitingOn?.quiz, next: nextLesson(lessons, completed, enrolled?.level ?? "beginner")?.slug ?? null };
 }
 
 /** After a result is logged: lessons waiting on it are completed (with that result as evidence). */
@@ -327,11 +340,47 @@ async function settleAwaitingLessons(userId: string, sport: Awaited<ReturnType<t
     const lesson = lessons.find((l) => l.id === w.lessonId)!;
     const entry = await qualifyingEntry(userId, sport.id, lesson, metrics);
     if (!entry) continue;
-    await db.lessonProgress.update({ where: { userId_lessonId: { userId, lessonId: lesson.id } }, data: { status: "completed", evidence: lesson.content.progressTest?.target != null ? "assessed" : "result_logged", assessmentEntryId: entry.id, completedAt: new Date() } });
+    const quiz = await quizRequirement(userId, lesson.id);
+    if (quiz.needsQuiz && !quiz.passed) continue; // still needs the knowledge check
+    await db.lessonProgress.update({ where: { userId_lessonId: { userId, lessonId: lesson.id } }, data: { status: "completed", evidence: evidenceFor(lesson, true, quiz.needsQuiz), assessmentEntryId: entry.id, completedAt: new Date() } });
     await awardXp(userId, "lesson", lesson.id, 15);
     settled.push(lesson.title);
   }
   return settled;
+}
+
+/** Which assessments a lesson is still waiting on. */
+async function waitingFor(userId: string, sportId: string, lesson: LessonView, metrics: MetricView[]) {
+  const needsResult = !!lesson.content.progressTest?.metricKey && metrics.some((m) => m.key === lesson.content.progressTest?.metricKey);
+  const quiz = await quizRequirement(userId, lesson.id);
+  return { result: needsResult && !(await qualifyingEntry(userId, sportId, lesson, metrics)), quiz: quiz.needsQuiz && !quiz.passed };
+}
+
+/**
+ * After a knowledge check is passed: the lesson completes if nothing else is required, or waits for
+ * its progress test. Passing the check counts as working through the lesson, so it needn't be marked done first.
+ */
+export async function settleLessonAfterQuiz(userId: string, lessonId: string) {
+  const row = await db.lesson.findUnique({ where: { id: lessonId }, select: { sport: { select: { slug: true } } } });
+  if (!row) return null;
+  const sport = await loadSport(row.sport.slug);
+  const lessonRow = sport.lessons.find((l) => l.id === lessonId);
+  if (!lessonRow) return null;
+  const lesson = lessonView(lessonRow);
+  const key = { userId_lessonId: { userId, lessonId } };
+  const current = await db.lessonProgress.findUnique({ where: key });
+  if (current?.status === "completed") return "completed" as const;
+  const metrics = sport.metrics.map(metricView);
+  const needsResult = !!lesson.content.progressTest?.metricKey && metrics.some((m) => m.key === lesson.content.progressTest?.metricKey);
+  const entry = needsResult ? await qualifyingEntry(userId, sport.id, lesson, metrics) : null;
+  const done = !needsResult || !!entry;
+  const data = done
+    ? { status: "completed", evidence: evidenceFor(lesson, needsResult, true), assessmentEntryId: entry?.id ?? null, completedAt: new Date() }
+    : { status: "awaiting_assessment", evidence: null, assessmentEntryId: null, completedAt: null };
+  await db.lessonProgress.upsert({ where: key, create: { userId, lessonId, ...data }, update: data });
+  if (!(await db.userSport.findUnique({ where: { userId_sportId: { userId, sportId: sport.id } } }))) await db.userSport.create({ data: { userId, sportId: sport.id } }).catch(() => undefined);
+  if (done) await awardXp(userId, "lesson", lesson.id, 15);
+  return data.status as "completed" | "awaiting_assessment";
 }
 
 // ── Practice plans ─────────────────────────────────────────────────────

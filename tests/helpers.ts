@@ -60,3 +60,16 @@ export const defaultOnboarding = {
   dietPrefs: [],
   allergies: [],
 };
+
+/** Passes a lesson's knowledge check through the API, answering from the stored quiz. */
+export async function passQuiz(cookie: string, sport: string, lesson: string) {
+  const { db } = await import("@/lib/server/db");
+  const quizRoute = await import("@/app/api/sports/[slug]/lessons/[lesson]/quiz/route");
+  const attemptRoute = await import("@/app/api/quiz-attempts/[id]/route");
+  const start = await call(quizRoute.POST, { cookie, params: { slug: sport, lesson } });
+  if (start.status !== 200) throw new Error(`quiz start failed: ${start.status} ${JSON.stringify(start.json)}`);
+  const row = await db.lessonQuiz.findFirstOrThrow({ where: { lesson: { slug: lesson, sport: { slug: sport } } } });
+  const content = JSON.parse(row.content) as { questions: { id: string; correct: string[] }[] };
+  const answers = Object.fromEntries((start.json.questions as { id: string }[]).map((q) => [q.id, content.questions.find((x) => x.id === q.id)!.correct]));
+  return call(attemptRoute.POST, { cookie, params: { id: start.json.attemptId }, body: { answers } });
+}

@@ -72,7 +72,8 @@ const LESSON_STATE: Record<string, { label: string; tone: "neutral" | "info" | "
 const EVIDENCE: Record<string, string> = {
   self_reported: "self-reported",
   result_logged: "result logged",
-  assessed: "progress test passed",
+  assessed: "assessed",
+  quiz_passed: "knowledge check passed",
 };
 
 /** Lesson status, with how completion is known (APEX can't verify results — they're logged by the user). */

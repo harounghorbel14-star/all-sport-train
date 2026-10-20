@@ -20,7 +20,28 @@ test("sports: search → join → lesson → practice → log a result", async (
   await expect(page).toHaveURL(/tab=learn/);
   await page.getByRole("link", { name: /Ball-handling basics/ }).first().click();
   await page.getByRole("button", { name: "Mark lesson complete" }).click();
-  await expect(page).not.toHaveURL(/ball-handling/);
+  // This lesson has a knowledge check, so marking it done isn't enough.
+  await expect(page.getByText("Awaiting assessment")).toBeVisible();
+  const quiz = page.locator("#quiz");
+  await quiz.getByRole("button", { name: "Start the check" }).click();
+  await quiz.getByRole("button", { name: "Submit answers" }).click(); // nothing answered: everything is wrong
+  await expect(quiz.getByText(/^0 of \d+ correct/)).toBeVisible();
+  // Learn from the review, then retry.
+  const items = quiz.locator("ol > li");
+  const answers: { prompt: string; correct: string[] }[] = [];
+  for (let i = 0; i < (await items.count()); i++) {
+    const prompt = (await items.nth(i).locator("p").first().innerText()).replace(/^\d+\.\s*/, "").trim();
+    const correct = (await items.nth(i).getByText(/^Correct answer:/).innerText()).replace(/^Correct answer:\s*/, "").split("; ");
+    answers.push({ prompt, correct });
+  }
+  await quiz.getByRole("button", { name: "Try again" }).click();
+  for (const a of answers) {
+    const set = quiz.locator("fieldset").filter({ hasText: a.prompt });
+    for (const c of a.correct) await set.getByLabel(c, { exact: true }).check();
+  }
+  await quiz.getByRole("button", { name: "Submit answers" }).click();
+  await expect(quiz.getByText("Passed — this counts toward completing the lesson.")).toBeVisible();
+  await expect(page.getByText("Completed · knowledge check passed")).toBeVisible();
 
   await page.goto("/sports/basketball?tab=practice");
   await page.getByRole("button", { name: "Build practice" }).click();
