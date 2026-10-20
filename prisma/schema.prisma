@@ -69,6 +69,7 @@ model User {
   goalItems              Goal[]
   quizAttempts           QuizAttempt[]
   workoutTemplates       WorkoutTemplate[]
+  travelPeriods          TravelPeriod[]
   corrections            RecordCorrection[]
 }
 
@@ -1089,4 +1090,25 @@ model WorkoutTemplate {
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, deletedAt])
+}
+
+/// A temporary change of routine (travel). While active, workouts generated for days inside it use
+/// its equipment, place and (never longer) session length. Nothing outside the dates changes.
+model TravelPeriod {
+  id             String   @id @default(cuid())
+  userId         String
+  startDate      String // YYYY-MM-DD, user's time zone
+  endDate        String
+  equipment      String   @default("[]") // JSON string[]
+  location       String   @default("mixed")
+  sessionMinutes Int?
+  note           String?
+  status         String   @default("active") // active | cancelled
+  /// Plans adapted for this trip: [{ originalId, replacementId }] so cancelling can put the originals back.
+  adapted        String   @default("[]")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, startDate])
 }

@@ -202,3 +202,26 @@ test("save a workout as a template and schedule it on a later day", async ({ pag
   await page.reload();
   await expect(page.getByRole("button", { name: new RegExp(`^Reschedule .* on ${free}$`) })).toBeVisible();
 });
+
+test("travel mode: add a trip, adapt today's workout after reviewing it, cancel and get the original back", async ({ page }) => {
+  await registerAndOnboard(page);
+  page.on("dialog", (d) => d.accept());
+  await page.goto("/plans#travel");
+  const card = page.locator("#travel");
+  await expect(card.getByText("No trips planned.")).toBeVisible();
+  await card.getByRole("button", { name: "Add a trip" }).click();
+  await page.getByLabel("Where you'll train").selectOption("home");
+  await page.getByRole("button", { name: "Save trip" }).click();
+  await expect(page.getByText("Trip saved", { exact: false })).toBeVisible();
+  await expect(card.getByText("bodyweight only")).toBeVisible();
+
+  await card.getByRole("button", { name: "Review scheduled workouts" }).click();
+  const sheet = page.getByRole("dialog");
+  await expect(sheet.getByText("Workouts during this trip")).toBeVisible();
+  await sheet.getByRole("button", { name: "Apply selected changes" }).click();
+  await expect(page.getByText("1 workout(s) adapted")).toBeVisible();
+
+  await card.getByRole("button", { name: /^Cancel trip/ }).click();
+  await expect(page.getByText("Trip cancelled — 1 original workout(s) restored")).toBeVisible();
+  await expect(card.getByText("No trips planned.")).toBeVisible();
+});

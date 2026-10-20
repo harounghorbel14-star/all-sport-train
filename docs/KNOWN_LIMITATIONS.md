@@ -23,6 +23,10 @@ Honest list of what APEX FIT does **not** do (yet). Updated with each work sessi
 - Consistency goals count completed workouts plus other logged activities; a week with nothing logged counts as 0 sessions.
 - Goals aren't summarised inside the monthly report yet.
 
+## Scheduling
+- Catch-up proposals only look at the current week; they never carry sessions into next week. Two catch-up requests sent at the same instant could, in theory, both add a session to the same day (each request re-checks the day first).
+- Travel mode changes generated workouts only (equipment, place, length); sport practice plans aren't adapted.
+
 ## Templates
 - Templates can't be shared with other users yet, and template contents are edited by editing a plan and updating the template from it (there's no separate template editor).
 

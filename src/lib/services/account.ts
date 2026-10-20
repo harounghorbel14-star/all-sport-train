@@ -31,6 +31,7 @@ export async function exportAccount(userId: string) {
       goalItems: true,
       quizAttempts: true,
       workoutTemplates: true,
+      travelPeriods: true,
       notifications: true,
       challengeEntries: true,
       posts: { include: { comments: true } },

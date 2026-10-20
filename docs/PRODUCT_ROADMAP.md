@@ -18,13 +18,13 @@ Baseline 2026-10-20 (branch `claude/modest-wozniak-1x8qcl` from `main` after PR 
 | 10 / 25 | Workout templates | H | COMPLETE (2026-10-20) | `WorkoutTemplate` (migration `20261020130000_workout_templates`): save from a plan (as last saved) or update an existing template from a plan, rename, folders, duplicate, soft delete with 30-day restore, schedule on a day (calendar rules + load warnings; replaces only today's untouched automatic plan, archived not deleted; never a started/edited/scheduled one). Re-validated on use; scheduled plans keep their own copy. Saving/scheduling never counts as training. Export + guest import — tests: templates.test.ts (6), e2e journey "save a workout as a template…". Sharing templates with others not implemented |
 | 11 | Live workout (log, replace, pause, offline, finish once, correct) | C | COMPLETE | api-workouts, e2e journey |
 | 12 | Plateau detection, training load | D | PARTIAL | cautious plateau check in the recommendation (≥4 sessions, ≥3 weeks); no training-load trend view |
-| 13 | Missed-workout recovery | G | PARTIAL | skipped days derived on the calendar; re-entry rule after long breaks; no "rebuild my week" flow |
+| 13 | Missed-workout recovery | G | COMPLETE (2026-10-20) | Plans › calendar "Missed a workout?": last 7 days (never before sign-up) — scheduled workouts not done, planned training days with nothing logged; proposal only (applied on request): at most 2 sessions this week, only while the week is below the usual number, free days only, never back to back, never a third day in a row, lighter (80 % volume) after 2+ misses or a 14-day break, nothing after a check-in suggesting recovery; missed workouts stay in history as skipped; apply re-checks the proposal — tests: travel-catchup.test.ts |
 | 14 | Exercise substitution | C | COMPLETE | engine substitution tests (equipment, pattern, level) |
 | 15 | Goal roadmap (measurable goals, milestones) | C/D | COMPLETE (2026-10-20) | `Goal` model (additive migration `20261020090000_goals`); kinds: exercise best (completed workouts only), sport result (metric range/direction, ratio attempt minimum, labelled self-reported), weekly consistency (finished weeks only), lesson (completes only with the lesson, assessed vs self-reported). Starting point = best logged result, a labelled self-reported value, or the first result after the goal was set — never invented; milestones at 25/50/75/100 %; no projections; target date is a reminder. Edit/abandon/restore with `RecordCorrection` audit, recomputed on every read so corrections apply; in export and guest import. Progress page card, FR/AR — tests: goals.test.ts (10), e2e journey "set a weekly goal…" |
 | 16 | Calendar: one-time, recurring, reschedule, cancel/restore, states | G | COMPLETE | calendar.test.ts, e2e |
 | 16 | Reminders | G | PARTIAL | in-app notifications; push needs a new dependency + VAPID secrets (BLOCKED on decision) |
 | 17 | Equipment inventory | H | COMPLETE | Settings › Training setup; used by the generator and substitutions |
-| 18 | Travel mode | G | MISSING | |
+| 18 | Travel mode | G | COMPLETE (2026-10-20) | `TravelPeriod` (migration `20261020150000_travel_periods`): dates (≤60 days, no overlaps), place, equipment, session length capped at the usual. Workouts generated for trip days use it automatically. Already-scheduled automatic workouts: preview → apply chosen (originals archived, never deleted); edited ones kept and flagged; cancelling restores untouched originals. Rest days and training days unchanged — tests: travel-catchup.test.ts, e2e journey "travel mode…" |
 | 19 | Personal bests, provenance, corrections | D | COMPLETE | corrections.test.ts, api-sports bests |
 | 20 / 22 | Progress story, weekly + monthly reports | D | PARTIAL | weekly review + monthly report; goals shown next to the report on Progress but not summarised inside it |
 | 21 | Sports benchmarks | D | BLOCKED | no reliable, licensed norm datasets; own history used instead (no invented percentiles) |
@@ -46,7 +46,7 @@ Baseline 2026-10-20 (branch `claude/modest-wozniak-1x8qcl` from `main` after PR 
 1. ✅ Goal roadmap (§15) — Phase C/D.
 2. ✅ Quizzes and assessment attempts (§7) — Phase F.
 3. ✅ Workout templates (§25) — Phase H.
-4. Missed-workout recovery and travel mode (§13, §18) — Phase G.
+4. ✅ Missed-workout recovery and travel mode (§13, §18) — Phase G.
 5. Feature flags (§35), privacy center (§28), AI evaluation suite (§32) — Phases I/L.
 
 Each item ships with tests and a checklist entry before the next one starts.

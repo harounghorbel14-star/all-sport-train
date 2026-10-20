@@ -120,9 +120,17 @@ export async function generateForUser(userId: string, overrides: GenerateOverrid
     dayIndexFor(userId, p, today),
     roadmapFor(p, today),
   ]);
+  // Travel: equipment and place for that day come from the trip; sessions are never longer than usual.
+  const travel = await db.travelPeriod.findFirst({ where: { userId, status: "active", startDate: { lte: today }, endDate: { gte: today } }, orderBy: { createdAt: "desc" } });
+  const engineProfile = toEngineProfile(p);
+  if (travel) {
+    engineProfile.equipment = parseJson(travel.equipment, z.array(z.string()), []);
+    engineProfile.location = travel.location;
+    engineProfile.sessionMinutes = Math.min(travel.sessionMinutes ?? p.sessionMinutes, p.sessionMinutes);
+  }
   const band = overrides.ignoreReadiness ? undefined : readiness.band;
   const volume = (overrides.ignoreReadiness ? 1 : readiness.volume) * roadmap.volume * Math.min(1, Math.max(0.5, overrides.volumeScale ?? 1));
-  const workout = generateWorkout(exercises, toEngineProfile(p), {
+  const workout = generateWorkout(exercises, engineProfile, {
     date: today,
     dayIndex,
     history,
@@ -134,10 +142,10 @@ export async function generateForUser(userId: string, overrides: GenerateOverrid
     focusOverride: overrides.focus,
     skillExercise: roadmap.phase.index >= 3 || p.experience !== "zero" ? skillExercise : null,
     avoidMuscles: overrides.avoidMuscles,
-    seed: `${userId}:${today}:${overrides.focus ?? ""}:${overrides.minutes ?? ""}:${overrides.volumeScale ?? ""}`,
+    seed: `${userId}:${today}:${overrides.focus ?? ""}:${overrides.minutes ?? ""}:${overrides.volumeScale ?? ""}${travel ? `:travel:${travel.id}` : ""}`,
   });
   // Keep the planned volume ≥1 set even after the phase multiplier.
-  return { workout, readiness: band, roadmap };
+  return { workout, readiness: band, roadmap, travel: travel ? { id: travel.id, startDate: travel.startDate, endDate: travel.endDate } : null };
 }
 
 const isUniqueViolation = (e: unknown) => e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002";
