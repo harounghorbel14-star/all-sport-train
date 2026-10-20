@@ -155,3 +155,26 @@ test("switch language to French and Arabic (right-to-left) from Settings", async
   await switchTo("en");
   await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
 });
+
+test("set a weekly goal, see honest progress, abandon and restore it", async ({ page }) => {
+  await registerAndOnboard(page);
+  page.on("dialog", (d) => d.accept());
+  await page.goto("/progress#goals");
+  const card = page.locator("#goals");
+  await expect(card.getByText("No goals yet.", { exact: false })).toBeVisible();
+  await card.getByRole("button", { name: "New goal" }).click();
+  await page.getByLabel("Type").selectOption("consistency");
+  await page.getByLabel("Sessions per week").fill("2");
+  await page.getByLabel("Weeks in a row").fill("3");
+  await page.getByRole("button", { name: "Create goal" }).click();
+  await expect(card.getByText("2× a week for 3 weeks")).toBeVisible();
+  await expect(card.getByText("0 of 3 weeks in a row")).toBeVisible();
+  await expect(card.getByText(/This week so far: 0 session/)).toBeVisible();
+
+  await card.getByRole("button", { name: "Abandon" }).click();
+  await expect(card.getByText("No goals yet.", { exact: false })).toBeVisible();
+  await card.getByRole("link", { name: "Show abandoned goals" }).click();
+  await expect(card.getByText("Abandoned")).toBeVisible();
+  await card.getByRole("button", { name: "Restore" }).click();
+  await expect(card.getByRole("button", { name: "Abandon" })).toBeVisible();
+});

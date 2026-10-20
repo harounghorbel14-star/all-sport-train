@@ -162,6 +162,8 @@ export async function importGuestData(req: Request, accountId: string, guestId: 
       ["practicePlans", tx.practicePlan],
       ["sportResults", tx.sportMetricEntry],
       ["savedMeals", tx.savedMeal],
+      ["goals", tx.goal],
+      ["corrections", tx.recordCorrection],
     ] as const) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- same updateMany shape on each delegate
       moved[name] = (await (model as any).updateMany({ where: { userId: guestId }, data: { userId: accountId } })).count;

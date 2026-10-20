@@ -17,6 +17,11 @@ Honest list of what APEX FIT does **not** do (yet). Updated with each work sessi
 - Recurring activities are weekly (the profile's sport schedule); there are no custom intervals (e.g. every other week) or times of day yet.
 - Reminders are in-app notifications; there are no push notifications.
 
+## Goals
+- Goal kinds are limited to exercise bests (reps, seconds, load), sport results with a numeric/time/ratio metric, weekly consistency and lessons. Body-measurement goals (weight, waist) are deliberately not offered.
+- Consistency goals count completed workouts plus other logged activities; a week with nothing logged counts as 0 sessions.
+- Goals aren't summarised inside the monthly report yet.
+
 ## Localisation
 - French and Arabic cover the shared dictionary (navigation, sign-in, onboarding, workout screens) and the full Today page, training calendar and record corrections. Other page bodies, engine-generated text (workout titles, phase names, missions), server messages (errors, calendar load warnings) and all sports content are English-only; in Arabic, untranslated English text is laid out left-to-right inside the RTL page.
 

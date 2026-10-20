@@ -28,6 +28,7 @@ export async function exportAccount(userId: string) {
       coachMessages: true,
       recommendationFeedback: true,
       corrections: true,
+      goalItems: true,
       notifications: true,
       challengeEntries: true,
       posts: { include: { comments: true } },

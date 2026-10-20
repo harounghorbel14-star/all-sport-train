@@ -66,6 +66,7 @@ model User {
   practicePlans          PracticePlan[]
   sportMetrics           SportMetricEntry[]
   recommendationFeedback RecommendationFeedback[]
+  goalItems              Goal[]
   corrections            RecordCorrection[]
 }
 
@@ -1003,4 +1004,34 @@ model RecordCorrection {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, recordType, recordId])
+}
+
+/// A measurable goal. Progress is always computed from the user's own records (sets, sport results,
+/// workouts, lessons) — never stored as a number the app made up.
+model Goal {
+  id             String    @id @default(cuid())
+  userId         String
+  kind           String // exercise | sport_metric | consistency | lesson
+  title          String
+  exerciseSlug   String? // kind=exercise
+  metric         String? // kind=exercise: reps | seconds | loadKg
+  sportSlug      String? // kind=sport_metric | lesson
+  metricKey      String? // kind=sport_metric
+  lessonSlug     String? // kind=lesson
+  direction      String    @default("higher") // higher | lower
+  /// Where the starting point came from: logged (best record when the goal was set) | self_reported | null (none yet).
+  baseline       Float?
+  baselineSource String?
+  baselineDate   String?
+  target         Float
+  periodWeeks    Int? // kind=consistency: weeks in a row that must meet the target
+  targetDate     String? // optional, YYYY-MM-DD; never a promise
+  status         String    @default("active") // active | abandoned
+  achievedAt     DateTime?
+  note           String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
 }

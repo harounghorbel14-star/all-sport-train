@@ -20,13 +20,13 @@ Baseline 2026-10-20 (branch `claude/modest-wozniak-1x8qcl` from `main` after PR 
 | 12 | Plateau detection, training load | D | PARTIAL | cautious plateau check in the recommendation (≥4 sessions, ≥3 weeks); no training-load trend view |
 | 13 | Missed-workout recovery | G | PARTIAL | skipped days derived on the calendar; re-entry rule after long breaks; no "rebuild my week" flow |
 | 14 | Exercise substitution | C | COMPLETE | engine substitution tests (equipment, pattern, level) |
-| 15 | Goal roadmap (measurable goals, milestones) | C/D | MISSING → next | profile goals are categories only |
+| 15 | Goal roadmap (measurable goals, milestones) | C/D | COMPLETE (2026-10-20) | `Goal` model (additive migration `20261020090000_goals`); kinds: exercise best (completed workouts only), sport result (metric range/direction, ratio attempt minimum, labelled self-reported), weekly consistency (finished weeks only), lesson (completes only with the lesson, assessed vs self-reported). Starting point = best logged result, a labelled self-reported value, or the first result after the goal was set — never invented; milestones at 25/50/75/100 %; no projections; target date is a reminder. Edit/abandon/restore with `RecordCorrection` audit, recomputed on every read so corrections apply; in export and guest import. Progress page card, FR/AR — tests: goals.test.ts (10), e2e journey "set a weekly goal…" |
 | 16 | Calendar: one-time, recurring, reschedule, cancel/restore, states | G | COMPLETE | calendar.test.ts, e2e |
 | 16 | Reminders | G | PARTIAL | in-app notifications; push needs a new dependency + VAPID secrets (BLOCKED on decision) |
 | 17 | Equipment inventory | H | COMPLETE | Settings › Training setup; used by the generator and substitutions |
 | 18 | Travel mode | G | MISSING | |
 | 19 | Personal bests, provenance, corrections | D | COMPLETE | corrections.test.ts, api-sports bests |
-| 20 / 22 | Progress story, weekly + monthly reports | D | PARTIAL | weekly review + monthly report; goal progress not included yet |
+| 20 / 22 | Progress story, weekly + monthly reports | D | PARTIAL | weekly review + monthly report; goals shown next to the report on Progress but not summarised inside it |
 | 21 | Sports benchmarks | D | BLOCKED | no reliable, licensed norm datasets; own history used instead (no invented percentiles) |
 | 23 | Nutrition & recovery | H | COMPLETE | api-other nutrition/recovery; estimates labelled; sharing control |
 | 24 | Smart streaks | H | COMPLETE | domain tests (rest days, grace, weekly targets) |
@@ -43,7 +43,7 @@ Baseline 2026-10-20 (branch `claude/modest-wozniak-1x8qcl` from `main` after PR 
 
 ## Order of work (this session)
 
-1. Goal roadmap (§15) — Phase C/D.
+1. ✅ Goal roadmap (§15) — Phase C/D.
 2. Quizzes and assessment attempts (§7) — Phase F.
 3. Workout templates (§25) — Phase H.
 4. Missed-workout recovery and travel mode (§13, §18) — Phase G.
