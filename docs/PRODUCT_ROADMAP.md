@@ -36,7 +36,7 @@ Baseline 2026-10-20 (branch `claude/modest-wozniak-1x8qcl` from `main` after PR 
 | 29 | Offline | J | COMPLETE | e2e pwa + offline set sync; cache cleared on logout |
 | 30 | Accessibility & localisation | J | PARTIAL | automated a11y checks on 14 pages; FR/AR for shared UI + Today/calendar/corrections only |
 | 31 | Product health | L | PARTIAL | `/api/health` readiness (DB, config); no performance budget |
-| 32 | AI evaluation lab | L | PARTIAL | fallback, safety, privacy and feedback tests exist; no single fixture-based eval suite |
+| 32 | AI evaluation lab | L | COMPLETE (2026-10-20) | `tests/ai-eval.test.ts`: mocked provider, 17 scenarios / 24 expectations with a printed scorecard and provider/model setting (no secrets): outage, rate limit, refusal, empty and invalid structured output → labelled rule-based fallback; working provider labelled AI; emergency answered without calling the model; injury guidance first; app-data grounding block; nutrition privacy off/on changes the request; email never sent; max_tokens bound; repeated recommendations identical; missing check-in never read as recovery; feedback never overrides pain; prerequisites surfaced. Mutation check: switching off the nutrition privacy rule makes the suite fail (verified). Measures app handling, not real model answer quality |
 | 33 | Content quality / coverage | L | COMPLETE | per-topic coverage report — coverage.test.ts |
 | 35 | Feature flags | L | COMPLETE (2026-10-20) | `FEATURES_DISABLED` env (`src/lib/server/features.ts`): default on; enforced server-side in `authedRoute({ feature })` (404 `feature_disabled`), in lesson completion (no waiting on a switched-off quiz) and in generation (trips ignored); UI hides the feature; data never deleted; `/api/health` reports disabled and misspelt names — tests: features.test.ts (enabled and disabled states) |
 | 36 | Security & integrity | B/I | COMPLETE | auth/ownership/race/CSP tests |
@@ -47,6 +47,6 @@ Baseline 2026-10-20 (branch `claude/modest-wozniak-1x8qcl` from `main` after PR 
 2. ✅ Quizzes and assessment attempts (§7) — Phase F.
 3. ✅ Workout templates (§25) — Phase H.
 4. ✅ Missed-workout recovery and travel mode (§13, §18) — Phase G.
-5. Feature flags (§35), privacy center (§28), AI evaluation suite (§32) — Phases I/L.
+5. ✅ Feature flags (§35), privacy center (§28), AI evaluation suite (§32) — Phases I/L.
 
 Each item ships with tests and a checklist entry before the next one starts.
