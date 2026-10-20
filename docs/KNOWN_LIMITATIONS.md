@@ -18,7 +18,7 @@ Honest list of what APEX FIT does **not** do (yet). Updated with each work sessi
 - Reminders are in-app notifications; there are no push notifications.
 
 ## Localisation
-- Only the shared dictionary (navigation, sign-in, onboarding, Today, workout screens) is translated into French and Arabic. Most page bodies and all sports content are English-only; in Arabic, untranslated English text is laid out left-to-right inside the RTL page.
+- French and Arabic cover the shared dictionary (navigation, sign-in, onboarding, workout screens) and the full Today page, training calendar and record corrections. Other page bodies, engine-generated text (workout titles, phase names, missions), server messages (errors, calendar load warnings) and all sports content are English-only; in Arabic, untranslated English text is laid out left-to-right inside the RTL page.
 
 ## Platform
 - No native App Store / Play Store builds; the app installs as a PWA ("Add to Home Screen").
@@ -28,7 +28,7 @@ Honest list of what APEX FIT does **not** do (yet). Updated with each work sessi
 - No integrations with health services (Apple Health, Google Fit, Strava).
 
 ## Security
-- No Content-Security-Policy header yet: Next.js inline scripts would need per-request nonces. Other headers (HSTS, nosniff, frame DENY, referrer and permissions policies) are set.
+- The Content-Security-Policy allows inline styles ('unsafe-inline' in style-src) because animations set style attributes. Scripts are nonce-only. Every page is rendered per request (needed for the nonce).
 
 ## Known issues
 - Query-string tabs (sport hubs, Progress) occasionally don't commit a client-side navigation (Next.js; root cause unknown). A fallback reloads the page after 1.5 s.

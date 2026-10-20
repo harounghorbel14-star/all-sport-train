@@ -143,9 +143,14 @@ test("switch language to French and Arabic (right-to-left) from Settings", async
   await switchTo("fr");
   await expect(page.locator("html")).toHaveAttribute("lang", "fr");
   await expect(page.getByRole("link", { name: "Aujourd'hui" }).first()).toBeVisible();
+  await expect(page.getByText("Missions de la semaine")).toBeVisible();
+  await page.goto("/plans");
+  await expect(page.getByText("Calendrier d'entraînement")).toBeVisible();
+  await page.goto("/today");
   await switchTo("ar");
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   await expect(page.getByRole("link", { name: "اليوم" }).first()).toBeVisible();
+  await expect(page.getByText("مهام الأسبوع")).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
   await switchTo("en");
   await expect(page.locator("html")).toHaveAttribute("dir", "ltr");

@@ -6,6 +6,8 @@ import { Pencil } from "lucide-react";
 import { api } from "@/lib/client/api";
 import { Button, Field, Input, Select } from "@/components/ui/primitives";
 import { Sheet, useToast } from "@/components/ui/overlay";
+import { useI18n } from "@/components/providers";
+import { fmt } from "@/lib/i18n";
 
 export interface CorrectionField {
   key: string;
@@ -27,6 +29,8 @@ export interface CorrectionField {
 export function CorrectRecord({ endpoint, title, fields, label }: { endpoint: string; title: string; fields: CorrectionField[]; label: string }) {
   const router = useRouter();
   const toast = useToast();
+  const { t } = useI18n();
+  const tr = t.records;
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const shown = (f: CorrectionField) => (f.value == null ? "" : f.type === "number" || !f.type ? String(Math.round(Number(f.value) * (f.scale ?? 1) * 100) / 100) : String(f.value));
@@ -42,7 +46,7 @@ export function CorrectRecord({ endpoint, title, fields, label }: { endpoint: st
       else if (raw.trim() === "") body[f.key] = null;
       else {
         const n = Number(raw);
-        if (!Number.isFinite(n)) return toast(`${f.label}: enter a number`, "error");
+        if (!Number.isFinite(n)) return toast(fmt(tr.enterNumber, { field: f.label }), "error");
         const base = n / (f.scale ?? 1);
         body[f.key] = f.integer ? Math.round(base) : Math.round(base * 1000) / 1000;
       }
@@ -52,11 +56,11 @@ export function CorrectRecord({ endpoint, title, fields, label }: { endpoint: st
     setBusy(true);
     try {
       await api(endpoint, { method: "PATCH", body });
-      toast("Corrected — the original is kept in your history");
+      toast(tr.saved);
       setOpen(false);
       router.refresh();
     } catch (e) {
-      toast(e instanceof Error ? e.message : "Could not save", "error");
+      toast(e instanceof Error ? e.message : t.calendar.couldNotSave, "error");
     } finally {
       setBusy(false);
     }
@@ -84,12 +88,12 @@ export function CorrectRecord({ endpoint, title, fields, label }: { endpoint: st
               )}
             </Field>
           ))}
-          <Field label="Reason (optional)" htmlFor="fix-reason">
-            <Input id="fix-reason" maxLength={300} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="e.g. typo, watch stopped late" />
+          <Field label={tr.reason} htmlFor="fix-reason">
+            <Input id="fix-reason" maxLength={300} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={tr.reasonHint} />
           </Field>
-          <p className="text-xs text-muted">Your original entry is kept in your correction history.</p>
+          <p className="text-xs text-muted">{tr.keptNote}</p>
           <Button className="w-full" onClick={save} loading={busy}>
-            Save correction
+            {tr.save}
           </Button>
         </div>
       </Sheet>

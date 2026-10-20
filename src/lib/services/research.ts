@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
+import { topicCoverage } from "../domain/coverage";
 import { db } from "../server/db";
 import { badRequest, notFound } from "../server/errors";
 import { parseJson } from "../server/json";
@@ -246,6 +247,7 @@ export async function coverage() {
         id: true,
         slug: true,
         name: true,
+        categorySlug: true,
         availability: true,
         reviewedAt: true,
         profile: true,
@@ -267,17 +269,7 @@ export async function coverage() {
     const profile = parseJson(s.profile, z.record(z.string(), z.unknown()), {});
     const ruleSources = [...new Set(s.rulesets.flatMap((r) => parseJson(r.sources, z.array(z.string()), [])))];
     const pub = <T extends { contentStatus: string }>(l: T[]) => l.filter((x) => x.contentStatus === "published");
-    const levels = new Set(pub(s.lessons).map((l) => l.level));
-    const missing: string[] = [];
-    if (s.availability !== "external") {
-      if (!pub(s.lessons).length) missing.push("Lessons");
-      else if (!levels.has("advanced")) missing.push("Advanced lessons");
-      if (!pub(s.drills).length) missing.push("Drills");
-      if (!s.rulesets.length) missing.push("Rules summary");
-      if (!profile.techniqueAreas) missing.push("Technique breakdown");
-      if (!profile.tactics) missing.push("Tactics");
-      if (!profile.injuryPrevention) missing.push("Injury prevention");
-    }
+    const topical = topicCoverage({ availability: s.availability, categorySlug: s.categorySlug, profile, lessons: pub(s.lessons), drills: pub(s.drills), rulesets: s.rulesets.length });
     const run = lastRuns.filter((r) => r.sportId === s.id).sort((a, b) => (b.lastRunAt?.getTime() ?? 0) - (a.lastRunAt?.getTime() ?? 0))[0];
     return {
       slug: s.slug,
@@ -296,7 +288,10 @@ export async function coverage() {
       tasksOpen: count(tk.filter((g) => !["done", "dismissed"].includes(g.status))),
       safetyReviews: count(tk.filter((g) => g.kind === "review_suggestion" && g.status === "needs_review")),
       gaps: count(tk.filter((g) => g.kind === "knowledge_gap" && g.status !== "done")),
-      missing,
+      missing: topical.missing,
+      topics: topical.topics,
+      topicsCovered: topical.covered,
+      topicsApplicable: topical.applicable,
       lastReview: s.reviewedAt,
       lastResearch: run ? { at: run.lastRunAt, status: run.status } : null,
     };

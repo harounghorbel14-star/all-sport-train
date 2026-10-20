@@ -1,8 +1,9 @@
 import { OfflineList } from "./list";
 
 export const metadata = { title: "Offline" };
-// Static so the service worker can cache it at install time.
-export const dynamic = "force-static";
+// Rendered per request so its scripts carry the CSP nonce; the service worker caches the whole
+// response (nonce and matching header together) at install time.
+export const dynamic = "force-dynamic";
 
 export default function OfflinePage() {
   return (
