@@ -50,3 +50,16 @@ Baseline 2026-10-20 (branch `claude/modest-wozniak-1x8qcl` from `main` after PR 
 5. ✅ Feature flags (§35), privacy center (§28), AI evaluation suite (§32) — Phases I/L.
 
 Each item ships with tests and a checklist entry before the next one starts.
+
+## Still open
+
+| Item | Why | What's needed |
+|---|---|---|
+| Coach workspace / practical verification (§26) | needs a product decision | coach role, client consent and data-sharing model |
+| Wearables / health services (§27) | BLOCKED | developer accounts and API credentials per provider (Apple, Google Health Connect, Garmin, Strava) |
+| Push reminders (§16) | BLOCKED on decision | a Web Push dependency and VAPID keys on the server |
+| Sports benchmarks (§21) | BLOCKED | licensed, sourced norm datasets; until then own history only |
+| Live AI coaching / research | needs a secret | `ANTHROPIC_API_KEY` on Railway |
+| Training-twin view (§5), recommendation outcome link (§34), training-load trend (§12) | PARTIAL | next P2 work |
+| Full localisation (§30) | PARTIAL | remaining page bodies, generated text, server messages, sports content |
+| Railway deployment health | not verified | access to the deployed service and logs |

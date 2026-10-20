@@ -102,19 +102,37 @@ Status: COMPLETE (verified end to end) · PARTIAL · MISSING · BROKEN · BLOCKE
 ## Known limitations
 Moved to [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md).
 
-## Required journeys — status 2026-10-19
+## Required journeys — status 2026-10-20 (master prompt §38)
 
 | # | Journey | Status | Evidence |
 |---|---|---|---|
-| 1 | Register, sign in, sign out, recover | COMPLETE | e2e auth.spec; api-auth tests (reset token single-use, expiry) |
+| 1 | Register, sign in, sign out, recover an account | COMPLETE | e2e auth.spec; api-auth tests (reset token single-use, expiry) |
 | 2 | Create and complete a workout | COMPLETE | e2e journey "start from zero → … → finish" |
-| 3 | Reload; history persists | COMPLETE | same e2e (reload mid-workout), api-workouts |
-| 4 | Record and correct performance metrics | COMPLETE | e2e "record a result, then correct a typo"; corrections.test |
-| 5 | Follow a lesson and complete its assessment | COMPLETE | api-sports "lesson states" (progress test via logged result) |
-| 6 | Prerequisite restrictions and safe next steps | COMPLETE | api-workouts skill locks; lesson prerequisites; coach suggestion lists missing prerequisites |
-| 7 | AI recommendation: explanation, accept/modify/reject | COMPLETE | recommendation.test; e2e "today shows a coach suggestion" |
-| 8 | Schedule and reschedule a workout | COMPLETE | e2e "schedule … then reschedule"; calendar.test |
-| 9 | Switch languages, Arabic RTL | COMPLETE | e2e "switch language to French and Arabic" |
-| 10 | Offline saved content; sync without duplicates | COMPLETE | e2e pwa.spec, journey offline set sync; sw.test |
-| 11 | Unauthorised access to another user's data | COMPLETE | api tests (404 on others' sessions, practices, records, plans) |
-| 12 | Export data; account deletion | COMPLETE | api-other export/deletion tests |
+| 3 | Workout persists after reload | COMPLETE | same e2e (reload mid-workout), api-workouts |
+| 4 | Correct a recorded result; derived metrics follow | COMPLETE | e2e "record a result, then correct a typo"; corrections.test; goals.test (achievement follows corrections) |
+| 5 | Generate, edit and execute a workout | COMPLETE | api-workouts plan editing; e2e journey; templates e2e (edit → save → schedule) |
+| 6 | AI recommendation: accept / modify / reject | COMPLETE | recommendation.test; e2e "today shows a coach suggestion" |
+| 7 | Missing recovery data is not read as recovery | COMPLETE | recommendation.test, ai-eval "missing data" |
+| 8 | Follow a lesson and complete its real assessment | COMPLETE | quizzes.test; api-sports "lesson states"; e2e sports journey (quiz fail → review → pass) |
+| 9 | Skill prerequisites and cycle detection | COMPLETE | sports.test "prerequisite graph"; quizzes.test (check waits for its prerequisite) |
+| 10 | Schedule, reschedule, cancel, restore | COMPLETE | calendar.test; e2e calendar journey |
+| 11 | Monthly reports and comparisons | COMPLETE | corrections.test "monthly report" |
+| 12 | Privacy controls change what reaches providers | COMPLETE | ai-eval privacy scenarios (mutation-checked); api-other "AI data minimisation"; privacy.test |
+| 13 | Switch languages incl. Arabic RTL | COMPLETE | e2e "switch language to French and Arabic" |
+| 14 | Offline content; sync without duplicates | COMPLETE | e2e pwa.spec, journey offline set sync; sw.test |
+| 15 | Unauthorised access to another user's data | COMPLETE | ownership tests in api-*, calendar, corrections, goals, quizzes, templates, travel-catchup, privacy |
+| 16 | Export data; account deletion | COMPLETE | api-other export/deletion; goals/templates/quizzes/trips included in export |
+| 17 | Safe fallback when external services fail | COMPLETE | ai-eval (outage, rate limit, refusal, empty, invalid output) |
+| 18 | Production build and critical routes | COMPLETE (locally) | `next build` OK; Playwright 34/34 against `next start` (desktop + mobile), CSP spec. Railway deployment not verified (no access) |
+
+## Final verification — 2026-10-20 (branch `claude/modest-wozniak-1x8qcl`)
+
+| Check | Command | Result |
+|---|---|---|
+| Types | `npx tsc --noEmit` | clean |
+| Lint | `npm run lint` | clean |
+| Unit + API | `npx vitest run` | 266 passed (24 files) |
+| Content | `npx tsx scripts/validate-sports.ts` | 135 sports, 14 knowledge checks valid |
+| Build | `npm run build` | succeeds |
+| E2E | `npx playwright test` | 34 passed (desktop + mobile) |
+| Migrations on existing data | copy of an older `dev.db` → `prisma migrate deploy` → seed ×2 | 8 migrations applied; users and lessons kept; 14 quizzes added once |
