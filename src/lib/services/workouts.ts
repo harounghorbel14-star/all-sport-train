@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { db } from "../server/db";
+import { featureEnabled } from "../server/features";
 import { badRequest, conflict, notFound } from "../server/errors";
 import { parseJson } from "../server/json";
 import { addDays, todayKey, weekday, weekStart } from "../domain/dates";
@@ -121,7 +122,7 @@ export async function generateForUser(userId: string, overrides: GenerateOverrid
     roadmapFor(p, today),
   ]);
   // Travel: equipment and place for that day come from the trip; sessions are never longer than usual.
-  const travel = await db.travelPeriod.findFirst({ where: { userId, status: "active", startDate: { lte: today }, endDate: { gte: today } }, orderBy: { createdAt: "desc" } });
+  const travel = !featureEnabled("travel") ? null : await db.travelPeriod.findFirst({ where: { userId, status: "active", startDate: { lte: today }, endDate: { gte: today } }, orderBy: { createdAt: "desc" } });
   const engineProfile = toEngineProfile(p);
   if (travel) {
     engineProfile.equipment = parseJson(travel.equipment, z.array(z.string()), []);

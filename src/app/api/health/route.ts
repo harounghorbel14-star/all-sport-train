@@ -1,5 +1,6 @@
 import { db } from "@/lib/server/db";
 import { configProblems } from "@/lib/server/env";
+import { disabledFeatures, unknownFeatureNames } from "@/lib/server/features";
 
 export const dynamic = "force-dynamic";
 
@@ -22,5 +23,7 @@ export async function GET() {
       problems.push("Database is unreachable — check DATABASE_URL");
     }
   }
-  return Response.json(problems.length ? { status: "misconfigured", problems } : { status: "ok" }, { status: problems.length ? 503 : 200 });
+  // Switched-off features are reported (names only) but don't make the service unhealthy.
+  const features = { disabled: disabledFeatures(), unknown: unknownFeatureNames() };
+  return Response.json(problems.length ? { status: "misconfigured", problems, features } : { status: "ok", features }, { status: problems.length ? 503 : 200 });
 }

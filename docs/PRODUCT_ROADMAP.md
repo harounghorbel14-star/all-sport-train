@@ -38,7 +38,7 @@ Baseline 2026-10-20 (branch `claude/modest-wozniak-1x8qcl` from `main` after PR 
 | 31 | Product health | L | PARTIAL | `/api/health` readiness (DB, config); no performance budget |
 | 32 | AI evaluation lab | L | PARTIAL | fallback, safety, privacy and feedback tests exist; no single fixture-based eval suite |
 | 33 | Content quality / coverage | L | COMPLETE | per-topic coverage report — coverage.test.ts |
-| 35 | Feature flags | L | MISSING | |
+| 35 | Feature flags | L | COMPLETE (2026-10-20) | `FEATURES_DISABLED` env (`src/lib/server/features.ts`): default on; enforced server-side in `authedRoute({ feature })` (404 `feature_disabled`), in lesson completion (no waiting on a switched-off quiz) and in generation (trips ignored); UI hides the feature; data never deleted; `/api/health` reports disabled and misspelt names — tests: features.test.ts (enabled and disabled states) |
 | 36 | Security & integrity | B/I | COMPLETE | auth/ownership/race/CSP tests |
 
 ## Order of work (this session)

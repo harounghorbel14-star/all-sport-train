@@ -1,6 +1,7 @@
 import type { Drill, Lesson, Ruleset, Sport, SportMetric } from "@prisma/client";
 import { z } from "zod";
 import { db } from "../server/db";
+import { featureEnabled } from "../server/features";
 import { badRequest, conflict, notFound } from "../server/errors";
 import { parseJson } from "../server/json";
 import { addDays, isDateKey, todayKey } from "../domain/dates";
@@ -259,6 +260,7 @@ export type LessonEvidence = "self_reported" | "result_logged" | "assessed" | "q
 
 /** Whether the lesson has a published knowledge check, and whether the user has passed it. */
 export async function quizRequirement(userId: string, lessonId: string) {
+  if (!featureEnabled("quizzes")) return { needsQuiz: false, passed: false }; // a switched-off check never blocks a lesson
   const quiz = await db.lessonQuiz.findUnique({ where: { lessonId }, select: { id: true, contentStatus: true } });
   if (!quiz || quiz.contentStatus !== "published") return { needsQuiz: false, passed: false };
   return { needsQuiz: true, passed: !!(await db.quizAttempt.findFirst({ where: { userId, quizId: quiz.id, passed: true }, select: { id: true } })) };

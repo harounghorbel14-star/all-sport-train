@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { db } from "../server/db";
+import { featureEnabled } from "../server/features";
 import { badRequest, conflict, notFound } from "../server/errors";
 import { parseJson } from "../server/json";
 import { quizContentSchema, type QuizContent } from "../content/sports/types";
@@ -24,6 +25,7 @@ const isUniqueViolation = (e: unknown) => e instanceof Prisma.PrismaClientKnownR
 
 /** Quiz state for a lesson: size, pass mark, attempt history, whether it's passed, and an open attempt to resume. */
 export async function quizForLesson(userId: string, sportSlug: string, lessonSlug: string) {
+  if (!featureEnabled("quizzes")) return null;
   const { lesson, prereqsMet } = await getLesson(userId, sportSlug, lessonSlug);
   const quiz = await loadQuiz(lesson.id);
   if (!quiz) return null;

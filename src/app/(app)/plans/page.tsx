@@ -13,6 +13,7 @@ import { PlanCalendarActions, ScheduleWorkoutButton } from "@/components/calenda
 import { listTemplates } from "@/lib/services/templates";
 import { catchUpPreview } from "@/lib/services/calendar";
 import { listTravel } from "@/lib/services/travel";
+import { featureEnabled } from "@/lib/server/features";
 import { EQUIPMENT } from "@/lib/content/types";
 import { EQUIPMENT_LABELS } from "@/lib/exercise-labels";
 import { CatchUpPanel } from "@/components/calendar/catch-up";
@@ -24,13 +25,13 @@ export const metadata = { title: "Plans & Roadmap" };
 
 export default async function PlansPage() {
   const { user, profile } = await requireUser();
-  const [road, plans, sessions, cal, tpl, catchUp, trips] = await Promise.all([roadmapOverview(user.id), listPlans(user.id, 12), recentSessions(user.id, 10), calendar(user.id, { days: 21 }), listTemplates(user.id), catchUpPreview(user.id), listTravel(user.id)]);
+  const [road, plans, sessions, cal, tpl, catchUp, trips] = await Promise.all([roadmapOverview(user.id), listPlans(user.id, 12), recentSessions(user.id, 10), calendar(user.id, { days: 21 }), featureEnabled("templates") ? listTemplates(user.id) : null, featureEnabled("catch_up") ? catchUpPreview(user.id) : null, featureEnabled("travel") ? listTravel(user.id) : null]);
   const s = road.state;
   const tc = getDictionary(profile.locale).calendar;
   const tt = getDictionary(profile.locale).templates;
   const tv = getDictionary(profile.locale).travel;
   const day = (k: string) => formatDateKey(k, profile.locale, { day: "numeric", month: "short" });
-  const folders = [...new Set(tpl.templates.map((x) => x.folder ?? ""))];
+  const folders = [...new Set((tpl?.templates ?? []).map((x) => x.folder ?? ""))];
   return (
     <div className="space-y-6">
       <PageHeader eyebrow="24-week framework" title="Plans & Roadmap" subtitle="An adaptable six-phase progression. Weekly reviews let you repeat, deload or move on — it's a framework, not a fixed schedule." />
@@ -38,7 +39,7 @@ export default async function PlansPage() {
       <Card id="calendar">
         <CardTitle icon={<CalendarDays className="size-4" />}>{tc.title}</CardTitle>
         <p className="-mt-2 mb-3 text-xs text-muted">{tc.intro}</p>
-        <CatchUpPanel data={catchUp} />
+        {catchUp && <CatchUpPanel data={catchUp} />}
         <ol className="divide-y divide-line">
           {cal.days.map((d) => {
             const empty = !d.plans.length && !d.recurring.length && !d.completed.length;
@@ -78,72 +79,76 @@ export default async function PlansPage() {
         </ol>
       </Card>
 
-      <Card id="travel">
-        <CardTitle icon={<Plane className="size-4" />} action={<AddTrip today={cal.today} usualMinutes={profile.sessionMinutes} equipment={[...EQUIPMENT]} />}>{tv.title}</CardTitle>
-        <p className="-mt-2 mb-3 text-xs text-muted">{tv.intro}</p>
-        {trips.current.length === 0 ? (
-          <p className="text-sm text-muted">{tv.empty}</p>
-        ) : (
-          <ul className="divide-y divide-line">
-            {trips.current.map((x) => {
-              const label = fmt(tv.dates, { start: day(x.startDate), end: day(x.endDate) });
-              return (
-                <li key={x.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
-                  <span className="min-w-0 text-sm">
-                    <span className="block font-medium">
-                      {label} <Badge tone={x.startDate <= cal.today ? "accent" : "info"}>{x.startDate <= cal.today ? tv.now : tv.upcoming}</Badge>
-                    </span>
-                    <span className="text-xs text-muted">
-                      {x.equipment.length ? x.equipment.map((e) => EQUIPMENT_LABELS[e] ?? e).join(", ") : tv.bodyweight}
-                      {x.sessionMinutes ? ` · ≤${x.sessionMinutes} min` : ""}
-                      {x.note ? ` · ${x.note}` : ""}
-                    </span>
-                  </span>
-                  <TripActions id={x.id} label={label} />
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </Card>
-
-      <Card id="templates">
-        <CardTitle icon={<Copy className="size-4" />}>{tt.title}</CardTitle>
-        <p className="-mt-2 mb-3 text-xs text-muted">{tt.intro}</p>
-        {tpl.templates.length === 0 && <p className="text-sm text-muted">{tt.empty}</p>}
-        {folders.map((f) => (
-          <div key={f || "-"} className="mb-3">
-            {(folders.length > 1 || f) && <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-subtle">{f || tt.noFolder}</p>}
+      {trips && (
+        <Card id="travel">
+          <CardTitle icon={<Plane className="size-4" />} action={<AddTrip today={cal.today} usualMinutes={profile.sessionMinutes} equipment={[...EQUIPMENT]} />}>{tv.title}</CardTitle>
+          <p className="-mt-2 mb-3 text-xs text-muted">{tv.intro}</p>
+          {trips.current.length === 0 ? (
+            <p className="text-sm text-muted">{tv.empty}</p>
+          ) : (
             <ul className="divide-y divide-line">
-              {tpl.templates.filter((x) => (x.folder ?? "") === f).map((x) => (
-                <li key={x.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
-                  <span className="min-w-0">
-                    <span className="block truncate font-medium">{x.name}</span>
-                    <span className="text-xs text-muted">
-                      {fmt(tt.meta, { minutes: x.minutes ?? "?", count: x.exercises })}
-                      {x.lastUsedAt && ` · ${fmt(tt.lastUsed, { date: x.lastUsedAt.toLocaleDateString(profile.locale) })}`}
+              {trips.current.map((x) => {
+                const label = fmt(tv.dates, { start: day(x.startDate), end: day(x.endDate) });
+                return (
+                  <li key={x.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                    <span className="min-w-0 text-sm">
+                      <span className="block font-medium">
+                        {label} <Badge tone={x.startDate <= cal.today ? "accent" : "info"}>{x.startDate <= cal.today ? tv.now : tv.upcoming}</Badge>
+                      </span>
+                      <span className="text-xs text-muted">
+                        {x.equipment.length ? x.equipment.map((e) => EQUIPMENT_LABELS[e] ?? e).join(", ") : tv.bodyweight}
+                        {x.sessionMinutes ? ` · ≤${x.sessionMinutes} min` : ""}
+                        {x.note ? ` · ${x.note}` : ""}
+                      </span>
                     </span>
-                  </span>
-                  <TemplateActions id={x.id} name={x.name} today={cal.today} restoreDays={tpl.restoreDays} />
-                </li>
-              ))}
+                    <TripActions id={x.id} label={label} />
+                  </li>
+                );
+              })}
             </ul>
-          </div>
-        ))}
-        {tpl.deleted.length > 0 && (
-          <details className="text-xs text-muted">
-            <summary className="cursor-pointer">{fmt(tt.recentlyDeleted, { n: tpl.deleted.length })}</summary>
-            <ul className="mt-1 divide-y divide-line">
-              {tpl.deleted.map((x) => (
-                <li key={x.id} className="flex items-center justify-between gap-2 py-1.5">
-                  <span className="truncate">{x.name}</span>
-                  <RestoreTemplate id={x.id} name={x.name} />
-                </li>
-              ))}
-            </ul>
-          </details>
-        )}
-      </Card>
+          )}
+        </Card>
+      )}
+
+      {tpl && (
+        <Card id="templates">
+          <CardTitle icon={<Copy className="size-4" />}>{tt.title}</CardTitle>
+          <p className="-mt-2 mb-3 text-xs text-muted">{tt.intro}</p>
+          {tpl.templates.length === 0 && <p className="text-sm text-muted">{tt.empty}</p>}
+          {folders.map((f) => (
+            <div key={f || "-"} className="mb-3">
+              {(folders.length > 1 || f) && <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-subtle">{f || tt.noFolder}</p>}
+              <ul className="divide-y divide-line">
+                {tpl.templates.filter((x) => (x.folder ?? "") === f).map((x) => (
+                  <li key={x.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                    <span className="min-w-0">
+                      <span className="block truncate font-medium">{x.name}</span>
+                      <span className="text-xs text-muted">
+                        {fmt(tt.meta, { minutes: x.minutes ?? "?", count: x.exercises })}
+                        {x.lastUsedAt && ` · ${fmt(tt.lastUsed, { date: x.lastUsedAt.toLocaleDateString(profile.locale) })}`}
+                      </span>
+                    </span>
+                    <TemplateActions id={x.id} name={x.name} today={cal.today} restoreDays={tpl.restoreDays} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+          {tpl.deleted.length > 0 && (
+            <details className="text-xs text-muted">
+              <summary className="cursor-pointer">{fmt(tt.recentlyDeleted, { n: tpl.deleted.length })}</summary>
+              <ul className="mt-1 divide-y divide-line">
+                {tpl.deleted.map((x) => (
+                  <li key={x.id} className="flex items-center justify-between gap-2 py-1.5">
+                    <span className="truncate">{x.name}</span>
+                    <RestoreTemplate id={x.id} name={x.name} />
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+        </Card>
+      )}
 
       <Card>
         <CardTitle icon={<Flag className="size-4" />}>

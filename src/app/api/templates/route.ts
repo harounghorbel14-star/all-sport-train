@@ -1,7 +1,7 @@
 import { authedRoute } from "@/lib/server/api";
 import { createTemplate, listTemplates, templateCreateSchema } from "@/lib/services/templates";
 
-export const GET = authedRoute({}, async ({ user }) => listTemplates(user.id));
+export const GET = authedRoute({ feature: "templates" }, async ({ user }) => listTemplates(user.id));
 
 /** Save a workout as a template: `{ planId }` (or `{ planId, replaceId }` to update one), or `{ workout, name }`. */
-export const POST = authedRoute({ body: templateCreateSchema }, async ({ user, body }) => ({ template: await createTemplate(user.id, body) }));
+export const POST = authedRoute({ feature: "templates", body: templateCreateSchema }, async ({ user, body }) => ({ template: await createTemplate(user.id, body) }));

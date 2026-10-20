@@ -4,11 +4,11 @@ import { dateKeySchema } from "@/lib/validation";
 import { deleteTemplate, duplicateTemplate, getTemplate, restoreTemplate, templatePatchSchema, updateTemplate } from "@/lib/services/templates";
 import { scheduleTemplate } from "@/lib/services/calendar";
 
-export const GET = authedRoute({}, async ({ user, params }) => ({ template: await getTemplate(user.id, params.id) }));
-export const PATCH = authedRoute({ body: templatePatchSchema }, async ({ user, params, body }) => ({ template: await updateTemplate(user.id, params.id, body) }));
+export const GET = authedRoute({ feature: "templates" }, async ({ user, params }) => ({ template: await getTemplate(user.id, params.id) }));
+export const PATCH = authedRoute({ feature: "templates", body: templatePatchSchema }, async ({ user, params, body }) => ({ template: await updateTemplate(user.id, params.id, body) }));
 
 /** Soft delete (restorable for 30 days). */
-export const DELETE = authedRoute({}, async ({ user, params }) => {
+export const DELETE = authedRoute({ feature: "templates" }, async ({ user, params }) => {
   await deleteTemplate(user.id, params.id);
   return { ok: true };
 });
@@ -16,6 +16,7 @@ export const DELETE = authedRoute({}, async ({ user, params }) => {
 /** Template actions: schedule it on a day, duplicate it, or restore a deleted one. */
 export const POST = authedRoute(
   {
+    feature: "templates",
     body: z.discriminatedUnion("action", [
       z.object({ action: z.literal("schedule"), dateKey: dateKeySchema }),
       z.object({ action: z.literal("duplicate") }),
