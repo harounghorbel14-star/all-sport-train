@@ -10,15 +10,19 @@ import { cmToIn, formatDateKey, formatLength, formatWeight, kgToLb } from "@/lib
 import { Card, CardTitle, EmptyState, PageHeader, Stat } from "@/components/ui/primitives";
 import { BarChart, LineChart, MeterBar } from "@/components/ui/charts";
 import { cx } from "@/lib/cx";
+import { goalOptions, listGoals } from "@/lib/services/goals";
+import { GoalsCard } from "@/components/goals/goals-card";
+import { featureEnabled } from "@/lib/server/features";
 import { ExercisePicker, MeasurementForm, PhotoJournal, DeleteMeasurement } from "./client";
 
 export const metadata = { title: "Progress" };
 
-export default async function ProgressPage({ searchParams }: { searchParams: Promise<{ range?: string; exercise?: string }> }) {
+export default async function ProgressPage({ searchParams }: { searchParams: Promise<{ range?: string; exercise?: string; goals?: string }> }) {
   const { user, profile } = await requireUser();
   const sp = await searchParams;
   const range = (sp.range && sp.range in RANGES ? sp.range : "12w") as RangeKey;
-  const [a, photos, report] = await Promise.all([analytics(user.id, range, sp.exercise), listProgressPhotos(user.id), monthlyReport(user.id)]);
+  const showAbandoned = sp.goals === "all";
+  const [a, photos, report, goals, options] = await Promise.all([analytics(user.id, range, sp.exercise), listProgressPhotos(user.id), monthlyReport(user.id), featureEnabled("goals") ? listGoals(user.id, { includeAbandoned: showAbandoned }) : null, featureEnabled("goals") ? goalOptions(user.id) : null]);
   const units = profile.units as "metric" | "imperial";
   const label = (w: string) => formatDateKey(w, profile.locale, { month: "short", day: "numeric" });
   const weights = [...a.measurements].filter((m) => m.weightKg).map((m) => ({ label: formatDateKey(m.dateKey, profile.locale, { month: "short", day: "numeric" }), value: Math.round((units === "imperial" ? kgToLb(m.weightKg!) : m.weightKg!) * 10) / 10 }));
@@ -41,6 +45,8 @@ export default async function ProgressPage({ searchParams }: { searchParams: Pro
         }
       />
       {!a.hasAnyData && <EmptyState icon={<LineIcon className="size-5" />} title="Your charts will fill in as you train" body="Complete a workout, log an activity or add a measurement to see your first data points." />}
+      {goals && options && <GoalsCard goals={goals} options={options} units={units} locale={profile.locale} showAbandoned={showAbandoned} />}
+
       <Card id="monthly">
         <CardTitle icon={<CalendarRange className="size-4" />}>Monthly report</CardTitle>
         <div className="overflow-x-auto">

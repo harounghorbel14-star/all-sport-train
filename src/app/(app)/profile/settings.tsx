@@ -169,6 +169,7 @@ export function SettingsApp({ email, tier, profile, ai, usda, security }: { emai
         <Toggle checked={p.shareWorkouts} onChange={(v) => set("shareWorkouts", v)} label="Show my workout count on my profile" />
         <Toggle checked={p.accountability} onChange={(v) => set("accountability", v)} label="Accountability mode" description="Get a gentle nudge when you miss a planned session (in-app only)." />
         <p className="text-xs text-subtle">Measurements, body photos and nutrition are always private and never appear on your profile.</p>
+        <Link href="/profile/privacy" className="text-sm text-accent underline">Open the privacy center</Link>
       </Section>
 
       <Card>
@@ -222,7 +223,7 @@ export function SettingsApp({ email, tier, profile, ai, usda, security }: { emai
         <InstallApp />
       </Card>
 
-      <Card>
+      <Card id="data">
         <CardTitle icon={<Database className="size-4" />}>Your data</CardTitle>
         <p className="text-sm text-muted">Export everything as JSON, or permanently delete your account, data and stored media.</p>
         <div className="mt-3 flex flex-wrap gap-2">

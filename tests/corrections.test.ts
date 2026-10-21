@@ -3,7 +3,7 @@ import { db } from "@/lib/server/db";
 import { seed } from "../prisma/seed";
 import { invalidateSportsCache } from "@/lib/services/sports";
 import { todayKey } from "@/lib/domain/dates";
-import { call, newUser } from "./helpers";
+import { call, newUser, passQuiz } from "./helpers";
 import * as metrics from "@/app/api/sports/[slug]/metrics/route";
 import * as metricItem from "@/app/api/sport-metrics/[id]/route";
 import * as sport from "@/app/api/sports/[slug]/route";
@@ -26,6 +26,7 @@ describe("correcting recorded results", () => {
     const log = (made: number) => call(metrics.POST, { cookie, params: { slug: "football" }, body: { metricKey: "pass_accuracy", made, attempts: 10, dateKey: T } });
     // A typo: 9/10 instead of 5/10 passes the first-touch test (target 70%).
     await call(lesson.POST, { cookie, params: { slug: "football", lesson: "first-touch" }, body: { status: "completed" } });
+    await passQuiz(cookie, "football", "first-touch"); // its knowledge check is passed; the progress test is what's left
     const typo = await log(9);
     expect(typo.json.lessonsPassed).toHaveLength(1);
     const id = typo.json.entry.id;

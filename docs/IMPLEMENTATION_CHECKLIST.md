@@ -33,12 +33,16 @@ Status: COMPLETE (verified end to end) · PARTIAL · MISSING · BROKEN · BLOCKE
 | Progress charts, personal records | COMPLETE | api-workouts PR tests |
 | Correcting recorded results (sport metrics, measurements, activities) | COMPLETE (2026-10-19) | PATCH endpoints with creation-time validation, owner-only; originals kept in `RecordCorrection`; bests, calories, profile weight and lesson assessments re-evaluated (lesson XP returned if no longer passed) — tests: corrections.test.ts, e2e "record a result, then correct a typo" |
 | Sport lessons, prerequisites, lesson states, progress tests | COMPLETE | api-sports "lesson states" |
-| Quizzes / coach verification of results | MISSING | no coach role; results are self-reported → P2 |
+| Quizzes (knowledge checks) | COMPLETE (2026-10-20) | see PRODUCT_ROADMAP §7 — tests: quizzes.test.ts, e2e sports journey |
+| Coach verification of practical results | MISSING | needs a coach role and client consent model (decision) |
 | Prerequisite cycle detection in content | COMPLETE (2026-10-19) | `findPrerequisiteCycle` in the content validator and in admin lesson saves (unknown prerequisites rejected too) — tests: sports.test "prerequisite graph", api-sports admin workflow |
 | Adaptive coach suggestion (reasons, gaps, plateaus, accept/modify/reject) | COMPLETE | recommendation.test.ts, e2e |
 | Recommendation feedback used for future suggestions | COMPLETE (2026-10-19) | last 3 weeks of responses: repeatedly shortened sessions set the suggested length; two declined effort-only lighter sessions stop that adjustment (stated in the reasons); pain, recovery and re-entry rules are never overridden — tests: recommendation.test.ts |
 | Research queue, claims, review, ruleset versions, coverage | COMPLETE | research.test.ts |
 | Coverage report per sport (missing topics) | COMPLETE (2026-10-19) | Admin › Research coverage: each published sport checked against 22 topics (present / missing / not applicable — e.g. positions only for team sports, lessons not expected for instructor-only activities); "Topic gaps across sports" lists how many sports miss each topic and filters to them — tests: coverage.test.ts |
+| Measurable goals with milestones | COMPLETE (2026-10-20) | see PRODUCT_ROADMAP §15 — tests: goals.test.ts, e2e journey "set a weekly goal…" |
+| Workout templates | COMPLETE (2026-10-20) | see PRODUCT_ROADMAP §25 — tests: templates.test.ts, e2e journey |
+| Missed-workout recovery, travel mode | COMPLETE (2026-10-20) | see PRODUCT_ROADMAP §13, §18 — tests: travel-catchup.test.ts, e2e journey |
 | Weekly review; monthly summary | COMPLETE (2026-10-19) | Monthly report on Progress (+ `GET /api/progress/report?month=`): workouts, time, active days, records, lessons, results; per-sport sessions/minutes compared only with the same sport; months in the user's time zone; no combined score — test: corrections.test "monthly report" |
 | Training calendar: reschedule, cancel, recurring activities | COMPLETE (2026-10-19) | Plans page calendar (last week + 2 weeks): schedule (one per day, not in the past, ≤90 days ahead), reschedule, cancel/restore (nothing deleted), completed/started workouts locked; skipped derived from data; weekly sport schedule = recurring activities, matched to logged activities; load warnings (never blocking) — tests: calendar.test.ts, e2e "schedule … then reschedule" |
 | Reminders | PARTIAL | in-app notifications; no push |
@@ -69,6 +73,7 @@ Status: COMPLETE (verified end to end) · PARTIAL · MISSING · BROKEN · BLOCKE
 - ✅ Completed sessions still render the live logging UI; completion retry loses the summary → reopening shows the summary; retries/races return the same summary, one activity, XP once — tests: api-workouts "completes once when two completions race", e2e journey
 - ✅ Query-string tabs (sport hubs, Progress) sometimes didn't respond: Next's router fetched the page but never committed it (pre-existing — reproduced on the last merged commit; still present on the latest Next 15 patch; bisected to the chart components but not to any one behaviour) → `TabLink` falls back to a normal page load after 1.5 s — 50-click stress: 0 stuck (was 3–6 of 8); e2e sports "query-string tabs always respond…"
 - ✅ Sport hub drops newest metric entries after 2,000 → newest 2,000 shown, personal bests from every entry — test: api-sports "…thousands of entries"
+- ✅ Guest import dropped lesson evidence (assessed completions became "self-reported") → evidence and assessed result kept; goals, corrections and quiz attempts move too (2026-10-20)
 - ✅ Guest import drops XP / achievements → XP for moved records comes along (no double counting), achievements re-evaluated — test: api-auth-upgrade "conflict-safe import"
 - ✅ Installable app (Android/iPhone) + offline saved lessons/plans — e2e + service-worker unit tests
 
@@ -97,19 +102,37 @@ Status: COMPLETE (verified end to end) · PARTIAL · MISSING · BROKEN · BLOCKE
 ## Known limitations
 Moved to [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md).
 
-## Required journeys — status 2026-10-19
+## Required journeys — status 2026-10-20 (master prompt §38)
 
 | # | Journey | Status | Evidence |
 |---|---|---|---|
-| 1 | Register, sign in, sign out, recover | COMPLETE | e2e auth.spec; api-auth tests (reset token single-use, expiry) |
+| 1 | Register, sign in, sign out, recover an account | COMPLETE | e2e auth.spec; api-auth tests (reset token single-use, expiry) |
 | 2 | Create and complete a workout | COMPLETE | e2e journey "start from zero → … → finish" |
-| 3 | Reload; history persists | COMPLETE | same e2e (reload mid-workout), api-workouts |
-| 4 | Record and correct performance metrics | COMPLETE | e2e "record a result, then correct a typo"; corrections.test |
-| 5 | Follow a lesson and complete its assessment | COMPLETE | api-sports "lesson states" (progress test via logged result) |
-| 6 | Prerequisite restrictions and safe next steps | COMPLETE | api-workouts skill locks; lesson prerequisites; coach suggestion lists missing prerequisites |
-| 7 | AI recommendation: explanation, accept/modify/reject | COMPLETE | recommendation.test; e2e "today shows a coach suggestion" |
-| 8 | Schedule and reschedule a workout | COMPLETE | e2e "schedule … then reschedule"; calendar.test |
-| 9 | Switch languages, Arabic RTL | COMPLETE | e2e "switch language to French and Arabic" |
-| 10 | Offline saved content; sync without duplicates | COMPLETE | e2e pwa.spec, journey offline set sync; sw.test |
-| 11 | Unauthorised access to another user's data | COMPLETE | api tests (404 on others' sessions, practices, records, plans) |
-| 12 | Export data; account deletion | COMPLETE | api-other export/deletion tests |
+| 3 | Workout persists after reload | COMPLETE | same e2e (reload mid-workout), api-workouts |
+| 4 | Correct a recorded result; derived metrics follow | COMPLETE | e2e "record a result, then correct a typo"; corrections.test; goals.test (achievement follows corrections) |
+| 5 | Generate, edit and execute a workout | COMPLETE | api-workouts plan editing; e2e journey; templates e2e (edit → save → schedule) |
+| 6 | AI recommendation: accept / modify / reject | COMPLETE | recommendation.test; e2e "today shows a coach suggestion" |
+| 7 | Missing recovery data is not read as recovery | COMPLETE | recommendation.test, ai-eval "missing data" |
+| 8 | Follow a lesson and complete its real assessment | COMPLETE | quizzes.test; api-sports "lesson states"; e2e sports journey (quiz fail → review → pass) |
+| 9 | Skill prerequisites and cycle detection | COMPLETE | sports.test "prerequisite graph"; quizzes.test (check waits for its prerequisite) |
+| 10 | Schedule, reschedule, cancel, restore | COMPLETE | calendar.test; e2e calendar journey |
+| 11 | Monthly reports and comparisons | COMPLETE | corrections.test "monthly report" |
+| 12 | Privacy controls change what reaches providers | COMPLETE | ai-eval privacy scenarios (mutation-checked); api-other "AI data minimisation"; privacy.test |
+| 13 | Switch languages incl. Arabic RTL | COMPLETE | e2e "switch language to French and Arabic" |
+| 14 | Offline content; sync without duplicates | COMPLETE | e2e pwa.spec, journey offline set sync; sw.test |
+| 15 | Unauthorised access to another user's data | COMPLETE | ownership tests in api-*, calendar, corrections, goals, quizzes, templates, travel-catchup, privacy |
+| 16 | Export data; account deletion | COMPLETE | api-other export/deletion; goals/templates/quizzes/trips included in export |
+| 17 | Safe fallback when external services fail | COMPLETE | ai-eval (outage, rate limit, refusal, empty, invalid output) |
+| 18 | Production build and critical routes | COMPLETE (locally) | `next build` OK; Playwright 34/34 against `next start` (desktop + mobile), CSP spec. Railway deployment not verified (no access) |
+
+## Final verification — 2026-10-20 (branch `claude/modest-wozniak-1x8qcl`)
+
+| Check | Command | Result |
+|---|---|---|
+| Types | `npx tsc --noEmit` | clean |
+| Lint | `npm run lint` | clean |
+| Unit + API | `npx vitest run` | 266 passed (24 files) |
+| Content | `npx tsx scripts/validate-sports.ts` | 135 sports, 14 knowledge checks valid |
+| Build | `npm run build` | succeeds |
+| E2E | `npx playwright test` | 34 passed (desktop + mobile) |
+| Migrations on existing data | copy of an older `dev.db` → `prisma migrate deploy` → seed ×2 | 8 migrations applied; users and lessons kept; 14 quizzes added once |

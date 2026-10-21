@@ -66,6 +66,10 @@ model User {
   practicePlans          PracticePlan[]
   sportMetrics           SportMetricEntry[]
   recommendationFeedback RecommendationFeedback[]
+  goalItems              Goal[]
+  quizAttempts           QuizAttempt[]
+  workoutTemplates       WorkoutTemplate[]
+  travelPeriods          TravelPeriod[]
   corrections            RecordCorrection[]
 }
 
@@ -875,6 +879,7 @@ model Lesson {
   updatedAt           DateTime         @updatedAt
   sport               Sport            @relation(fields: [sportId], references: [id], onDelete: Cascade)
   progress            LessonProgress[]
+  quiz                LessonQuiz?
 
   @@unique([sportId, slug])
 }
@@ -1003,4 +1008,107 @@ model RecordCorrection {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, recordType, recordId])
+}
+
+/// A measurable goal. Progress is always computed from the user's own records (sets, sport results,
+/// workouts, lessons) — never stored as a number the app made up.
+model Goal {
+  id             String    @id @default(cuid())
+  userId         String
+  kind           String // exercise | sport_metric | consistency | lesson
+  title          String
+  exerciseSlug   String? // kind=exercise
+  metric         String? // kind=exercise: reps | seconds | loadKg
+  sportSlug      String? // kind=sport_metric | lesson
+  metricKey      String? // kind=sport_metric
+  lessonSlug     String? // kind=lesson
+  direction      String    @default("higher") // higher | lower
+  /// Where the starting point came from: logged (best record when the goal was set) | self_reported | null (none yet).
+  baseline       Float?
+  baselineSource String?
+  baselineDate   String?
+  target         Float
+  periodWeeks    Int? // kind=consistency: weeks in a row that must meet the target
+  targetDate     String? // optional, YYYY-MM-DD; never a promise
+  status         String    @default("active") // active | abandoned
+  achievedAt     DateTime?
+  note           String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+}
+
+/// Knowledge check attached to a lesson (one per lesson). Seeded additively; versioned so attempts keep what they were graded against.
+model LessonQuiz {
+  id            String        @id @default(cuid())
+  lessonId      String        @unique
+  content       String // JSON QuizContent
+  version       Int           @default(1)
+  contentStatus String        @default("published")
+  updatedAt     DateTime      @updatedAt
+  lesson        Lesson        @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  attempts      QuizAttempt[]
+}
+
+/// One attempt: questions (and option order) are fixed when it starts and graded once, on the server.
+model QuizAttempt {
+  id          String     @id @default(cuid())
+  userId      String
+  quizId      String
+  quizVersion Int
+  questions   String // JSON [{ id, options: optionId[] }] as shown
+  answers     String? // JSON { questionId: optionId[] }
+  correct     Int?
+  total       Int
+  passed      Boolean?
+  status      String     @default("open") // open | submitted
+  /// "userId:quizId" while open, so only one attempt per quiz can be open at a time.
+  openKey     String?    @unique
+  createdAt   DateTime   @default(now())
+  submittedAt DateTime?
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quiz        LessonQuiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@index([userId, quizId])
+}
+
+/// A reusable workout. Never counts as training: only a scheduled plan that is completed does.
+model WorkoutTemplate {
+  id           String    @id @default(cuid())
+  userId       String
+  name         String
+  folder       String?
+  content      String // JSON GeneratedWorkout (validated like an edited plan)
+  sourcePlanId String?
+  lastUsedAt   DateTime?
+  /// Soft delete: restorable for 30 days, then removed.
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, deletedAt])
+}
+
+/// A temporary change of routine (travel). While active, workouts generated for days inside it use
+/// its equipment, place and (never longer) session length. Nothing outside the dates changes.
+model TravelPeriod {
+  id             String   @id @default(cuid())
+  userId         String
+  startDate      String // YYYY-MM-DD, user's time zone
+  endDate        String
+  equipment      String   @default("[]") // JSON string[]
+  location       String   @default("mixed")
+  sessionMinutes Int?
+  note           String?
+  status         String   @default("active") // active | cancelled
+  /// Plans adapted for this trip: [{ originalId, replacementId }] so cancelling can put the originals back.
+  adapted        String   @default("[]")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, startDate])
 }

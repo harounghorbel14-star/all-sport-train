@@ -66,6 +66,7 @@ For Playwright in a custom environment, set `PLAYWRIGHT_CHROMIUM_PATH` to a Chro
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | no | Enables "Continue with Google" (see [Google sign-in setup](#google-sign-in-setup)). |
 | `GOOGLE_CALLBACK_URL` | no | Override for the redirect URI; defaults to `${APP_BASE_URL}/api/auth/google/callback`. |
 | `TRUSTED_PROXY_HOPS` | no | How many reverse proxies sit in front of the app (default `1`, right for Railway). Rate limits use the client address the last proxy added to `X-Forwarded-For`, so clients can't spoof it. Use `0` if the app is exposed directly. |
+| `FEATURES_DISABLED` | no | Comma-separated features to switch off without a code change: `goals`, `quizzes`, `templates`, `travel`, `catch_up`. Switched-off features are hidden and their API returns 404 `feature_disabled`; their data is kept, and lessons don't wait on a switched-off quiz. `/api/health` lists what's off (and misspelt names). |
 | `RESEND_API_KEY`, `MAIL_FROM` | for password reset | Transactional email through Resend. Without them, development logs reset links to the server console; production sends nothing. |
 
 Secrets are only read on the server (`src/lib/server/env.ts`, validated with Zod). No key ever reaches the browser.

@@ -1,0 +1,846 @@
+import type { QuizContent } from "./types";
+
+/** Knowledge checks keyed by "sportSlug/lessonSlug". Every question is answerable from that lesson's own text. Not reviewed by a coach. */
+export const LESSON_QUIZZES: Record<string, QuizContent> = {
+  "calisthenics/movement-standards": {
+    passPercent: 80,
+    questions: [
+      {
+        id: "pushup-standard",
+        type: "single",
+        prompt: "Which description matches a strict push-up rep?",
+        options: [
+          { id: "a", text: "Chest close to the floor, body straight, arms locked at the top." },
+          { id: "b", text: "Lower partway down and push up quickly to fit in more reps." },
+          { id: "c", text: "Let the hips sag as long as the arms bend." },
+        ],
+        correct: ["a"],
+        explanation: "The lesson's push-up standard is chest close to the floor, body straight and arms locked at the top. Half reps are listed as a mistake.",
+      },
+      {
+        id: "pullup-standard",
+        type: "single",
+        prompt: "What counts as a strict pull-up?",
+        options: [
+          { id: "a", text: "Starting with bent arms and pulling until the chin is near the bar." },
+          { id: "b", text: "From a dead hang to chin over the bar, with no swing." },
+          { id: "c", text: "Swinging the legs to get the chin over the bar." },
+        ],
+        correct: ["b"],
+        explanation: "The lesson defines a pull-up as dead hang to chin over the bar, no swing. Counting momentum-driven reps is a listed mistake.",
+      },
+      {
+        id: "squat-standard",
+        type: "multiple",
+        prompt: "Which are part of the lesson's squat standard? Select all that apply.",
+        options: [
+          { id: "a", text: "Thighs at least parallel." },
+          { id: "b", text: "Heels down." },
+          { id: "c", text: "Heels lifting off the floor to go deeper." },
+          { id: "d", text: "Stopping well above parallel." },
+        ],
+        correct: ["a", "b"],
+        explanation: "The squat standard in the lesson is thighs at least parallel with heels down.",
+      },
+      {
+        id: "easier-variation",
+        type: "single",
+        scenario: "In your baseline test you manage 3 strict pull-ups before your form breaks down.",
+        prompt: "What does the lesson suggest?",
+        options: [
+          { id: "a", text: "Use an easier variation." },
+          { id: "b", text: "Add swinging reps until you reach 5." },
+          { id: "c", text: "Switch to half reps so you can do more." },
+        ],
+        correct: ["a"],
+        explanation: "The lesson says if you can't do 5 strict reps, use an easier variation. Half reps and momentum-driven reps are listed mistakes.",
+      },
+      {
+        id: "reps-not-counted",
+        type: "multiple",
+        prompt: "According to the lesson's mistakes, which of these should NOT be counted as reps? Select all that apply.",
+        options: [
+          { id: "a", text: "Half reps." },
+          { id: "b", text: "Momentum-driven reps." },
+          { id: "c", text: "Controlled reps through the full standard range." },
+        ],
+        correct: ["a", "b"],
+        explanation: "Half reps and counting momentum-driven reps are the lesson's listed mistakes. Strict, full-range reps are what count.",
+      },
+    ],
+  },
+
+  "boxing/stance-guard": {
+    passPercent: 80,
+    questions: [
+      {
+        id: "foot-position",
+        type: "single",
+        prompt: "How should your feet be set in your stance?",
+        options: [
+          { id: "a", text: "In a straight line, one directly in front of the other." },
+          { id: "b", text: "About shoulder-width, lead foot forward, rear heel slightly raised." },
+          { id: "c", text: "Side by side and flat, with both heels down." },
+        ],
+        correct: ["b"],
+        explanation: "The lesson says feet about shoulder-width, lead foot forward, rear heel slightly raised. Feet in a straight line is a listed mistake because it removes balance.",
+      },
+      {
+        id: "hand-position",
+        type: "single",
+        prompt: "Where should your hands and elbows be in your guard?",
+        options: [
+          { id: "a", text: "Hands at cheekbone height, elbows in to protect the body." },
+          { id: "b", text: "Hands at chest height, elbows flared out wide." },
+          { id: "c", text: "Hands dropped by the hips to stay relaxed." },
+        ],
+        correct: ["a"],
+        explanation: "The lesson's guard is hands at cheekbone height with elbows in to protect the body. Hands dropping is a listed mistake.",
+      },
+      {
+        id: "stance-fixes",
+        type: "multiple",
+        scenario: "You film your stance. Your feet are lined up one in front of the other, your hands have drifted down, your chin is up, and your knees are soft.",
+        prompt: "Which of these should you fix? Select all that apply.",
+        options: [
+          { id: "a", text: "Feet in a straight line." },
+          { id: "b", text: "Hands dropping." },
+          { id: "c", text: "Chin up." },
+          { id: "d", text: "Soft knees." },
+        ],
+        correct: ["a", "b", "c"],
+        explanation: "Feet in a straight line, hands dropping and chin up are the lesson's listed mistakes. Soft knees are correct: the lesson says knees soft, weight evenly spread.",
+      },
+      {
+        id: "chin-eyes",
+        type: "single",
+        prompt: "What does the lesson say about your chin and eyes?",
+        options: [
+          { id: "a", text: "Lift the chin so you can see clearly." },
+          { id: "b", text: "Chin tucked; look through your eyebrows." },
+          { id: "c", text: "Look down at your feet to check your stance." },
+        ],
+        correct: ["b"],
+        explanation: "The lesson says chin tucked and look through your eyebrows. Chin up is a listed mistake.",
+      },
+      {
+        id: "weight-balance",
+        type: "single",
+        prompt: "How should your weight and knees be set?",
+        options: [
+          { id: "a", text: "Knees locked straight, weight on the heels." },
+          { id: "b", text: "Knees soft, weight evenly spread, staying on the balls of your feet." },
+          { id: "c", text: "All your weight on the front foot." },
+        ],
+        correct: ["b"],
+        explanation: "The lesson's key points say knees soft and weight evenly spread, and an objective is to stay balanced on the balls of your feet.",
+      },
+    ],
+  },
+
+  "boxing/footwork": {
+    passPercent: 80,
+    questions: [
+      {
+        id: "step-drag-order",
+        type: "single",
+        scenario: "You want to move sideways towards your right while keeping your stance.",
+        prompt: "How should your feet move?",
+        options: [
+          { id: "a", text: "The foot nearest the direction moves first; the other follows the same distance." },
+          { id: "b", text: "The far foot crosses over the near foot first." },
+          { id: "c", text: "Hop high with both feet at once." },
+        ],
+        correct: ["a"],
+        explanation: "The lesson says the foot nearest the direction moves first and the other follows the same distance. Crossing feet and bouncing too high are listed mistakes.",
+      },
+      {
+        id: "step-size",
+        type: "single",
+        prompt: "What kind of steps does the lesson say keep you balanced?",
+        options: [
+          { id: "a", text: "Long, lunging steps." },
+          { id: "b", text: "Short steps." },
+          { id: "c", text: "High bouncing steps." },
+        ],
+        correct: ["b"],
+        explanation: "The lesson's key point is that short steps keep you balanced. Bouncing too high is a listed mistake.",
+      },
+      {
+        id: "pivot",
+        type: "single",
+        prompt: "How do you pivot to change angles?",
+        options: [
+          { id: "a", text: "Turn on the heel of the rear foot and keep the lead leg still." },
+          { id: "b", text: "Turn on the ball of the lead foot, swinging the rear leg round." },
+          { id: "c", text: "Jump and spin both feet at the same time." },
+        ],
+        correct: ["b"],
+        explanation: "The lesson describes the pivot as turning on the ball of the lead foot, swinging the rear leg round.",
+      },
+      {
+        id: "footwork-mistakes",
+        type: "multiple",
+        prompt: "Which of these are footwork mistakes listed in the lesson? Select all that apply.",
+        options: [
+          { id: "a", text: "Crossing feet." },
+          { id: "b", text: "Bouncing too high." },
+          { id: "c", text: "Narrowing the stance when moving." },
+          { id: "d", text: "Keeping your stance width while moving." },
+        ],
+        correct: ["a", "b", "c"],
+        explanation: "Crossing feet, bouncing too high and narrowing the stance are the listed mistakes. Keeping stance width while moving is one of the lesson's objectives.",
+      },
+    ],
+  },
+
+  "football/first-touch": {
+    passPercent: 80,
+    questions: [
+      {
+        id: "touch-direction",
+        type: "single",
+        scenario: "A pass is coming to you and a defender is closing in from your left.",
+        prompt: "Where should your first touch go?",
+        options: [
+          { id: "a", text: "Dead at your feet, so the ball stops under you." },
+          { id: "b", text: "Away from the pressure, about one step ahead into space." },
+          { id: "c", text: "Towards the defender to draw them in." },
+        ],
+        correct: ["b"],
+        explanation: "The lesson says take your first touch away from pressure, not dead at your feet, directing it about one step ahead into space. Stopping the ball dead under you is a listed mistake.",
+      },
+      {
+        id: "cushion-contact",
+        type: "single",
+        prompt: "What should the receiving foot do as the ball arrives?",
+        options: [
+          { id: "a", text: "Relax and draw back slightly, 'giving' as the ball arrives." },
+          { id: "b", text: "Stay stiff so the ball bounces off it." },
+          { id: "c", text: "Jab forward hard at the ball." },
+        ],
+        correct: ["a"],
+        explanation: "The lesson says relax the receiving foot, draw it back slightly on contact and 'give' as the ball arrives. A stiff ankle that makes the ball bounce away is a listed mistake.",
+      },
+      {
+        id: "before-ball-arrives",
+        type: "multiple",
+        prompt: "Which of these does the lesson tell you to do before the ball reaches you? Select all that apply.",
+        options: [
+          { id: "a", text: "Look up so you know where to go." },
+          { id: "b", text: "Get your body in line with the ball early." },
+          { id: "c", text: "Stand side-on to the passer so you can see more of the pitch." },
+          { id: "d", text: "Watch only the ball and nothing else." },
+        ],
+        correct: ["a", "b", "c"],
+        explanation: "Looking up, getting in line early and standing side-on all come from the lesson. Watching only the ball and never checking your surroundings is a listed mistake.",
+      },
+      {
+        id: "both-feet",
+        type: "single",
+        prompt: "After practising with one foot, what does the lesson's final step say to do?",
+        options: [
+          { id: "a", text: "Repeat with the other foot and with the sole of the foot." },
+          { id: "b", text: "Keep using only your stronger foot." },
+          { id: "c", text: "Switch to stopping the ball dead under you." },
+        ],
+        correct: ["a"],
+        explanation: "The last step is to repeat with the other foot and with the sole of the foot, and using both feet is one of the lesson's objectives.",
+      },
+    ],
+  },
+
+  "football/passing": {
+    passPercent: 80,
+    questions: [
+      {
+        id: "standing-foot",
+        type: "single",
+        prompt: "Where should your standing foot go when you pass?",
+        options: [
+          { id: "a", text: "Well behind the ball." },
+          { id: "b", text: "Beside the ball, pointing at the target." },
+          { id: "c", text: "In front of the ball, pointing away from the target." },
+        ],
+        correct: ["b"],
+        explanation: "The lesson says plant your standing foot beside the ball, pointing at the target. Standing foot too far behind the ball is a listed mistake.",
+      },
+      {
+        id: "ball-lifting",
+        type: "single",
+        scenario: "Your inside-foot passes keep lifting off the ground instead of rolling to your teammate.",
+        prompt: "Which listed mistake is the likely cause?",
+        options: [
+          { id: "a", text: "Leaning back." },
+          { id: "b", text: "Following through towards the target." },
+          { id: "c", text: "Planting the standing foot beside the ball." },
+        ],
+        correct: ["a"],
+        explanation: "The lesson lists 'leaning back so the ball lifts' as a mistake. Following through towards the target and planting beside the ball are correct technique.",
+      },
+      {
+        id: "strike-technique",
+        type: "multiple",
+        prompt: "Which of these are part of the lesson's passing technique? Select all that apply.",
+        options: [
+          { id: "a", text: "Strike through the middle of the ball with the inside of the foot." },
+          { id: "b", text: "Keep the ankle locked and follow through towards the target." },
+          { id: "c", text: "Practise only with your dominant foot." },
+        ],
+        correct: ["a", "b"],
+        explanation: "Striking through the middle with the inside of the foot and keeping the ankle locked with a follow-through are key points. Only practising with the dominant foot is a listed mistake.",
+      },
+      {
+        id: "pass-target",
+        type: "single",
+        prompt: "Where does the lesson say to aim your pass?",
+        options: [
+          { id: "a", text: "At your teammate's weaker foot." },
+          { id: "b", text: "Behind your teammate so they have to turn." },
+          { id: "c", text: "To your teammate's stronger foot or into the space in front of them." },
+        ],
+        correct: ["c"],
+        explanation: "The lesson says pass to your teammate's stronger foot or into the space in front of them, and to weight the pass so it is easy to receive.",
+      },
+    ],
+  },
+
+  "basketball/ball-handling": {
+    passPercent: 80,
+    questions: [
+      {
+        id: "dribble-contact",
+        type: "single",
+        prompt: "Which part of the hand should control the dribble?",
+        options: [
+          { id: "a", text: "The fingertips." },
+          { id: "b", text: "A flat palm slapping the ball." },
+          { id: "c", text: "The heel of the hand." },
+        ],
+        correct: ["a"],
+        explanation: "An objective is to dribble with the fingertips, not the palm. Slapping the ball with a flat palm is a listed mistake.",
+      },
+      {
+        id: "athletic-stance",
+        type: "single",
+        prompt: "What body position does the lesson recommend while dribbling?",
+        options: [
+          { id: "a", text: "Standing upright with straight legs." },
+          { id: "b", text: "Athletic stance: knees bent, back straight." },
+          { id: "c", text: "Bent over at the waist with straight knees." },
+        ],
+        correct: ["b"],
+        explanation: "The lesson's key point is an athletic stance with knees bent and back straight. Standing upright is a listed mistake.",
+      },
+      {
+        id: "dribble-habits",
+        type: "multiple",
+        prompt: "Which of these match the lesson's ball-handling guidance? Select all that apply.",
+        options: [
+          { id: "a", text: "Push the ball down firmly and let it come back to your fingertips." },
+          { id: "b", text: "Protect the ball with your body and off-arm." },
+          { id: "c", text: "Keep the ball below waist height." },
+          { id: "d", text: "Use only your strong hand." },
+        ],
+        correct: ["a", "b", "c"],
+        explanation: "Pushing the ball down firmly, protecting it with body and off-arm, and keeping it below waist height all come from the lesson. Only using the strong hand is a listed mistake.",
+      },
+      {
+        id: "next-progression",
+        type: "single",
+        scenario: "Your pound dribble is solid, but you still lose the ball on crossovers.",
+        prompt: "Based on the lesson's steps, what should you do next?",
+        options: [
+          { id: "a", text: "Move straight on to between-the-legs dribbles." },
+          { id: "b", text: "Keep practising crossovers until they are controlled." },
+          { id: "c", text: "Start running at full speed while dribbling." },
+        ],
+        correct: ["b"],
+        explanation: "The steps say to add between-the-legs once crossovers are controlled, and to build up from walking to jogging to running.",
+      },
+      {
+        id: "eyes-up",
+        type: "single",
+        prompt: "Where should your eyes be while dribbling?",
+        options: [
+          { id: "a", text: "Up, glancing at the ball only when learning." },
+          { id: "b", text: "Fixed on the ball at all times." },
+          { id: "c", text: "Closed, to feel the ball better." },
+        ],
+        correct: ["a"],
+        explanation: "The lesson says eyes up and glance at the ball only when learning; seeing the floor is one of the objectives.",
+      },
+    ],
+  },
+
+  "basketball/shooting-form": {
+    passPercent: 80,
+    questions: [
+      {
+        id: "elbow-guide-hand",
+        type: "single",
+        prompt: "What should your shooting elbow and guide hand do?",
+        options: [
+          { id: "a", text: "Elbow flared out; guide hand pushes with the thumb." },
+          { id: "b", text: "Elbow under the ball; guide hand on the side only." },
+          { id: "c", text: "Elbow tucked behind the ball; guide hand underneath it." },
+        ],
+        correct: ["b"],
+        explanation: "The lesson says elbow under the ball, guide hand on the side only. Guide-hand thumb pushing and elbow flaring out are listed mistakes.",
+      },
+      {
+        id: "shooting-target",
+        type: "single",
+        prompt: "Where should your eyes be, and when?",
+        options: [
+          { id: "a", text: "On the front of the rim, early." },
+          { id: "b", text: "On the ball until it leaves your hands." },
+          { id: "c", text: "On the back of the backboard, at release." },
+        ],
+        correct: ["a"],
+        explanation: "The lesson's key point is eyes on the target (front of the rim) early.",
+      },
+      {
+        id: "follow-through",
+        type: "single",
+        prompt: "What does the lesson say about the follow-through?",
+        options: [
+          { id: "a", text: "Pull the hand back down quickly after release." },
+          { id: "b", text: "Wrist snaps down; hold the finish." },
+          { id: "c", text: "Keep the wrist stiff with no snap." },
+        ],
+        correct: ["b"],
+        explanation: "The lesson says follow through: wrist snaps down, hold the finish.",
+      },
+      {
+        id: "inconsistent-form",
+        type: "multiple",
+        scenario: "Your form shots from 1–2 m are still inconsistent. A friend says you should start shooting from much further out instead.",
+        prompt: "Which choices fit the lesson? Select all that apply.",
+        options: [
+          { id: "a", text: "Stay at close range until your form is consistent." },
+          { id: "b", text: "Check that your elbow is under the ball." },
+          { id: "c", text: "Move further back now." },
+          { id: "d", text: "Let your guide-hand thumb add extra push." },
+        ],
+        correct: ["a", "b"],
+        explanation: "Shooting from too far before form is consistent and the guide-hand thumb pushing are listed mistakes. Elbow under the ball is a key point.",
+      },
+      {
+        id: "shooting-balance",
+        type: "single",
+        prompt: "How should your feet be set for balance?",
+        options: [
+          { id: "a", text: "Feet together, toes level." },
+          { id: "b", text: "Feet shoulder-width, shooting foot slightly forward." },
+          { id: "c", text: "Feet very wide, non-shooting foot well forward." },
+        ],
+        correct: ["b"],
+        explanation: "The lesson's balance cue is feet shoulder-width with the shooting foot slightly forward.",
+      },
+    ],
+  },
+
+  "baseball/throwing": {
+    passPercent: 80,
+    questions: [
+      {
+        id: "four-seam-grip",
+        type: "single",
+        prompt: "How do you hold a four-seam grip?",
+        options: [
+          { id: "a", text: "Across the horseshoe of the seams with the index and middle finger." },
+          { id: "b", text: "Deep in the palm with all five fingers wrapped around." },
+          { id: "c", text: "With only the thumb and index finger." },
+        ],
+        correct: ["a"],
+        explanation: "The lesson says grip across the horseshoe of the seams with index and middle finger.",
+      },
+      {
+        id: "body-sequence",
+        type: "single",
+        prompt: "Which describes the lesson's body action?",
+        options: [
+          { id: "a", text: "Face the target square-on and throw with only the arm." },
+          { id: "b", text: "Turn sideways with the glove-side shoulder at the target, step with the glove-side foot, rotate hips then shoulders." },
+          { id: "c", text: "Step with the throwing-side foot and rotate shoulders before hips." },
+        ],
+        correct: ["b"],
+        explanation: "The key points are turn sideways, glove-side shoulder at the target, step with the glove-side foot, rotate hips then shoulders. Throwing with only the arm is a listed mistake.",
+      },
+      {
+        id: "elbow-pain",
+        type: "single",
+        scenario: "Partway through a throwing session you feel pain in your elbow.",
+        prompt: "What does the lesson say to do?",
+        options: [
+          { id: "a", text: "Stop." },
+          { id: "b", text: "Keep throwing but more softly." },
+          { id: "c", text: "Throw harder to loosen it up." },
+        ],
+        correct: ["a"],
+        explanation: "The lesson's safety guidance is to stop if you feel elbow or shoulder pain.",
+      },
+      {
+        id: "session-habits",
+        type: "multiple",
+        prompt: "Which of these match the lesson's guidance? Select all that apply.",
+        options: [
+          { id: "a", text: "Warm up with short, easy throws before increasing distance." },
+          { id: "b", text: "Release out front and follow through across your body." },
+          { id: "c", text: "Throw hard from the start to save time." },
+          { id: "d", text: "Short-arm the ball for accuracy." },
+        ],
+        correct: ["a", "b"],
+        explanation: "Warming up with short, easy throws is a safety point, and releasing out front with a follow-through is a key point. Throwing hard before warming up and short-arming are listed mistakes.",
+      },
+    ],
+  },
+
+  "swimming/water-confidence": {
+    passPercent: 80,
+    questions: [
+      {
+        id: "breathing-pattern",
+        type: "single",
+        prompt: "How does the lesson say to breathe?",
+        options: [
+          { id: "a", text: "In through the mouth above water, out through the nose and mouth underwater." },
+          { id: "b", text: "Hold your breath the whole time your face is in the water." },
+          { id: "c", text: "Breathe in through the nose while underwater." },
+        ],
+        correct: ["a"],
+        explanation: "The lesson says breathe in through the mouth above water and out through the nose and mouth underwater, and an objective is to exhale underwater calmly.",
+      },
+      {
+        id: "relax-to-float",
+        type: "single",
+        prompt: "Why does the lesson tell you to relax?",
+        options: [
+          { id: "a", text: "Tension makes you sink." },
+          { id: "b", text: "Relaxing makes you swim faster." },
+          { id: "c", text: "It doesn't matter; tension helps you float." },
+        ],
+        correct: ["a"],
+        explanation: "The key point is: relax — tension makes you sink.",
+      },
+      {
+        id: "stand-up",
+        type: "single",
+        prompt: "How do you recover to standing in shallow water?",
+        options: [
+          { id: "a", text: "Kick hard and reach for the bottom with straight legs." },
+          { id: "b", text: "Knees to chest, press arms down, feet to the floor." },
+          { id: "c", text: "Lift your head first and wait to sink down." },
+        ],
+        correct: ["b"],
+        explanation: "The lesson teaches standing up by bringing knees to chest, pressing arms down, then feet to the floor.",
+      },
+      {
+        id: "safe-practice",
+        type: "multiple",
+        scenario: "A friend who can't swim yet wants to practise putting their face in the water.",
+        prompt: "Which options follow the lesson's safety guidance? Select all that apply.",
+        options: [
+          { id: "a", text: "Practise only in shallow water with a lifeguard or instructor present." },
+          { id: "b", text: "Take supervised learn-to-swim lessons." },
+          { id: "c", text: "Practise alone in deep water to build confidence faster." },
+        ],
+        correct: ["a", "b"],
+        explanation: "The safety points are to practise only in shallow water with a lifeguard or instructor present, and that non-swimmers should take supervised learn-to-swim lessons.",
+      },
+    ],
+  },
+
+  "swimming/body-position": {
+    passPercent: 80,
+    questions: [
+      {
+        id: "streamline-arms",
+        type: "single",
+        prompt: "How are the arms held in a streamline?",
+        options: [
+          { id: "a", text: "Overhead, one hand on top of the other, biceps squeezing the ears." },
+          { id: "b", text: "By your sides, palms facing the legs." },
+          { id: "c", text: "Overhead, hands wide apart." },
+        ],
+        correct: ["a"],
+        explanation: "The lesson's streamline is arms overhead, one hand on top of the other, biceps squeezing the ears.",
+      },
+      {
+        id: "sinking-legs",
+        type: "single",
+        scenario: "During your glide you keep looking forward to see the wall, and your legs start to sink.",
+        prompt: "What should you change?",
+        options: [
+          { id: "a", text: "Lift your head higher." },
+          { id: "b", text: "Look at the pool floor, not forward." },
+          { id: "c", text: "Kick harder from the knees." },
+        ],
+        correct: ["b"],
+        explanation: "The lesson says look at the pool floor, not forward; a head lifted forward makes the legs sink. Kicking from the knees is a listed mistake.",
+      },
+      {
+        id: "kick-technique",
+        type: "multiple",
+        prompt: "Which describe the kick taught in this lesson? Select all that apply.",
+        options: [
+          { id: "a", text: "Small and fast from the hips." },
+          { id: "b", text: "Knees slightly soft, ankles relaxed." },
+          { id: "c", text: "Driven mainly from the knees." },
+          { id: "d", text: "Stiff, flexed ankles." },
+        ],
+        correct: ["a", "b"],
+        explanation: "The lesson says kick small and fast from the hips with knees slightly soft and relaxed ankles. Kicking from the knees and stiff, flexed ankles are listed mistakes.",
+      },
+      {
+        id: "lift-hips",
+        type: "single",
+        prompt: "What does the lesson say helps lift the hips?",
+        options: [
+          { id: "a", text: "Pressing the chest gently into the water." },
+          { id: "b", text: "Raising the head to look ahead." },
+          { id: "c", text: "Bending at the waist." },
+        ],
+        correct: ["a"],
+        explanation: "The key point is to press the chest gently into the water to lift the hips; keeping hips near the surface is an objective.",
+      },
+    ],
+  },
+
+  "running/run-walk-start": {
+    passPercent: 80,
+    questions: [
+      {
+        id: "starting-intervals",
+        type: "single",
+        prompt: "Which is an example starting session from the lesson?",
+        options: [
+          { id: "a", text: "1 min run / 2 min walk for 20–25 minutes." },
+          { id: "b", text: "Run as far as you can without stopping." },
+          { id: "c", text: "Sprint 1 min / rest 10 s for 45 minutes." },
+        ],
+        correct: ["a"],
+        explanation: "The lesson suggests beginning with intervals such as 1 min run / 2 min walk for 20–25 minutes.",
+      },
+      {
+        id: "effort-level",
+        type: "single",
+        prompt: "What effort level should your runs be?",
+        options: [
+          { id: "a", text: "As fast as you can manage." },
+          { id: "b", text: "Conversational." },
+          { id: "c", text: "Hard enough that you can't speak." },
+        ],
+        correct: ["b"],
+        explanation: "An objective is to keep effort conversational, and running too fast is a listed mistake.",
+      },
+      {
+        id: "hard-week",
+        type: "single",
+        scenario: "You finished this week's sessions, but they felt hard.",
+        prompt: "What does the lesson suggest?",
+        options: [
+          { id: "a", text: "Repeat the week — that's normal." },
+          { id: "b", text: "Move on and add extra distance anyway." },
+          { id: "c", text: "Skip your rest days to catch up." },
+        ],
+        correct: ["a"],
+        explanation: "The lesson says repeat a week if it felt hard — that's normal. Adding distance too quickly and skipping rest days are listed mistakes.",
+      },
+      {
+        id: "beginner-mistakes",
+        type: "multiple",
+        prompt: "Which of these are mistakes listed in the lesson? Select all that apply.",
+        options: [
+          { id: "a", text: "Running too fast." },
+          { id: "b", text: "Adding distance too quickly." },
+          { id: "c", text: "Skipping rest days." },
+          { id: "d", text: "Gradually lengthening run segments as they feel easier." },
+        ],
+        correct: ["a", "b", "c"],
+        explanation: "Running too fast, adding distance too quickly and skipping rest days are the listed mistakes. Gradually lengthening run segments as they feel easier is the lesson's advice.",
+      },
+      {
+        id: "weekly-frequency",
+        type: "single",
+        prompt: "How often does the lesson aim for you to run?",
+        options: [
+          { id: "a", text: "Every day." },
+          { id: "b", text: "Three times a week." },
+          { id: "c", text: "Once a week." },
+        ],
+        correct: ["b"],
+        explanation: "The first objective is to run three times a week.",
+      },
+    ],
+  },
+
+  "running/running-form": {
+    passPercent: 80,
+    questions: [
+      {
+        id: "posture",
+        type: "single",
+        prompt: "What posture does the lesson recommend?",
+        options: [
+          { id: "a", text: "Stand tall, lean slightly from the ankles." },
+          { id: "b", text: "Bend forward at the waist." },
+          { id: "c", text: "Lean back to lengthen your stride." },
+        ],
+        correct: ["a"],
+        explanation: "The lesson's key point is to stand tall and lean slightly from the ankles.",
+      },
+      {
+        id: "overstriding",
+        type: "single",
+        scenario: "A video shows your foot landing far out in front of you with a straight leg.",
+        prompt: "What does the lesson suggest?",
+        options: [
+          { id: "a", text: "Reach further forward to cover more ground." },
+          { id: "b", text: "Avoid overstriding — let your feet land close beneath you." },
+          { id: "c", text: "Lock the knee harder on landing." },
+        ],
+        correct: ["b"],
+        explanation: "Overstriding with a straight leg is a listed mistake; the lesson says feet should land close beneath you, under your centre of mass.",
+      },
+      {
+        id: "relaxed-running",
+        type: "multiple",
+        prompt: "Which of these match the lesson's cues? Select all that apply.",
+        options: [
+          { id: "a", text: "Relax your shoulders and hands." },
+          { id: "b", text: "Let your arms cross the body." },
+          { id: "c", text: "Keep your shoulders tense for stability." },
+          { id: "d", text: "Use a natural, slightly quicker cadence." },
+        ],
+        correct: ["a", "d"],
+        explanation: "Relaxing shoulders and hands is a key point and a natural, slightly quicker cadence is an objective. Tense shoulders and arms crossing the body are listed mistakes.",
+      },
+      {
+        id: "foot-strike",
+        type: "single",
+        prompt: "What does the lesson say about changing your foot-strike?",
+        options: [
+          { id: "a", text: "Switch to a new foot-strike pattern straight away." },
+          { id: "b", text: "Small changes only; don't force a new foot-strike pattern." },
+          { id: "c", text: "Always land on your toes." },
+        ],
+        correct: ["b"],
+        explanation: "The lesson says make small changes only and don't force a new foot-strike pattern.",
+      },
+    ],
+  },
+
+  "tennis/grips-ready": {
+    passPercent: 80,
+    questions: [
+      {
+        id: "continental-grip",
+        type: "single",
+        prompt: "How do you find the continental grip?",
+        options: [
+          { id: "a", text: "Shake hands with the racket edge." },
+          { id: "b", text: "Lay the racket face flat on the ground and pick it up." },
+          { id: "c", text: "Hold the racket with both hands at the top of the handle." },
+        ],
+        correct: ["a"],
+        explanation: "The lesson says continental: shake hands with the racket edge.",
+      },
+      {
+        id: "forehand-grip",
+        type: "single",
+        prompt: "How do you move from continental to a forehand grip?",
+        options: [
+          { id: "a", text: "Rotate the hand slightly behind the handle (eastern/semi-western)." },
+          { id: "b", text: "Squeeze the handle as tightly as you can." },
+          { id: "c", text: "Slide the hand up onto the racket throat." },
+        ],
+        correct: ["a"],
+        explanation: "The lesson's forehand grip is to rotate the hand slightly behind the handle (eastern/semi-western). Gripping too tightly is a listed mistake.",
+      },
+      {
+        id: "split-step-timing",
+        type: "single",
+        scenario: "You are at the baseline and your opponent is about to hit the ball.",
+        prompt: "When do you split step?",
+        options: [
+          { id: "a", text: "With a small hop as the opponent makes contact." },
+          { id: "b", text: "After the ball has bounced on your side." },
+          { id: "c", text: "Never — wait flat-footed until you see where it goes." },
+        ],
+        correct: ["a"],
+        explanation: "The lesson says split step with a small hop as the opponent makes contact. Flat-footed waiting is a listed mistake.",
+      },
+      {
+        id: "ready-position",
+        type: "multiple",
+        prompt: "Which are part of the lesson's ready position? Select all that apply.",
+        options: [
+          { id: "a", text: "Knees bent." },
+          { id: "b", text: "Racket in front." },
+          { id: "c", text: "Weight on the balls of the feet." },
+          { id: "d", text: "Gripping the racket as tightly as possible." },
+        ],
+        correct: ["a", "b", "c"],
+        explanation: "The ready position is knees bent, racket in front, weight on the balls of the feet. Gripping too tightly is a listed mistake.",
+      },
+    ],
+  },
+
+  "tennis/forehand": {
+    passPercent: 80,
+    questions: [
+      {
+        id: "unit-turn",
+        type: "single",
+        prompt: "What is the unit turn?",
+        options: [
+          { id: "a", text: "Shoulders and racket turn together as the ball approaches." },
+          { id: "b", text: "Only the arm takes the racket back after the bounce." },
+          { id: "c", text: "Turning to face the net square-on." },
+        ],
+        correct: ["a"],
+        explanation: "The lesson defines the unit turn as shoulders and racket turning together as the ball approaches. Late preparation and an arm-only swing are listed mistakes.",
+      },
+      {
+        id: "swing-path",
+        type: "single",
+        prompt: "Which swing path does the lesson teach for topspin?",
+        options: [
+          { id: "a", text: "High to low, finishing by the hip." },
+          { id: "b", text: "Drop the racket below the ball, swing up and through, finish over the opposite shoulder." },
+          { id: "c", text: "Flat and level, stopping at contact." },
+        ],
+        correct: ["b"],
+        explanation: "The key points are drop the racket below the ball, then swing up and through, finishing over the opposite shoulder; swinging low to high for topspin is an objective.",
+      },
+      {
+        id: "contact-point",
+        type: "single",
+        prompt: "Where should you make contact with the ball?",
+        options: [
+          { id: "a", text: "Beside the body." },
+          { id: "b", text: "Behind the body." },
+          { id: "c", text: "In front of the body." },
+        ],
+        correct: ["c"],
+        explanation: "An objective is contact in front of the body. Hitting beside or behind the body is a listed mistake.",
+      },
+      {
+        id: "late-forehands",
+        type: "multiple",
+        scenario: "Your forehands feel rushed. You start turning only when the ball bounces, swing mostly with your arm, and stay where you finished after each shot.",
+        prompt: "Which changes fit the lesson? Select all that apply.",
+        options: [
+          { id: "a", text: "Turn early, with shoulders and racket together." },
+          { id: "b", text: "Recover to the centre after the shot." },
+          { id: "c", text: "Let the ball get beside you before swinging." },
+          { id: "d", text: "Keep it an arm-only swing for control." },
+        ],
+        correct: ["a", "b"],
+        explanation: "The lesson says turn early with a unit turn and recover to the centre. Late preparation, an arm-only swing and hitting beside the body are listed mistakes.",
+      },
+    ],
+  },
+};

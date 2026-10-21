@@ -1,5 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
-import { CATEGORIES, SOURCES, SPORT_SEEDS, metricSeedSchema, sportProfileSchema, lessonContentSchema, drillContentSchema } from "../src/lib/content/sports";
+import { CATEGORIES, LESSON_QUIZZES, SOURCES, SPORT_SEEDS, metricSeedSchema, sportProfileSchema, lessonContentSchema, drillContentSchema, quizContentSchema } from "../src/lib/content/sports";
 
 /**
  * Seeds the sports knowledge base. Re-running is safe and additive, so existing
@@ -63,6 +63,15 @@ export async function seedSports(db: PrismaClient) {
       for (const r of rules.filter((x) => haveRules.has(x.slug))) await db.ruleset.update({ where: { sportId_slug: { sportId, slug: r.slug } }, data: r.data });
       for (const l of lessons.filter((x) => haveLessons.has(x.slug))) await db.lesson.update({ where: { sportId_slug: { sportId, slug: l.slug } }, data: l.data });
       for (const d of drills.filter((x) => haveDrills.has(x.slug))) await db.drill.update({ where: { sportId_slug: { sportId, slug: d.slug } }, data: d.data });
+    }
+    // Knowledge checks: created when missing; with SEED_OVERWRITE a changed quiz gets a new version.
+    for (const [key, quiz] of Object.entries(LESSON_QUIZZES).filter(([k]) => k.startsWith(`${s.slug}/`))) {
+      const lesson = await db.lesson.findUnique({ where: { sportId_slug: { sportId, slug: key.slice(s.slug.length + 1) } }, select: { id: true } });
+      if (!lesson) continue;
+      const content = JSON.stringify(quizContentSchema.parse(quiz));
+      const have = await db.lessonQuiz.findUnique({ where: { lessonId: lesson.id } });
+      if (!have) await db.lessonQuiz.create({ data: { lessonId: lesson.id, content } });
+      else if (overwrite && have.content !== content) await db.lessonQuiz.update({ where: { id: have.id }, data: { content, version: { increment: 1 } } });
     }
   }
   return { sports: SPORT_SEEDS.length, createdOrUpdated: created, sources: SOURCES.length };

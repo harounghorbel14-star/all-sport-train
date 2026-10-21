@@ -4,6 +4,8 @@ import { ArrowLeft, ArrowRight, Lock, ShieldAlert } from "lucide-react";
 import { requireUser } from "@/lib/auth/server";
 import { AppError } from "@/lib/server/errors";
 import { getLesson } from "@/lib/services/sports";
+import { quizForLesson } from "@/lib/services/quizzes";
+import { LessonQuiz } from "@/components/sports/lesson-quiz";
 import { Card, CardTitle, Notice, PageHeader } from "@/components/ui/primitives";
 import { DrillBadges, LessonStatusBadge, SourceList } from "@/components/sports/badges";
 import { LessonActions } from "./actions";
@@ -20,9 +22,10 @@ async function load(userId: string, slug: string, lesson: string) {
 
 export default async function LessonPage({ params }: { params: Promise<{ slug: string; lesson: string }> }) {
   const { slug, lesson: lessonSlug } = await params;
-  const { user } = await requireUser();
+  const { user, profile } = await requireUser();
   const { hub, lesson, drills, completedLessons, state, prereqsMet, previous, next } = await load(user.id, slug, lessonSlug);
   const c = lesson.content;
+  const quiz = await quizForLesson(user.id, slug, lessonSlug);
   const missing = lesson.prerequisites.filter((p) => !completedLessons.includes(p)).map((p) => hub.lessons.find((l) => l.slug === p));
   const sources = hub.sources.filter((s) => lesson.sources.includes(s.slug));
   const list = (items?: string[], ordered = false) => {
@@ -108,7 +111,7 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
           <CardTitle>Check your progress</CardTitle>
           <p className="text-sm text-muted">{c.progressTest.description}</p>
           {state.state === "awaiting_assessment" && (
-            <p className="mt-2 text-sm">This lesson completes when you log a result that meets this test. Results are self-reported — log what you actually measured.</p>
+            <p className="mt-2 text-sm">This lesson completes when you log a result that meets this test{quiz && !quiz.passed ? " and pass the knowledge check below" : ""}. Results are self-reported — log what you actually measured.</p>
           )}
           {c.progressTest.metricKey && (
             <Link href={`/sports/${slug}?tab=progress`} className="mt-2 inline-block text-sm text-accent underline">
@@ -117,6 +120,7 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
           )}
         </Card>
       )}
+      {quiz && <LessonQuiz slug={slug} lesson={lesson.slug} initial={quiz} hasProgressTest={!!c.progressTest?.metricKey} locale={profile.locale} />}
       {sources.length > 0 && <SourceList sources={sources} />}
       <div className="flex flex-wrap items-center gap-2">
         <LessonActions slug={slug} lesson={lesson.slug} state={state.state} />

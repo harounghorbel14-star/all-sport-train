@@ -155,3 +155,73 @@ test("switch language to French and Arabic (right-to-left) from Settings", async
   await switchTo("en");
   await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
 });
+
+test("set a weekly goal, see honest progress, abandon and restore it", async ({ page }) => {
+  await registerAndOnboard(page);
+  page.on("dialog", (d) => d.accept());
+  await page.goto("/progress#goals");
+  const card = page.locator("#goals");
+  await expect(card.getByText("No goals yet.", { exact: false })).toBeVisible();
+  await card.getByRole("button", { name: "New goal" }).click();
+  await page.getByLabel("Type").selectOption("consistency");
+  await page.getByLabel("Sessions per week").fill("2");
+  await page.getByLabel("Weeks in a row").fill("3");
+  await page.getByRole("button", { name: "Create goal" }).click();
+  await expect(card.getByText("2× a week for 3 weeks")).toBeVisible();
+  await expect(card.getByText("0 of 3 weeks in a row")).toBeVisible();
+  await expect(card.getByText(/This week so far: 0 session/)).toBeVisible();
+
+  await card.getByRole("button", { name: "Abandon" }).click();
+  await expect(card.getByText("No goals yet.", { exact: false })).toBeVisible();
+  await card.getByRole("link", { name: "Show abandoned goals" }).click();
+  await expect(card.getByText("Abandoned")).toBeVisible();
+  await card.getByRole("button", { name: "Restore" }).click();
+  await expect(card.getByRole("button", { name: "Abandon" })).toBeVisible();
+});
+
+test("save a workout as a template and schedule it on a later day", async ({ page }) => {
+  await registerAndOnboard(page);
+  await page.goto("/today");
+  await page.getByRole("link", { name: "View & edit" }).click();
+  await expect(page).toHaveURL(/\/workout\//);
+  await page.getByRole("button", { name: "Save as template" }).click();
+  await page.getByLabel("Name").fill("My go-to session");
+  await page.getByLabel("Folder (optional)").fill("Home");
+  await page.getByRole("dialog").getByRole("button", { name: "Save as template" }).click();
+  await expect(page.getByText("Template saved")).toBeVisible();
+
+  await page.goto("/plans#templates");
+  const card = page.locator("#templates");
+  await expect(card.getByText("My go-to session")).toBeVisible();
+  // The first day the calendar offers for scheduling is free: use it.
+  const free = (await page.getByRole("button", { name: /^Schedule a workout on / }).first().getAttribute("aria-label"))!.replace("Schedule a workout on ", "");
+  await card.getByRole("button", { name: "Schedule: My go-to session" }).click();
+  await page.getByLabel("Date").fill(free);
+  await page.getByRole("button", { name: "Schedule workout" }).click();
+  await expect(page.getByText("Workout scheduled")).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("button", { name: new RegExp(`^Reschedule .* on ${free}$`) })).toBeVisible();
+});
+
+test("travel mode: add a trip, adapt today's workout after reviewing it, cancel and get the original back", async ({ page }) => {
+  await registerAndOnboard(page);
+  page.on("dialog", (d) => d.accept());
+  await page.goto("/plans#travel");
+  const card = page.locator("#travel");
+  await expect(card.getByText("No trips planned.")).toBeVisible();
+  await card.getByRole("button", { name: "Add a trip" }).click();
+  await page.getByLabel("Where you'll train").selectOption("home");
+  await page.getByRole("button", { name: "Save trip" }).click();
+  await expect(page.getByText("Trip saved", { exact: false })).toBeVisible();
+  await expect(card.getByText("bodyweight only")).toBeVisible();
+
+  await card.getByRole("button", { name: "Review scheduled workouts" }).click();
+  const sheet = page.getByRole("dialog");
+  await expect(sheet.getByText("Workouts during this trip")).toBeVisible();
+  await sheet.getByRole("button", { name: "Apply selected changes" }).click();
+  await expect(page.getByText("1 workout(s) adapted")).toBeVisible();
+
+  await card.getByRole("button", { name: /^Cancel trip/ }).click();
+  await expect(page.getByText("Trip cancelled — 1 original workout(s) restored")).toBeVisible();
+  await expect(card.getByText("No trips planned.")).toBeVisible();
+});

@@ -162,6 +162,11 @@ export async function importGuestData(req: Request, accountId: string, guestId: 
       ["practicePlans", tx.practicePlan],
       ["sportResults", tx.sportMetricEntry],
       ["savedMeals", tx.savedMeal],
+      ["goals", tx.goal],
+      ["corrections", tx.recordCorrection],
+      ["quizAttempts", tx.quizAttempt],
+      ["templates", tx.workoutTemplate],
+      ["trips", tx.travelPeriod],
     ] as const) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- same updateMany shape on each delegate
       moved[name] = (await (model as any).updateMany({ where: { userId: guestId }, data: { userId: accountId } })).count;
@@ -169,6 +174,7 @@ export async function importGuestData(req: Request, accountId: string, guestId: 
     // Moved rows keep no guest-scoped uniqueness keys (they'd otherwise block or confuse the account's own).
     await tx.workoutSession.updateMany({ where: { userId: accountId, activeKey: guestId }, data: { activeKey: null } });
     await tx.workoutPlan.updateMany({ where: { userId: accountId, dailyKey: { startsWith: `${guestId}:` } }, data: { dailyKey: null } });
+    await tx.quizAttempt.updateMany({ where: { userId: accountId, openKey: { startsWith: `${guestId}:` } }, data: { status: "submitted", openKey: null, submittedAt: new Date(), correct: 0, passed: false } });
     // Activities: skip imported entries whose externalId the account already has.
     const acts = await tx.activityEntry.findMany({ where: { userId: guestId }, select: { id: true, externalId: true } });
     const takenExt = new Set((await tx.activityEntry.findMany({ where: { userId: accountId, externalId: { not: null } }, select: { externalId: true } })).map((a) => a.externalId));
@@ -198,7 +204,7 @@ export async function importGuestData(req: Request, accountId: string, guestId: 
       await tx.userSport.upsert({ where: { userId_sportId: { userId: accountId, sportId: s.sportId } }, create: { userId: accountId, sportId: s.sportId, level: s.level, goals: s.goals, position: s.position, supervised: s.supervised }, update: {} });
     }
     for (const l of await tx.lessonProgress.findMany({ where: { userId: guestId } })) {
-      await tx.lessonProgress.upsert({ where: { userId_lessonId: { userId: accountId, lessonId: l.lessonId } }, create: { userId: accountId, lessonId: l.lessonId, status: l.status, completedAt: l.completedAt }, update: {} });
+      await tx.lessonProgress.upsert({ where: { userId_lessonId: { userId: accountId, lessonId: l.lessonId } }, create: { userId: accountId, lessonId: l.lessonId, status: l.status, evidence: l.evidence, assessmentEntryId: l.assessmentEntryId, completedAt: l.completedAt }, update: {} });
     }
     // XP earned for the moved records comes along (same source + record = earned once). Achievement
     // XP is not copied: achievements are re-evaluated against the merged data below.

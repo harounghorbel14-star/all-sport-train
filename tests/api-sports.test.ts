@@ -2,7 +2,7 @@ import { todayKey } from "@/lib/domain/dates";
 import { beforeAll, describe, expect, it } from "vitest";
 import { db } from "@/lib/server/db";
 import { seed } from "../prisma/seed";
-import { call, newUser } from "./helpers";
+import { call, newUser, passQuiz } from "./helpers";
 import { invalidateSportsCache } from "@/lib/services/sports";
 import * as sports from "@/app/api/sports/route";
 import * as sport from "@/app/api/sports/[slug]/route";
@@ -60,8 +60,14 @@ describe("learning path", () => {
   it("enrols, completes lessons and moves the next lesson forward", async () => {
     const { cookie } = await newUser();
     expect((await call(sport.POST, { cookie, params: { slug: "basketball" }, body: { level: "beginner", position: "Guard", supervised: false } })).status).toBe(200);
+    // The lesson has a knowledge check: marking it done waits for the check.
+    const marked = await call(lesson.POST, { cookie, params: { slug: "basketball", lesson: "ball-handling" }, body: { status: "completed" } });
+    expect(marked.json.status).toBe("awaiting_assessment");
+    expect(marked.json.quizRequired).toBe(true);
+    expect((await passQuiz(cookie, "basketball", "ball-handling")).json.lesson).toBe("completed");
     const done = await call(lesson.POST, { cookie, params: { slug: "basketball", lesson: "ball-handling" }, body: { status: "completed" } });
     expect(done.status).toBe(200);
+    expect(done.json.status).toBe("completed");
     expect(done.json.next).not.toBe("ball-handling");
     const hub = await call(sport.GET, { cookie, params: { slug: "basketball" } });
     expect(hub.json.user.completedLessons).toContain("ball-handling");
@@ -87,6 +93,7 @@ describe("lesson states", () => {
     // "Mark complete" on a lesson with a progress test waits for a result that meets it.
     const ft = await call(lesson.POST, { ...lessonPath("first-touch"), body: { status: "completed" } });
     expect(ft.json.status).toBe("awaiting_assessment");
+    expect(ft.json.quizRequired).toBe(true);
     expect(await db.xpEvent.count({ where: { userId, source: "lesson" } })).toBe(1); // only the offside lesson
     const hub = await call(sport.GET, { cookie, params: { slug: "football" } });
     expect(hub.json.user.completedLessons).not.toContain("first-touch");
@@ -95,14 +102,18 @@ describe("lesson states", () => {
     await call(metrics.POST, { cookie, params: { slug: "football" }, body: { metricKey: "pass_accuracy", made: 5, attempts: 10, dateKey: todayKey("UTC") } });
     await call(metrics.POST, { cookie, params: { slug: "football" }, body: { metricKey: "pass_accuracy", made: 4, attempts: 4, dateKey: todayKey("UTC") } });
     expect((await states())["first-touch"].state).toBe("awaiting_assessment");
-    // …a qualifying one does.
+    // …a qualifying one meets the test, but the knowledge check is still required…
     const pass = await call(metrics.POST, { cookie, params: { slug: "football" }, body: { metricKey: "pass_accuracy", made: 8, attempts: 10, dateKey: todayKey("UTC") } });
-    expect(pass.json.lessonsPassed).toContain("First touch & ball control");
+    expect(pass.json.lessonsPassed).toEqual([]);
+    expect((await states())["first-touch"].state).toBe("awaiting_assessment");
+    // …and passing the check completes it, assessed by both.
+    expect((await passQuiz(cookie, "football", "first-touch")).json.lesson).toBe("completed");
     expect((await states())["first-touch"]).toEqual({ state: "completed", evidence: "assessed" });
     expect(await db.xpEvent.count({ where: { userId, source: "lesson" } })).toBe(2);
 
-    // With a qualifying result already logged, the next lesson using that test completes right away.
-    expect((await call(lesson.POST, { ...lessonPath("passing"), body: { status: "completed" } })).json.status).toBe("completed");
+    // With a qualifying result already logged, the next lesson using that test needs only its own check.
+    expect((await call(lesson.POST, { ...lessonPath("passing"), body: { status: "completed" } })).json.status).toBe("awaiting_assessment");
+    expect((await passQuiz(cookie, "football", "passing")).json.lesson).toBe("completed");
   });
 });
 

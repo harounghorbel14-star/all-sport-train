@@ -5,17 +5,19 @@ import { useRouter } from "next/navigation";
 import { api } from "@/lib/client/api";
 import { Button } from "@/components/ui/primitives";
 import { useToast } from "@/components/ui/overlay";
+import { useI18n } from "@/components/providers";
 
 export function LessonActions({ slug, lesson, state }: { slug: string; lesson: string; state: string }) {
   const router = useRouter();
   const toast = useToast();
+  const { t } = useI18n();
   const [busy, setBusy] = useState(false);
   async function set(status: "in_progress" | "completed" | "reset") {
     setBusy(true);
     try {
-      const r = await api<{ status: string; next: string | null }>(`/api/sports/${slug}/lessons/${lesson}`, { body: { status } });
+      const r = await api<{ status: string; next: string | null; quizRequired?: boolean }>(`/api/sports/${slug}/lessons/${lesson}`, { body: { status } });
       if (r.status === "awaiting_assessment") {
-        toast("Saved. Log a result that meets the progress test to complete this lesson.");
+        toast(r.quizRequired ? t.quiz.savedNeedsQuiz : t.quiz.savedNeedsResult);
         router.refresh();
       } else if (r.status === "completed") {
         toast("Lesson completed");

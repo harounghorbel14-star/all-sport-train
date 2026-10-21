@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { featureEnabled, type Feature } from "./features";
 import { z } from "zod";
 import { AppError, badRequest, forbidden, unauthorized } from "./errors";
 import { getUserFromToken, readCookie, SESSION_COOKIE, type AuthUser } from "../auth/session";
@@ -12,6 +13,8 @@ interface Options<B, Q> {
   body?: z.ZodType<B>;
   query?: z.ZodType<Q>;
   admin?: boolean;
+  /** Refuse with 404 while this feature is switched off (FEATURES_DISABLED). */
+  feature?: Feature;
 }
 
 const MUTATING = new Set(["POST", "PUT", "PATCH", "DELETE"]);
@@ -111,6 +114,7 @@ export function authedRoute<B = undefined, Q = undefined>(
       const user = await getUserFromToken(readCookie(req.headers.get("cookie"), SESSION_COOKIE));
       if (!user) throw unauthorized();
       if (user.isGuest && guestBlocked(new URL(req.url).pathname)) throw new AppError(403, "guest_restricted", "Create a free account to use this feature. Your guest progress will be kept.");
+      if (opts.feature && !featureEnabled(opts.feature)) throw new AppError(404, "feature_disabled", "This feature is turned off right now. Your data is kept.");
       if (opts.admin && !isAdmin(user)) throw forbidden(user.role === "admin" ? "Verify your email (use “Forgot password” once) to use admin features" : "Administrator access required");
       const params = (await route?.params) ?? {};
       const { body, query } = await parseInput(req, opts);

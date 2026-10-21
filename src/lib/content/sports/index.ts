@@ -13,6 +13,7 @@ import { SOURCES as BASE_SOURCES } from "./sources";
 import type { SportSeed } from "./types";
 
 export * from "./types";
+export { LESSON_QUIZZES } from "./quizzes";
 
 /** Source registry: core sources plus those cited by extended sport content. */
 export const SOURCES = [...BASE_SOURCES, ...ENRICHMENT_GROUPS.flatMap((g) => g.sources)];

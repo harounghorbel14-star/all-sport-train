@@ -38,7 +38,7 @@ async function audit(page: Page) {
   });
 }
 
-const PAGES = ["/today", "/plans", "/progress", "/activity", "/nutrition", "/recovery", "/sports", "/sports/basketball", "/sports/basketball/lessons/ball-handling", "/academy", "/exercises", "/coach", "/profile", "/offline"];
+const PAGES = ["/today", "/plans", "/progress", "/activity", "/nutrition", "/recovery", "/sports", "/sports/basketball", "/sports/basketball/lessons/ball-handling", "/academy", "/exercises", "/coach", "/profile", "/profile/privacy", "/offline"];
 
 test("core pages pass basic accessibility checks", async ({ page }) => {
   test.setTimeout(240_000);
