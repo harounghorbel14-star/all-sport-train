@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { currentUser } from "@/lib/auth/server";
 import { profileView } from "@/lib/services/profile";
+import { bodyFieldsFrom } from "@/lib/body-input";
 import { OnboardingWizard } from "./wizard";
 import { publishedSports } from "@/lib/services/sports";
 
@@ -32,8 +33,8 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
         exercisePrefs: p.exercisePrefs,
         dietPrefs: p.dietPrefs,
         allergies: p.allergies.join(", "),
-        height: p.heightCm ? String(p.heightCm) : "",
-        weight: p.weightKg ? String(p.weightKg) : "",
+        // Shown in the user's own units (the wizard converts if they switch).
+        ...bodyFieldsFrom(p.heightCm, p.weightKg, p.units === "imperial" ? "imperial" : "metric"),
       }
     : undefined;
   return (

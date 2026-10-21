@@ -18,6 +18,10 @@ Honest list of what APEX FIT does **not** do (yet). Updated with each work sessi
 - Recurring activities are weekly (the profile's sport schedule); there are no custom intervals (e.g. every other week) or times of day yet.
 - Reminders are in-app notifications; there are no push notifications.
 
+## Onboarding
+- Height and weight are optional and checked against 100–250 cm and 25–350 kg (shown in the user's units). Heights typed in metres ("1.78") are refused with the range rather than guessed at.
+- The onboarding height fix is verified locally and in CI-equivalent runs only; the deployed Railway onboarding flow still needs a check after deploy.
+
 ## Goals
 - Goal kinds are limited to exercise bests (reps, seconds, load), sport results with a numeric/time/ratio metric, weekly consistency and lessons. Body-measurement goals (weight, waist) are deliberately not offered.
 - Consistency goals count completed workouts plus other logged activities; a week with nothing logged counts as 0 sessions.

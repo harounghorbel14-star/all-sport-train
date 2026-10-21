@@ -94,16 +94,21 @@ export async function completeOnboarding(userId: string, input: OnboardingInput)
     onboardingCompleted: true,
     programStartDate: existing.programStartDate ?? new Date(`${todayKey(tz)}T00:00:00Z`),
   };
-  const updated = await db.profile.update({ where: { userId }, data });
-  if (input.weightKg || input.heightCm) {
-    const dk = todayKey(tz);
-    const already = await db.bodyMeasurement.findFirst({ where: { userId, dateKey: dk } });
-    if (!already) {
-      await db.bodyMeasurement.create({
-        data: { userId, dateKey: dk, weightKg: input.weightKg ?? null, heightCm: input.heightCm ?? null, milestone: "Starting point" },
-      });
+  // One transaction: a failure leaves neither a half-saved profile nor a stray measurement. Retrying is
+  // safe — the profile is overwritten and the starting measurement is written once per day.
+  const updated = await db.$transaction(async (tx) => {
+    const u = await tx.profile.update({ where: { userId }, data });
+    if (input.weightKg || input.heightCm) {
+      const dk = todayKey(tz);
+      const already = await tx.bodyMeasurement.findFirst({ where: { userId, dateKey: dk } });
+      if (!already) {
+        await tx.bodyMeasurement.create({
+          data: { userId, dateKey: dk, weightKg: input.weightKg ?? null, heightCm: input.heightCm ?? null, milestone: "Starting point" },
+        });
+      }
     }
-  }
+    return u;
+  });
   return profileView(updated);
 }
 

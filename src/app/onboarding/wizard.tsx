@@ -4,13 +4,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Check, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { api } from "@/lib/client/api";
+import { api, ApiError } from "@/lib/client/api";
 import { useI18n, fmt } from "@/components/providers";
 import { Button, Chip, Field, Input, Notice, Select, Textarea, cx } from "@/components/ui/primitives";
 import { MuscleMap, emphasisFromRegions, type RegionId } from "@/components/muscle-map";
 import { EQUIPMENT_LABELS, LIMITATION_LABELS } from "@/lib/exercise-labels";
 import { ACTIVITY_LABELS, AGE_LABELS, DIET_LABELS, EMPHASIS_LABELS, EXPERIENCE_LABELS, GOAL_LABELS, LOCATION_LABELS, PREF_LABELS, WEEKDAYS } from "@/lib/labels";
-import { inToCm, lbToKg } from "@/lib/format";
+import { cleanDecimal, parseBody, switchUnits, type Units } from "@/lib/body-input";
+import { cmToIn, formatLength, formatWeight } from "@/lib/format";
 
 interface State {
   experience: string;
@@ -27,8 +28,10 @@ interface State {
   activityLevel: string;
   ageRange: string;
   sex: string;
-  units: "metric" | "imperial";
+  units: Units;
   height: string;
+  heightFt: string;
+  heightIn: string;
   weight: string;
   limitations: string[];
   limitationNotes: string;
@@ -66,6 +69,8 @@ export function OnboardingWizard({ name, initial, sports }: { name: string; init
     sex: "",
     units: "metric",
     height: "",
+    heightFt: "",
+    heightIn: "",
     weight: "",
     limitations: [],
     limitationNotes: "",
@@ -82,17 +87,26 @@ export function OnboardingWizard({ name, initial, sports }: { name: string; init
     setStep(Math.max(0, Math.min(STEPS.length - 1, n)));
   };
 
+  // Height and weight are checked as they're typed (in the user's units) and before anything is sent.
+  const body = useMemo(() => parseBody(s), [s]);
+  const [serverField, setServerField] = useState<{ height?: string; weight?: string }>({});
+  const fieldErrors = { height: body.errors.height ?? serverField.height, weight: body.errors.weight ?? serverField.weight };
   const canNext = useMemo(() => {
     if (step === 1) return s.goals.length > 0;
     if (step === 5) return s.daysPerWeek >= 1;
+    if (step === 6) return !body.errors.height && !body.errors.weight;
     return true;
-  }, [step, s]);
+  }, [step, s, body]);
 
   async function submit() {
     setSubmitting(true);
     setError(null);
-    const height = s.height ? (s.units === "imperial" ? inToCm(Number(s.height)) : Number(s.height)) : null;
-    const weight = s.weight ? (s.units === "imperial" ? lbToKg(Number(s.weight)) : Number(s.weight)) : null;
+    if (body.errors.height || body.errors.weight) {
+      setSubmitting(false);
+      setDir(-1);
+      setStep(6); // show the field to fix
+      return;
+    }
     const limitations = s.exercisePrefs.includes("low_impact") ? [...new Set([...s.limitations, "high_impact"])] : s.limitations;
     try {
       await api("/api/onboarding", {
@@ -110,8 +124,8 @@ export function OnboardingWizard({ name, initial, sports }: { name: string; init
           activityLevel: s.activityLevel,
           ageRange: s.ageRange || null,
           sex: s.sex || null,
-          heightCm: height ? Math.round(height * 10) / 10 : null,
-          weightKg: weight ? Math.round(weight * 10) / 10 : null,
+          heightCm: body.heightCm,
+          weightKg: body.weightKg,
           limitations,
           limitationNotes: s.limitationNotes || null,
           exercisePrefs: s.exercisePrefs,
@@ -124,6 +138,13 @@ export function OnboardingWizard({ name, initial, sports }: { name: string; init
       router.push("/today?welcome=1");
       router.refresh();
     } catch (e) {
+      // Field errors from the server go next to the field they're about.
+      const details = e instanceof ApiError && e.details && typeof e.details === "object" ? (e.details as Record<string, string[] | undefined>) : {};
+      if (details.heightCm || details.weightKg) {
+        setServerField({ height: details.heightCm?.[0], weight: details.weightKg?.[0] });
+        setDir(-1);
+        setStep(6);
+      }
       setError(e instanceof Error ? e.message : "Could not save");
       setSubmitting(false);
     }
@@ -341,16 +362,28 @@ export function OnboardingWizard({ name, initial, sports }: { name: string; init
                       <option value="unspecified">Other / unspecified</option>
                     </Select>
                   </Field>
-                  <Field label={`Height (${s.units === "metric" ? "cm" : "in"})`} htmlFor="height" optional>
-                    <Input id="height" inputMode="decimal" value={s.height} onChange={(e) => set("height", e.target.value.replace(/[^\d.]/g, ""))} />
-                  </Field>
-                  <Field label={`Weight (${s.units === "metric" ? "kg" : "lb"})`} htmlFor="weight" optional>
-                    <Input id="weight" inputMode="decimal" value={s.weight} onChange={(e) => set("weight", e.target.value.replace(/[^\d.]/g, ""))} />
-                  </Field>
                 </div>
-                <div className="flex gap-2">
-                  <Chip selected={s.units === "metric"} onClick={() => set("units", "metric")}>Metric</Chip>
-                  <Chip selected={s.units === "imperial"} onClick={() => set("units", "imperial")}>Imperial</Chip>
+                <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Units for height and weight">
+                  <span className="text-sm font-medium">Units</span>
+                  <Chip selected={s.units === "metric"} onClick={() => setS((p) => ({ ...p, ...switchUnits(p, "metric") }))}>Metric (cm, kg)</Chip>
+                  <Chip selected={s.units === "imperial"} onClick={() => setS((p) => ({ ...p, ...switchUnits(p, "imperial") }))}>Imperial (ft/in, lb)</Chip>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {s.units === "metric" ? (
+                    <Field label="Height (cm)" htmlFor="height" optional error={fieldErrors.height} hint="e.g. 178 or 178,5">
+                      <Input id="height" inputMode="decimal" value={s.height} aria-invalid={!!fieldErrors.height} onChange={(e) => { setServerField({}); set("height", cleanDecimal(e.target.value)); }} />
+                    </Field>
+                  ) : (
+                    <Field label="Height (ft and in)" htmlFor="height-ft" optional error={fieldErrors.height}>
+                      <div className="flex gap-2">
+                        <Input id="height-ft" aria-label="Height, feet" inputMode="numeric" placeholder="ft" value={s.heightFt} aria-invalid={!!fieldErrors.height} onChange={(e) => { setServerField({}); set("heightFt", e.target.value.replace(/\D/g, "")); }} />
+                        <Input id="height-in" aria-label="Height, inches" inputMode="decimal" placeholder="in" value={s.heightIn} aria-invalid={!!fieldErrors.height} onChange={(e) => { setServerField({}); set("heightIn", cleanDecimal(e.target.value)); }} />
+                      </div>
+                    </Field>
+                  )}
+                  <Field label={`Weight (${s.units === "metric" ? "kg" : "lb"})`} htmlFor="weight" optional error={fieldErrors.weight}>
+                    <Input id="weight" inputMode="decimal" value={s.weight} aria-invalid={!!fieldErrors.weight} onChange={(e) => { setServerField({}); set("weight", cleanDecimal(e.target.value)); }} />
+                  </Field>
                 </div>
                 {s.ageRange === "under18" && (
                   <Notice tone="warn">You&apos;re still growing — we&apos;ll focus on skills, technique and healthy habits, and won&apos;t suggest calorie deficits. Training with a parent, coach or PE teacher is a great idea.</Notice>
@@ -409,6 +442,7 @@ export function OnboardingWizard({ name, initial, sports }: { name: string; init
                   <Row k="Schedule" v={`${s.daysPerWeek}× per week · ${s.sessionMinutes} min`} />
                   <Row k="Location" v={LOCATION_LABELS[s.location]} />
                   <Row k="Equipment" v={s.equipment.length ? s.equipment.map((e) => EQUIPMENT_LABELS[e]).join(", ") : "Bodyweight only"} />
+                  <Row k="Height & weight" v={bodySummary(body.heightCm, body.weightKg, s.units)} />
                 </dl>
                 <p className="mt-4 text-sm text-muted">We&apos;ll create your first session and a 24-week roadmap that adapts to how training actually goes. {t.onboarding.disclaimer}</p>
                 {error && <p role="alert" className="mt-3 text-sm text-danger">{error}</p>}
@@ -441,6 +475,14 @@ export function OnboardingWizard({ name, initial, sports }: { name: string; init
       </div>
     </div>
   );
+}
+
+/** Exactly what will be saved, in the user's units (so a unit mix-up is visible before submitting). */
+function bodySummary(heightCm: number | null, weightKg: number | null, units: Units) {
+  if (heightCm == null && weightKg == null) return "Not provided";
+  const totalIn = heightCm == null ? null : Math.round(cmToIn(heightCm));
+  const h = heightCm == null ? null : units === "imperial" ? `${Math.floor(totalIn! / 12)} ft ${totalIn! % 12} in` : formatLength(heightCm, units);
+  return [h, weightKg == null ? null : formatWeight(weightKg, units)].filter(Boolean).join(" · ");
 }
 
 function Row({ k, v }: { k: string; v?: string }) {
