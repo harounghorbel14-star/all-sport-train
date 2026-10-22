@@ -3,6 +3,7 @@ import { EQUIPMENT, LIMITATIONS } from "./content/types";
 import { EMPHASES, EXPERIENCE, GOALS } from "./engine/types";
 import { isDateKey, isValidTimeZone } from "./domain/dates";
 import { MEALS } from "./domain/nutrition";
+import { HEIGHT_CM, WEIGHT_KG } from "./body-input";
 
 export const AGE_RANGES = ["under18", "18-24", "25-34", "35-44", "45-54", "55-64", "65+"] as const;
 export const ACTIVITY_LEVELS = ["sedentary", "light", "moderate", "active", "very_active"] as const;
@@ -31,6 +32,10 @@ export const loginSchema = z.object({ email: emailSchema, password: z.string().m
 
 const list = <T extends readonly [string, ...string[]]>(values: T, max = 20) => z.array(z.enum(values)).max(max);
 
+// Stored in metric. Messages name the field and the allowed range, so the user knows what to change.
+const heightCm = z.number(`Height must be a number in centimetres`).min(HEIGHT_CM.min, `Height must be between ${HEIGHT_CM.min} and ${HEIGHT_CM.max} cm`).max(HEIGHT_CM.max, `Height must be between ${HEIGHT_CM.min} and ${HEIGHT_CM.max} cm`);
+const weightKg = z.number(`Weight must be a number in kilograms`).min(WEIGHT_KG.min, `Weight must be between ${WEIGHT_KG.min} and ${WEIGHT_KG.max} kg`).max(WEIGHT_KG.max, `Weight must be between ${WEIGHT_KG.min} and ${WEIGHT_KG.max} kg`);
+
 export const onboardingSchema = z.object({
   ageRange: z.enum(AGE_RANGES).nullable().optional(),
   sex: z.enum(["female", "male", "unspecified"]).nullable().optional(),
@@ -41,15 +46,15 @@ export const onboardingSchema = z.object({
   sports: z.array(z.string().max(30)).max(20),
   location: z.enum(LOCATIONS),
   equipment: list(EQUIPMENT, 30),
-  daysPerWeek: z.number().int().min(1).max(7),
+  daysPerWeek: z.number().int("Training days per week must be a whole number").min(1, "Training days per week must be between 1 and 7").max(7, "Training days per week must be between 1 and 7"),
   trainingDays: z.array(z.number().int().min(0).max(6)).max(7),
-  sessionMinutes: z.number().int().min(10).max(120),
+  sessionMinutes: z.number().int("Session length must be whole minutes").min(10, "Session length must be between 10 and 120 minutes").max(120, "Session length must be between 10 and 120 minutes"),
   activityLevel: z.enum(ACTIVITY_LEVELS),
   limitations: list(LIMITATIONS),
   limitationNotes: z.string().max(500).nullable().optional(),
   exercisePrefs: list(EXERCISE_PREFS),
-  heightCm: z.number().min(100).max(250).nullable().optional(),
-  weightKg: z.number().min(25).max(350).nullable().optional(),
+  heightCm: heightCm.nullable().optional(),
+  weightKg: weightKg.nullable().optional(),
   dietPrefs: list(DIET_PREFS),
   allergies: z.array(z.string().trim().max(40)).max(20),
   units: z.enum(["metric", "imperial"]).optional(),
@@ -136,8 +141,8 @@ export const checkInSchema = z.object({
 
 export const measurementSchema = z.object({
   dateKey: dateKeySchema,
-  weightKg: z.number().min(25).max(350).nullable().optional(),
-  heightCm: z.number().min(100).max(250).nullable().optional(),
+  weightKg: weightKg.nullable().optional(),
+  heightCm: heightCm.nullable().optional(),
   chestCm: z.number().min(40).max(200).nullable().optional(),
   waistCm: z.number().min(40).max(200).nullable().optional(),
   armCm: z.number().min(10).max(80).nullable().optional(),

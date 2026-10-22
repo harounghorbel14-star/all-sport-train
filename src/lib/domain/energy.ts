@@ -25,8 +25,9 @@ export function exerciseKcal(met: number, durationMin: number, weightKg?: number
   const spread = assumedMass ? 0.35 : 0.2;
   return {
     mid: Math.round(mid),
-    low: Math.round(mid * (1 - spread)),
-    high: Math.round(mid * (1 + spread)),
+    // Rounded outwards, so a small estimate stays a range (e.g. 1–3) instead of collapsing to one number.
+    low: Math.floor(mid * (1 - spread)),
+    high: Math.ceil(mid * (1 + spread)),
     assumedMass,
     method: `MET ${met.toFixed(1)} × ${Math.round(mass)} kg × ${(hours).toFixed(2)} h (net of resting energy)${assumedMass ? " — body mass assumed" : ""}`,
   };
